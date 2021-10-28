@@ -1,6 +1,6 @@
 import discord from 'discord.js';
 const { Client, Collection, Message } = discord;
-import {  } from "module";
+import fs from 'fs';
 
 // ----------------------------------------------------------------
 //                             Typedefs 
@@ -35,14 +35,29 @@ export default class Zen {
   async init () {
     // Checks
 
-    this.commands = new Collection();
-
-
+    this.setupCommands();
     this.createListeners();
 
     // Set token
     this.bot.login(this.config.token);
     this.bot.setMaxListeners(20);
+  }
+
+  /**
+   * 
+   */
+  async setupCommands () {
+    this.commands = new Collection();
+    const commandFiles = fs.readdirSync('./main/commands').filter(file => file.endsWith('.js'));
+    
+    for (const file of commandFiles) {
+      try{
+        const command = await import(`./main/commands/${file}`);
+        this.commands.set(command.data.name, command);
+      } catch (err) {
+        console.error(`An error occured while importing ${file} - ${err}`);
+      }
+    }
   }
 
   /**
