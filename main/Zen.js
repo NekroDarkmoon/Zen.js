@@ -24,7 +24,7 @@ import Command from './structures/Command.js';
  * 
  * @class Zen
  */
-export default class Zen {
+export default class Zen{
   constructor (bot, config, db) {
     /** @type {ZenConfig} */
     this.config = config;
@@ -36,8 +36,8 @@ export default class Zen {
   async init () {
     // Checks
 
-    this.setupCommands();
-    this.createListeners();
+    await this.setupCommands();
+    await this.createListeners();
 
     // Set token
     this.bot.login(this.config.token);
@@ -53,18 +53,20 @@ export default class Zen {
      */
     this.commands = new Collection();
     const commandFiles = fs.readdirSync('./main/commands')
-      .filter(file => file.endsWith('.js'))
-      .forEach(file => {
-        try{
-          /** @type {Command} */
-          const command = await import(`./commands/${file}`);
-          console.info(`Importing command ${command.name}`);
-          this.commands.set(command.name, command);
-        } catch (err) {
-          console.error(`An error occured while importing ${file} - ${err}`);
-        }
-      });
-    
+      .filter(file => file.endsWith('.js'));
+
+    for ( const file of commandFiles ) {
+      try{
+        /** @type {Command} */
+        const cmdClass = (await import(`./commands/${file}`)).default;
+        console.log(cmdClass);
+        const command = new cmdClass();
+        console.info(`Importing command ${command.name}`);
+        this.commands.set(command.name, command);
+      } catch (err) {
+        console.error(`An error occured while importing ${file} - ${err}`);
+      }
+    }   
   }
 
   /**
