@@ -1,6 +1,7 @@
 import discord from 'discord.js';
 const { Client, Collection, Message } = discord;
 import fs from 'fs';
+import Command from './structures/Command.js'; 
 
 // ----------------------------------------------------------------
 //                             Typedefs 
@@ -47,17 +48,23 @@ export default class Zen {
    * 
    */
   async setupCommands () {
+    /**
+     * @type {discord.Collection<string, Command>}
+     */
     this.commands = new Collection();
-    const commandFiles = fs.readdirSync('./main/commands').filter(file => file.endsWith('.js'));
+    const commandFiles = fs.readdirSync('./main/commands')
+      .filter(file => file.endsWith('.js'))
+      .forEach(file => {
+        try{
+          /** @type {Command} */
+          const command = await import(`./commands/${file}`);
+          console.info(`Importing command ${command.name}`);
+          this.commands.set(command.name, command);
+        } catch (err) {
+          console.error(`An error occured while importing ${file} - ${err}`);
+        }
+      });
     
-    for (const file of commandFiles) {
-      try{
-        const command = await import(`./main/commands/${file}`);
-        this.commands.set(command.data.name, command);
-      } catch (err) {
-        console.error(`An error occured while importing ${file} - ${err}`);
-      }
-    }
   }
 
   /**
