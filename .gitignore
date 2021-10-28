@@ -8,3 +8,6 @@ node_modules/
 
 # OS Specific
 .DS_Store
+
+# Bot settings
+main/settings/config.json
