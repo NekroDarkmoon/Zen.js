@@ -70,7 +70,6 @@ export default class Zen extends Client{
     this.login(this.config.token);
     this.setMaxListeners(20);
 
-    console.log(await this.CommandHandler.getCommands());
   }
 
   /**

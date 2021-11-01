@@ -24,7 +24,7 @@ export default class InteractionCreateEvent {
 
     /** @type {Zen} */
     const bot = interaction.client;
-    const command = bot.commandHandler.commands.get(interaction.commandName);
+    const command = bot.CommandHandler.commands.get(interaction.commandName);
 
     if (!command) return;
 

@@ -125,7 +125,7 @@ export default class CommandHandler {
       console.log(`Importing ${file}`);
       const cmdClass = (await import(`../commands/${file}`)).default;
       const command = new cmdClass();
-      this.commands.set(Command.name, command);
+      this.commands.set(command.name, command);
     });
 
     await Promise.all(promises);
@@ -173,6 +173,7 @@ export default class CommandHandler {
     const { size } = this.globalCommands;
     if ( size <= 0) return;
 
+    console.info(`Registering ${size} Global commands.`);
     await this.rest.put(
       Routes.applicationCommands(this.config.client_id),
       {body: this.globalComamnds.mapValues( cmd => cmd.data.toJSON())}
