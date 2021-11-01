@@ -37,7 +37,6 @@ export default class ZenDB {
       // Execute sql
       const sql = `${ct} ${table}(${query})`;
       await this.execute(sql);
-
     }
   }
 
@@ -65,18 +64,20 @@ export default class ZenDB {
    * 
    */
   async execute (sql, ...args) {
+    // Create Connection
     const conn = await this.pool.connect();
     
     try {
-      const result = await conn.query(sql);
+      // TODO: Make this dynamic in relations to args
+      await conn.query(sql);
       await conn.query('COMMIT');
+
     } catch ( err ) {
       await conn.query('ROLLBACK');
       console.error(err);
     } finally {
       conn.release()
     }
-
   }
 
 }
