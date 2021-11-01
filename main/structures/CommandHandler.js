@@ -34,14 +34,40 @@ export default class CommandHandler {
 
   async deleteGlobalCommands () {}
 
+  /**
+   * @returns {Promise<{id:string}[]>}
+   */
+  async getCommands () {
+    try {
+      return [...(await this.getGlobalCommands()),
+         ...(await this.getGuildCommands())]
+    } catch (err) {
+      // TODO: Replace with logger
+      console.error(err);
+      return [];
+    }
+  } 
 
-  async getCommands () {} 
+  /**
+   * @returns {Promise<{id:string}[]>}
+   */
+  async getGuildCommands () {
+    return this.rest.get(
+      Routes.applicationCommands(this.config.client_id, this.config.guild_id),
+      {body: this.guildComamnds.mapValues( cmd => cmd.data.toJSON())}
+    );
+  }
 
+  /**
+   * @returns {Promise<{id:string}[]>}
+   */ 
+  async getGlobalCommands () {
+    return this.rest.get(
+      Routes.applicationCommands(this.config.client_id),
+      {body: this.guildComamnds.mapValues( cmd => cmd.data.toJSON())}
+    );
+  }
 
-  async getGuildCommands () {}
-
-
-  async getGlobalCommands () {}
 
   /**
    * @returns {Promise<void>}
@@ -91,7 +117,7 @@ export default class CommandHandler {
     await this.rest.put(
       Routes.applicationCommands(
         this.config.client_id,
-        this.config.guildId
+        this.config.guild_id
       ),
       {body: this.guildComamnds.mapValues( cmd => cmd.data.toJSON() )}
     );
