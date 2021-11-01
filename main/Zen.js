@@ -69,6 +69,8 @@ export default class Zen extends Client{
     // Set token
     this.login(this.config.token);
     this.setMaxListeners(20);
+
+    console.log(await this.CommandHandler.getCommands());
   }
 
   /**
@@ -77,11 +79,11 @@ export default class Zen extends Client{
    */
   async setupEventListeners () {
     const eventFiles = fs
-      .readdirSync(`${__dirname}/events`)
+      .readdirSync(`./main/events`)
       .filter((file) => file.endsWith(".js"));
     
     eventFiles.forEach( async file => {
-      const eventClass = (await import(`${__dirname}/events/${file}`)).default;
+      const eventClass = (await import(`./events/${file}`)).default;
       const event = new eventClass();
       if ( event.once ) this.once(event.name, (...args) => event.execute(...args));
       else { this.on(event.name, (...args) => event.execute(...args)); }

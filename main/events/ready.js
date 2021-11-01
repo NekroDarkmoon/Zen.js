@@ -1,7 +1,7 @@
 // ----------------------------------------------------------------
 //                             Imports
 // ----------------------------------------------------------------
-import { Client, ClientEvents } from "discord.js";
+import { Client } from "discord.js";
 
 
 // ----------------------------------------------------------------
@@ -9,7 +9,6 @@ import { Client, ClientEvents } from "discord.js";
 // ----------------------------------------------------------------
 export default class ReadyEvent {
   constructor () {
-    /** @type {keyof ClientEvents} */
     this.name = "ready";
     /** @type {boolean} */
     this.once = true;

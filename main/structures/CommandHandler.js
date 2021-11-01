@@ -97,7 +97,7 @@ export default class CommandHandler {
   async getGuildCommands () {
     return this.rest.get(
       Routes.applicationGuildCommands(this.config.client_id, this.config.guild_id),
-      {body: this.guildComamnds.mapValues( cmd => cmd.data.toJSON())}
+      // {body: this.guildCommands.mapValues( cmd => cmd.data.toJSON())}
     );
   }
 
@@ -107,7 +107,7 @@ export default class CommandHandler {
   async getGlobalCommands () {
     return this.rest.get(
       Routes.applicationCommands(this.config.client_id),
-      {body: this.guildComamnds.mapValues( cmd => cmd.data.toJSON())}
+      // {body: this.guildCommands.mapValues( cmd => cmd.data.toJSON())}
     );
   }
 
@@ -130,8 +130,9 @@ export default class CommandHandler {
 
     await Promise.all(promises);
     
-    this.globalComamnds = this.commands.filter( cmd => cmd.global);
-    this.guildComamnds = this.commands.filter( cmd => !cmd.global);
+    // console.log(this.commands);
+    this.globalCommands = this.commands.filter( cmd => cmd.global);
+    this.guildCommands = this.commands.filter( cmd => !cmd.global);
   }
 
   /**
@@ -151,8 +152,7 @@ export default class CommandHandler {
    * @returns {Promise<void>}
    */
   async registerGuildCommands () {
-    const { size } = this.guildComamnds;
-    
+    const { size } = this.guildCommands;
     if (size <= 0) return;
 
     // TODO: Make to logger
@@ -162,7 +162,7 @@ export default class CommandHandler {
         this.config.client_id,
         this.config.guild_id
       ),
-      {body: this.guildComamnds.mapValues( cmd => cmd.data.toJSON() )}
+      {body: this.guildCommands.mapValues( cmd => cmd.data.toJSON() )}
     );
   }
 
@@ -170,12 +170,12 @@ export default class CommandHandler {
    * @returns {Promise<void>}
    */
   async registerGlobalCommands () {
-    const { size } = this.guildComamnds;
+    const { size } = this.globalCommands;
     if ( size <= 0) return;
 
     await this.rest.put(
       Routes.applicationCommands(this.config.client_id),
-      {body: this.globalComamnds.mapValues( cmd => cmd.data.toJSON )}
+      {body: this.globalComamnds.mapValues( cmd => cmd.data.toJSON())}
     );
   }
 

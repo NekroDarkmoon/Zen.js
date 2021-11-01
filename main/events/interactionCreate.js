@@ -1,8 +1,8 @@
 // ----------------------------------------------------------------
 //                             Imports
 // ----------------------------------------------------------------
-import { ClientEvents, Interaction } from "discord.js";
-import Zen from "../Zen";
+import { Interaction } from "discord.js";
+import Zen from "../Zen.js";
 
 
 // ----------------------------------------------------------------
@@ -10,7 +10,6 @@ import Zen from "../Zen";
 // ----------------------------------------------------------------
 export default class InteractionCreateEvent {
   constructor () {
-    /** @type {keyof ClientEvents} */
     this.name = "interactionCreate";
     /** @type {boolean} */
     this.once = false;
