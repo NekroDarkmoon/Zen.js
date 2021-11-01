@@ -41,7 +41,6 @@ async function main () {
 
   // Setup Logger
   const logger = setupLogger('info');
-  logger.info("hi");
 
   // Fetch data from config file
   const config = JSON.parse(
@@ -50,17 +49,16 @@ async function main () {
     )
   );
 
-  // TODO: Set up postgres database
-  const db = new ZenDB(config.postgresql);
+  // Setup DB
+  const db = new ZenDB(config.postgresql, logger);
   await db.init();
 
   // Set up bot instance
-  const zen = new Zen(config, db);
+  const zen = new Zen(config, db, logger);
 
   // ["exit", "SIGINT", "SIGQUIT", "SIGTERM", "uncaughtException", "unhandledRejection"]
 	// 	.forEach(ec => process.on(ec, ZEN.handleExit.bind(ZEN)));
   
-
   await zen.start();
 }
 

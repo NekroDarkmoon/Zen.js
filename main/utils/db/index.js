@@ -9,7 +9,10 @@ import { readFile } from "fs/promises";
 //                            Main Class
 // ----------------------------------------------------------------
 export default class ZenDB {
-  constructor (uri) {
+  constructor (uri, logger) {
+    // Setup Logger
+    this.logger = logger;
+
     // Create new pool request to conenct to the db
     try {this.pool = new Pool({ connectionString: uri })}
     catch (err) {console.error(err);}
@@ -38,6 +41,8 @@ export default class ZenDB {
       const sql = `${ct} ${table}(${query})`;
       await this.execute(sql);
     }
+
+    this.logger.info("DB setup Complete");
   }
 
 
@@ -45,9 +50,7 @@ export default class ZenDB {
    * @returns {Promise<void>}
    */
   async close () {
-    // TODO: Add logger
-
-    console.log("Closing connection to db pool");
+    this.logger.info("Closing pool.");
     await this.pool.end()
   }
 

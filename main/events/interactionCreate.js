@@ -31,8 +31,7 @@ export default class InteractionCreateEvent {
     try {
       await command.execute(interaction);
     } catch ( err ) {
-      // TODO: Convert to logger
-      console.error(err);
+      bot.logger.error(err);
 
       await interaction.reply({
         content: "There was an error while executing this command!",

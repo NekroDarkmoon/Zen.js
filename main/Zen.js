@@ -7,6 +7,7 @@ const { Client, Message, Intents } = discord;
 import ZenDB from './utils/db/index.js';
 import CommandHandler from './structures/CommandHandler.js';
 import fs from "fs";
+import winston from 'winston';
 
 
 // ----------------------------------------------------------------
@@ -30,7 +31,12 @@ import fs from "fs";
  * @class Zen
  */
 export default class Zen extends Client{
-  constructor (config, db) {
+  /**
+   * @param {ZenConfig} config 
+   * @param {ZenDB} db 
+   * @param {winston.Logger} logger 
+   */
+  constructor (config, db, logger) {
     // Init Client with intents and partials
     super({
       intents: [
@@ -51,8 +57,8 @@ export default class Zen extends Client{
     /** @type {ZenDB} */
     this.db = db;
 
-    // TODO: Other initers
-    this.logger = null;
+    /** @type {winston.Logger} */
+    this.logger = logger;
   }
 
 
@@ -109,36 +115,6 @@ export default class Zen extends Client{
       }
     }
     return true;
-  }
-
-  /**
-   * 
-   * @param {Interaction} interaction 
-   */
-  async onInteractionCreate (interaction) {
-    // Validation
-    if (!interaction.isCommand()) return;
-    const command = this.bot.commands.get(interaction.commandName);
-    if (!command) return;
-
-    // Execute Interaction 
-    try { await command.execute(interaction) }
-    catch (err) {
-      console.error( err );
-      await interaction.reply({
-        content: `Oops there was an error while executing this command. ${error}`,
-        ephemeral: true 
-      });
-    }
-  }
-
-  async onMessageCreate (message) {
-
-  }
-
-  async onReady () {
-    // TODO: Change how this works
-    console.log(`Ready!`);
   }
 
   // async createListeners () {
