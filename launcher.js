@@ -2,6 +2,7 @@
 //                             Imports
 // ----------------------------------------------------------------
 import Zen from "./main/Zen.js";
+import ZenDB from "./main/utils/db/index.js";
 import { readFile } from 'fs/promises';
 
 // ----------------------------------------------------------------
@@ -9,7 +10,8 @@ import { readFile } from 'fs/promises';
 // ----------------------------------------------------------------
 async function main () {
   // TODO: Set up postgres database
-  const db = null;
+  const db = new ZenDB();
+  await db.init();
 
   // Fetch data from config file
   const config = JSON.parse(
