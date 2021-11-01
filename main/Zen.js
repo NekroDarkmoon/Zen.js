@@ -1,7 +1,12 @@
+// ----------------------------------------------------------------
+//                             Imports
+// ----------------------------------------------------------------
 import discord from 'discord.js';
-const { Client, Collection, Message } = discord;
-import fs from 'fs';
+const { Client, Message, Intents } = discord;
+
 import Command from './structures/Command.js'; 
+import CommandHandler from './structures/CommandHandler.js';
+
 
 // ----------------------------------------------------------------
 //                             Typedefs 
@@ -24,24 +29,40 @@ import Command from './structures/Command.js';
  * 
  * @class Zen
  */
-export default class Zen{
-  constructor (bot, config, db) {
+export default class Zen extends Client{
+  constructor (config, db) {
+    // Init Client with intents and partials
+    super({
+      intents: [
+        Intents.FLAGS.GUILDS,
+        Intents.FLAGS.GUILD_BANS,
+        Intents.FLAGS.GUILD_MEMBERS,
+        Intents.FLAGS.GUILD_MESSAGES,
+      ],
+      partials: ['MESSAGE', 'CHANNEL', 'REACTION', 'GUILD_MEMBER']
+    });
+
     /** @type {ZenConfig} */
     this.config = config;
-    
-    /** @type {Client} */
-    this.bot = bot;
+
+    /** @type {CommandHandler} */
+    this.CommandHandler = new CommandHandler(this.config);
+
+    // TODO: Other initers
+    this.logger = null;
   }
 
-  async init () {
-    // Checks
+  async start () {
+    if (!this.config.token) throw new Error("No discord token provided");
 
-    await this.setupCommands();
+    // Setup commands, events, interactions & listeners
+    await this.CommandHandler.loadCommands();
+    await this.CommandHandler.registerCommands();
     await this.createListeners();
 
     // Set token
-    this.bot.login(this.config.token);
-    this.bot.setMaxListeners(20);
+    this.login(this.config.token);
+    this.setMaxListeners(20);
   }
 
   /**
@@ -117,9 +138,9 @@ export default class Zen{
   }
 
   async createListeners () {
-    this.bot.once('ready', this.onReady.bind(this));
-    this.bot.on('interactionCreate', this.onInteractionCreate.bind(this));
-    this.bot.ws.on('INTERACTION_CREATE', this.onInteractionCreate.bind(this));
-    this.bot.on('messageCreate', this.onMessageCreate.bind(this));
+    this.once('ready', this.onReady.bind(this));
+    this.on('interactionCreate', this.onInteractionCreate.bind(this));
+    this.ws.on('INTERACTION_CREATE', this.onInteractionCreate.bind(this));
+    this.on('messageCreate', this.onMessageCreate.bind(this));
   }
 }
