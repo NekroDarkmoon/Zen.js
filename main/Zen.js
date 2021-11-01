@@ -26,7 +26,6 @@ import fs from "fs";
 // ----------------------------------------------------------------
 /**
  * Main class for Zen
- * 
  * @class Zen
  */
 export default class Zen extends Client{
@@ -55,6 +54,7 @@ export default class Zen extends Client{
 
   /**
    * @returns {Promise<void>}
+   * @memberof Zen
    */
   async start () {
     if (!this.config.token) throw new Error("No discord token provided");
@@ -65,7 +65,6 @@ export default class Zen extends Client{
     // Setup commands & interactions
     await this.CommandHandler.loadCommands();
     await this.CommandHandler.registerCommands();
-    // await this.createListeners();
 
     // Set token
     this.login(this.config.token);
@@ -74,6 +73,7 @@ export default class Zen extends Client{
 
   /**
    * @returns {Promise<void>}
+   * @memberof Zen
    */
   async setupEventListeners () {
     const eventFiles = fs
@@ -136,10 +136,10 @@ export default class Zen extends Client{
     console.log(`Ready!`);
   }
 
-  async createListeners () {
-    this.once('ready', this.onReady.bind(this));
-    this.on('interactionCreate', this.onInteractionCreate.bind(this));
-    this.ws.on('INTERACTION_CREATE', this.onInteractionCreate.bind(this));
-    this.on('messageCreate', this.onMessageCreate.bind(this));
-  }
+  // async createListeners () {
+  //   this.once('ready', this.onReady.bind(this));
+  //   this.on('interactionCreate', this.onInteractionCreate.bind(this));
+  //   this.ws.on('INTERACTION_CREATE', this.onInteractionCreate.bind(this));
+  //   this.on('messageCreate', this.onMessageCreate.bind(this));
+  // }
 }
