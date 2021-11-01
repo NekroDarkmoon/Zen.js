@@ -9,16 +9,16 @@ import { readFile } from 'fs/promises';
 //                              Main 
 // ----------------------------------------------------------------
 async function main () {
-  // TODO: Set up postgres database
-  const db = new ZenDB();
-  await db.init();
-
   // Fetch data from config file
   const config = JSON.parse(
     await readFile(
       new URL("./main/settings/config.json", import.meta.url)
     )
   );
+
+  // TODO: Set up postgres database
+  const db = new ZenDB(config.postgresql);
+  await db.init();
 
   // Set up bot instance
   const zen = new Zen(config, db);

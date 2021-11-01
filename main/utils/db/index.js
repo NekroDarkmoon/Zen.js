@@ -11,7 +11,7 @@ import { readFile } from "fs/promises";
 export default class ZenDB {
   constructor (uri) {
     // Create new pool request to conenct to the db
-    try {this.pool = new Pool({ uri });}
+    try {this.pool = new Pool({ connectionString: uri })}
     catch (err) {console.error(err);}
   }
 
@@ -56,7 +56,7 @@ export default class ZenDB {
   /**
    * 
    */
-  async query () {
+  async fetch () {
 
   }
 
@@ -65,17 +65,14 @@ export default class ZenDB {
    * 
    */
   async execute (sql, ...args) {
-
     const conn = await this.pool.connect();
     
     try {
       const result = await conn.query(sql);
-      
       await conn.query('COMMIT');
-
     } catch ( err ) {
       await conn.query('ROLLBACK');
-      throw err;
+      console.error(err);
     } finally {
       conn.release()
     }
