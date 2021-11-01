@@ -19,8 +19,8 @@ export default class ZenDB {
    */
   async init () {
     // Fetch schemas and create them in the db.
-
     
+
   }
 
 
