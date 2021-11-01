@@ -2,21 +2,23 @@
 //                             Imports
 // ----------------------------------------------------------------
 import Zen from "./main/Zen.js";
+import ZenDB from "./main/utils/db/index.js";
 import { readFile } from 'fs/promises';
 
 // ----------------------------------------------------------------
 //                              Main 
 // ----------------------------------------------------------------
 async function main () {
-  // TODO: Set up postgres database
-  const db = null;
-
   // Fetch data from config file
   const config = JSON.parse(
     await readFile(
       new URL("./main/settings/config.json", import.meta.url)
     )
   );
+
+  // TODO: Set up postgres database
+  const db = new ZenDB(config.postgresql);
+  await db.init();
 
   // Set up bot instance
   const zen = new Zen(config, db);

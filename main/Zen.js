@@ -4,6 +4,7 @@
 import discord from 'discord.js';
 const { Client, Message, Intents } = discord;
 
+import ZenDB from './utils/db/index.js';
 import CommandHandler from './structures/CommandHandler.js';
 import fs from "fs";
 
@@ -46,6 +47,9 @@ export default class Zen extends Client{
 
     /** @type {CommandHandler} */
     this.CommandHandler = new CommandHandler(this.config);
+
+    /** @type {ZenDB} */
+    this.db = db;
 
     // TODO: Other initers
     this.logger = null;
