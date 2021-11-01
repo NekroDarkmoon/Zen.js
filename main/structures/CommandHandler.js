@@ -26,13 +26,57 @@ export default class CommandHandler {
   }
 
 
-  async deleteCommands () {}
+  /**
+   * @returns {Promise<void>}
+   */
+  async deleteCommands () {
+    try {
+      await this.deleteGlobalCommands();
+      await this.deleteGuildCommands();
 
+      // TODO: Convert to logger
+      console.log("Successfully deleted all application (/) commands");
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
-  async deleteGuildCommands () {}
+  /**
+   * @returns {Promise<void>}
+   */
+  async deleteGuildCommands () {
+    const commands = await this.getGuildCommands();
+    if (commands.length <= 0) return;
+    
+    const promises = commands.map( async cmd => {
+      this.rest.delete(
+        Routes.applicationGuildCommand(
+          this.config.client_id,
+          this.config.guild_id,
+          cmd.id
+        )
+      );
+    });
 
+    await Promise.all(promises);
+  }
 
-  async deleteGlobalCommands () {}
+  /**
+   * @returns {Promise<void>}
+   */
+  async deleteGlobalCommands () {
+    const commands = await this.getGlobalCommands();
+    if (commands.length <= 0) return;
+    
+    const promises = commands.map( async cmd => {
+      this.rest.delete(
+        Routes.applicationCommand(this.config.client_id, cmd.id)
+      );
+    });
+
+    await Promise.all(promises);
+  }
+
 
   /**
    * @returns {Promise<{id:string}[]>}
@@ -53,7 +97,7 @@ export default class CommandHandler {
    */
   async getGuildCommands () {
     return this.rest.get(
-      Routes.applicationCommands(this.config.client_id, this.config.guild_id),
+      Routes.applicationGuildCommands(this.config.client_id, this.config.guild_id),
       {body: this.guildComamnds.mapValues( cmd => cmd.data.toJSON())}
     );
   }
@@ -115,7 +159,7 @@ export default class CommandHandler {
     // TODO: Make to logger
     console.info(`Registering ${size} Guild commands.`);
     await this.rest.put(
-      Routes.applicationCommands(
+      Routes.applicationGuildCommands(
         this.config.client_id,
         this.config.guild_id
       ),
