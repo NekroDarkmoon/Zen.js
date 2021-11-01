@@ -4,8 +4,8 @@
 import discord from 'discord.js';
 const { Client, Message, Intents } = discord;
 
-import Command from './structures/Command.js'; 
 import CommandHandler from './structures/CommandHandler.js';
+import fs from "fs";
 
 
 // ----------------------------------------------------------------
@@ -52,13 +52,20 @@ export default class Zen extends Client{
     this.logger = null;
   }
 
+
+  /**
+   * @returns {Promise<void>}
+   */
   async start () {
     if (!this.config.token) throw new Error("No discord token provided");
 
-    // Setup commands, events, interactions & listeners
+    // Setup event listeners
+    await this.setupEventListeners();
+    
+    // Setup commands & interactions
     await this.CommandHandler.loadCommands();
     await this.CommandHandler.registerCommands();
-    await this.createListeners();
+    // await this.createListeners();
 
     // Set token
     this.login(this.config.token);
@@ -66,29 +73,21 @@ export default class Zen extends Client{
   }
 
   /**
-   * 
+   * @returns {Promise<void>}
    */
-  async setupCommands () {
-    /**
-     * @type {discord.Collection<string, Command>}
-     */
-    this.commands = new Collection();
-    const commandFiles = fs.readdirSync('./main/commands')
-      .filter(file => file.endsWith('.js'));
-
-    for ( const file of commandFiles ) {
-      try{
-        /** @type {Command} */
-        const cmdClass = (await import(`./commands/${file}`)).default;
-        console.log(cmdClass);
-        const command = new cmdClass();
-        console.info(`Importing command ${command.name}`);
-        this.commands.set(command.name, command);
-      } catch (err) {
-        console.error(`An error occured while importing ${file} - ${err}`);
-      }
-    }   
+  async setupEventListeners () {
+    const eventFiles = fs
+      .readdirSync(`${__dirname}/events`)
+      .filter((file) => file.endsWith(".js"));
+    
+    eventFiles.forEach( async file => {
+      const eventClass = (await import(`${__dirname}/events/${file}`)).default;
+      const event = new eventClass();
+      if ( event.once ) this.once(event.name, (...args) => event.execute(...args));
+      else { this.on(event.name, (...args) => event.execute(...args)); }
+    });
   }
+
 
   /**
    * 
