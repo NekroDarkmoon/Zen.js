@@ -22,6 +22,6 @@ export default class ReadyEvent {
     if ( bot.config.activity ) bot.user.setActivity(bot.config.activity);
 
     // TODO: Convert to logger
-    bot.logger.log(`Logged in as ${bot.user.tag}!`);
+    console.log(`Logged in as ${bot.user.tag}!`);
   }
 }

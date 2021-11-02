@@ -56,10 +56,19 @@ export default class ZenDB {
 
 
   /**
+   * @param {string} sql
+   * @param {array} values 
    * 
+   * @returns {object | null} result
    */
-  async fetch () {
+  async fetchOne (sql, values) {
+    // Validation
+    if (sql.indexOf("SELECT") === -1 ) throw "Not a fetch query";
 
+    // Pool query
+    const result = await this.pool.query(sql, values);
+    if (result.rows.length === 0) return null;
+    return result.rows[0];
   }
 
 
