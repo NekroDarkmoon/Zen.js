@@ -7,29 +7,32 @@
   },
 
   "logger": {
-    "server_id": "BIGINT PRIMARY KEY NOT NULL,",
+    "server_id": "BIGINT NOT NULL,",
     "user_id": "BIGINT NOT NULL,",
     "channel_id": "BIGINT NOT NULL,",
-    "last_msg": "DATE NOT NULL"
+    "last_msg": "DATE NOT NULL,",
+    "ADD": "PRIMARY KEY (server_id, user_id)" 
   },
 
   "quests": {
-    "server_id": "BIGINT PRIMARY KEY NOT NULL,",
+    "server_id": "BIGINT NOT NULL,",
     "user_id": "BIGINT NOT NULL,",
     "quest_id": "INT NOT NULL,",
     "type": "TEXT,",
     "posted_on": "DATE DEFAULT CURRENT_DATE,",
-    "msg": "TEXT"
+    "msg": "TEXT,",
+    "ADD": "PRIMARY KEY (server_id, user_id)" 
   },
 
   "playchns": {
-    "server_id": "BIGINT PRIMARY KEY NOT NULL,",
+    "server_id": "BIGINT NOT NULL,",
     "user_id": "BIGINT NOT NULL,",
-    "map": "BOOLEAN DEFAULT FALSE"   
+    "map": "BOOLEAN DEFAULT FALSE,",   
+    "ADD": "PRIMARY KEY (server_id, user_id)" 
   },
 
   "rep": {
-    "server_id": "BIGINT PRIMARY KEY NOT NULL,",
+    "server_id": "BIGINT NOT NULL,",
     "user_id": "BIGINT NOT NULL,",
     "rep": "INT NOT NULL,",
     "last_given": "DATE DEFAULT CURRENT_DATE,",
@@ -37,9 +40,10 @@
   },
 
   "xp": {
-    "server_id": "BIGINT PRIMARY KEY NOT NULL,",
+    "server_id": "BIGINT NOT NULL,",
     "user_id": "BIGINT NOT NULL,",
     "xp": "INT NOT NULL,",
-    "level": "INT NOT NULL"
+    "level": "INT NOT NULL,",
+    "ADD": "PRIMARY KEY (server_id, user_id)" 
   }
 }
