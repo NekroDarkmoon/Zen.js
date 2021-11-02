@@ -76,17 +76,25 @@ export default class ZenDB {
 
   /**
    * 
+   * @param {string} sql 
+   * @param {array} values 
    */
-  async execute (sql, ...args) {
+  async execute (sql, values) {
+    // Validation
+    if (sql.indexOf("INSERT") === -1) throw "Not an execute query";
+
     // Create Connection
     const conn = await this.pool.connect();
-    
+    // TODO: Add ability to gain a result from the transaction
+
+    // Start Transaction
     try {
-      // TODO: Make this dynamic in relations to args
-      await conn.query(sql);
+      await conn.query(sql, values);
+      // Commit transaction
       await conn.query('COMMIT');
 
     } catch ( err ) {
+      // Rollback if an error occured
       await conn.query('ROLLBACK');
       console.error(err);
     } finally {
