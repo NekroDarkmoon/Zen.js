@@ -55,6 +55,8 @@ export default class ZenDB {
   }
 
 
+  async fetch () {}
+
   /**
    * @param {string} sql
    * @param {array} values 

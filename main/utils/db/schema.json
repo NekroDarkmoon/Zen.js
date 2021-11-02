@@ -1,7 +1,7 @@
 {
   "settings": {
-    "serverId": "BIGINT PRIMARY KEY NOT NULL,",
-    "ownerId": "BIGINT NOT NULL,",
+    "server_id": "BIGINT PRIMARY KEY NOT NULL,",
+    "owner_id": "BIGINT NOT NULL,",
     "prefix": "TEXT DEFAULT NULL,",
     "loggingChn": "BIGINT"
   },
@@ -32,7 +32,8 @@
     "serverId": "BIGINT PRIMARY KEY NOT NULL,",
     "userId": "BIGINT NOT NULL,",
     "rep": "INT NOT NULL,",
-    "lastGiven": "DATE DEFAULT CURRENT_DATE"
+    "lastGiven": "DATE DEFAULT CURRENT_DATE,",
+    "CONSTRAINT": "server_user UNIQUE (serverid, userid));"
   },
 
   "xp": {

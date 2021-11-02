@@ -1,7 +1,7 @@
 // ----------------------------------------------------------------
 //                             Imports
 // ----------------------------------------------------------------
-import Command from "../structures/Command.js";
+import Zen from "../Zen.js";
 import { SlashCommandBuilder } from "@discordjs/builders"
 import { Interaction } from "discord.js";
 
@@ -12,16 +12,28 @@ import { Interaction } from "discord.js";
 export default class Rep {
   constructor () {
     this.name = 'rep';
-    this.description = 'Displays the Reputation of a user.';
+    this.description = 'Commands Related to the reputation system';
     this.global = false;
     this.data = new SlashCommandBuilder()
       .setName(this.name)
       .setDescription(this.description)
-      .addUserOption( option => 
-        option
-          .setName('target')
-          .setDescription('Selected User')
-          .setRequired(false)
+      .addSubcommand( subcommand => 
+        subcommand
+          .setName('get')
+          .setDescription('Displays the Reputation of a user.')
+          .addUserOption( option => option.setName('target').setDescription('Selected User'))
+      )
+      .addSubcommand( subcommand => 
+        subcommand
+          .setName('giverep')
+          .setDescription('Give another user Reputation Points.')
+          .addUserOption( option => 
+            option
+              .setName('target')
+              .setDescription('Selected User')
+              .setRequired(true)
+          )
+          .addIntegerOption( opt => opt.setName('amount').setDescription('Reputation amount given'))
       )
   }
 
@@ -30,7 +42,24 @@ export default class Rep {
    * @returns {Promise<void>}
    * */
   execute = async (interaction) => {
+    // Get Bot & interface
+    /** @type {Zen} */
     const bot = interaction.client;
+    if (!this.bot) this.bot = bot;
+
+    // Execute based on subcommand
+    const sub = interaction.options.getSubcommand();
+    if (sub === "get") await this.getRep(interaction);
+    else if (sub === "giverep") await this.giveRep(interaction);
+  }
+
+  /**
+   * Get the Reputation points of a giver username.
+   * Returns the rep of the calling user if no args given.
+   * @param {Interaction} interaction 
+   */
+  async getRep ( interaction ) {
+    // Data builder
     let user = interaction.options.getUser('target'); 
     if ( !user ) user = interaction.user;
     
@@ -39,15 +68,37 @@ export default class Rep {
       const sql = "SELECT * FROM rep WHERE serverid=$1 AND userid=$2;"
       const values = [interaction.guild.id, user.id];
 
-      const result = await interaction.client.db.fetchOne(sql, values);
+      const result = await this.bot.db.fetchOne(sql, values);
       const rep = result ? result.rep : 0 ;
 
       const msg = `Member \`${user.username}\` has \`${rep}\` rep.`;
       await interaction.reply(msg);
 
     } catch ( err ) {
-      bot.logger.error(err);
+      this.bot.logger.error({message: err});
+    }
+  } 
+
+  /**
+   * Give another user reputation and create a cooldown for it as well.
+   * @param {Interaction} interaction 
+   */
+  async giveRep ( interaction ) {
+    // Data builder
+    const user = interaction.options.getUser('target');
+    let rep = interaction.options.getInteger('amount');
+    if (!rep) rep = 0;
+    console.log(user, rep)
+    
+    // DB transaction
+    try {
+      const sql = ` INSERT INTO rep (serverid, userid, rep)
+                    VALUES ($1, $2, $3)
+                    ON CONFLICT ON CONSTRAINT server_user 
+                    DO UPDATE SET rep = rep.rep + $3;`
     }
 
+    await interaction.reply("Under Progress");
   }
+
 }
