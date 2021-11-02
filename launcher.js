@@ -41,6 +41,7 @@ async function main () {
 
   // Setup Logger
   const logger = setupLogger('info');
+  console.info("Logger setup. Switching to logger.");
 
   // Fetch data from config file
   const config = JSON.parse(
@@ -52,10 +53,11 @@ async function main () {
   // Setup DB
   const db = new ZenDB(config.postgresql, logger);
   await db.init();
+  logger.info("DB initiated");
 
   // Set up bot instance
   const zen = new Zen(config, db, logger);
-
+  logger.info("Bot Initiated");
   // ["exit", "SIGINT", "SIGQUIT", "SIGTERM", "uncaughtException", "unhandledRejection"]
 	// 	.forEach(ec => process.on(ec, ZEN.handleExit.bind(ZEN)));
   

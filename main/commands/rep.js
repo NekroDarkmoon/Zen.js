@@ -69,6 +69,7 @@ export default class Rep {
       const values = [interaction.guild.id, user.id];
 
       const result = await this.bot.db.fetchOne(sql, values);
+      console.log(result);
       const rep = result ? result.rep : 0 ;
 
       const msg = `Member \`${user.username}\` has \`${rep}\` rep.`;
@@ -87,20 +88,25 @@ export default class Rep {
     // Data builder
     const user = interaction.options.getUser('target');
     let rep = interaction.options.getInteger('amount');
-    if (!rep) rep = 0;
-    console.log(user, rep)
-    
-    // DB transaction
+    rep = (!rep || rep === 0) ? 1 : rep;
+
+    // Validation
+     
+
+    // Execute Db transaction
     try {
       const sql = `INSERT INTO rep (server_id, user_id, rep)
                    VALUES ($1, $2, $3)
                    ON CONFLICT ON CONSTRAINT server_user 
                    DO UPDATE SET rep = rep.rep + $3;`
+      const values = [interaction.guild.id, user.id, rep];
+      await this.bot.db.execute(sql, values);
+    } catch (err) {
+      this.bot.logger.error(err);
+    }
 
-
-    } catch (err) {}
-
-    await interaction.reply("Under Progress");
+    const msg = `Gave \`${user.username}\` \`${rep}\` rep`;
+    await interaction.reply(msg);
   }
 
 }

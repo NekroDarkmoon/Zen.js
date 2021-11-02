@@ -33,14 +33,13 @@
     "user_id": "BIGINT NOT NULL,",
     "rep": "INT NOT NULL,",
     "last_given": "DATE DEFAULT CURRENT_DATE,",
-    "CONSTRAINT": "server_user UNIQUE (server_id, user_id));"
+    "CONSTRAINT": "server_user UNIQUE (server_id, user_id)"
   },
 
   "xp": {
     "server_id": "BIGINT PRIMARY KEY NOT NULL,",
     "user_id": "BIGINT NOT NULL,",
     "xp": "INT NOT NULL,",
-    "level": "INT NOT NULL,",
-    "CONSTRAINT": "server_user UNIQUE (server_id, user_id));"
+    "level": "INT NOT NULL"
   }
 }

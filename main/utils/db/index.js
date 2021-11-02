@@ -66,6 +66,7 @@ export default class ZenDB {
   async fetchOne (sql, values) {
     // Validation
     if (sql.indexOf("SELECT") === -1 ) throw "Not a fetch query";
+    if (!values) values = [];
 
     // Pool query
     const result = await this.pool.query(sql, values);
@@ -81,7 +82,8 @@ export default class ZenDB {
    */
   async execute (sql, values) {
     // Validation
-    if (sql.indexOf("INSERT") === -1) throw "Not an execute query";
+    // if (sql.indexOf("INSERT") === -1) throw "Not an execute query";
+    if ( !values ) values = [];
 
     // Create Connection
     const conn = await this.pool.connect();
