@@ -65,7 +65,7 @@ export default class Rep {
     
     // Get data from db
     try {
-      const sql = "SELECT * FROM rep WHERE serverid=$1 AND userid=$2;"
+      const sql = "SELECT * FROM rep WHERE server_id=$1 AND user_id=$2;"
       const values = [interaction.guild.id, user.id];
 
       const result = await this.bot.db.fetchOne(sql, values);
@@ -92,11 +92,13 @@ export default class Rep {
     
     // DB transaction
     try {
-      const sql = ` INSERT INTO rep (serverid, userid, rep)
-                    VALUES ($1, $2, $3)
-                    ON CONFLICT ON CONSTRAINT server_user 
-                    DO UPDATE SET rep = rep.rep + $3;`
-    }
+      const sql = `INSERT INTO rep (server_id, user_id, rep)
+                   VALUES ($1, $2, $3)
+                   ON CONFLICT ON CONSTRAINT server_user 
+                   DO UPDATE SET rep = rep.rep + $3;`
+
+
+    } catch (err) {}
 
     await interaction.reply("Under Progress");
   }
