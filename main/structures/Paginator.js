@@ -21,7 +21,7 @@ export default class Paginator {
   constructor ( data, max_pages=null ) {
     this.collector = null;
     this.data = data;
-    this.max_pages = max_pages ? max_pages : Math.ceil( data / 15 );
+    this.max_pages = max_pages ? max_pages : Math.ceil( data.length / 15 );
   }
 
   /**
@@ -60,7 +60,7 @@ export default class Paginator {
    * @param {Interaction} msgInteraction
    * @param {number} time
    */
-  createCollector (msgInteraction, time=1000*15) {
+  createCollector (msgInteraction, time=1000*30) {
     // Data builder
     /** @type {Interaction.channel} */
     const channel = msgInteraction.channel;
@@ -89,13 +89,13 @@ export default class Paginator {
       console.log(pageNum)
 
       // Prepate data for pageNumber
-      const data = `Data ${pageNum}`;
+      const data = this._prepareData(pageNum)
 
       // Create embed
       const e = new MessageEmbed()
         .setTitle('RepBoard')
         .setDescription(data)
-        .setColor('#0099ff')
+        .setColor('DARK_GOLD')
 
       // Update components
       const components = this.getPaginationComponents(pageNum);
@@ -114,36 +114,38 @@ export default class Paginator {
     });
   }
 
+  /**
+   * 
+   * @param {Number} page 
+   * @returns 
+   */
   _prepareData (page) {
     const maxLines = 15;
     const data = this.data;
     const dataLen = data.length;
     // Splice array for 15 values if exists  
-
-    console.log(((page-1)*maxLines) , (page*maxLines - 1));
+    // TODO: Add check for no content
     const display = data.splice( ((page-1)*maxLines) , (page*maxLines - 1));
     
     // Tabulate data for display
     const tabulated = Paginator.tabulate(display) 
-
     return tabulated;
   }
 
-
+  /**
+   * 
+   * @param {Array<{}>} data 
+   * @returns 
+   */
   static tabulate (data) {
-    console.log(data);
     // Data builder
+  
+    // TODO: Fix this 
     const options = {
       columnSplitter: '|',
-      config: {
-				" Rank ": { align: "center" },
-				" Points ": { align: "right" }
-			}
     }
 
     const columns = columnify(data, options);
-
-
     return `\`\`\`\n${columns}\n\`\`\``;
   } 
 

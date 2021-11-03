@@ -162,7 +162,11 @@ export default class Rep {
       const values = [interaction.guild.id];
 
       let result = await this.bot.db.fetch(sql, values); 
-      if ( !result ) { console.log("hel"); return;}
+      if ( !result ) { 
+        const msg = `This server has no one with reputation points.`;
+        await interaction.reply(msg);
+        return;
+      }
 
       // Modify results to needs
       let modifiedResult = []
@@ -183,12 +187,12 @@ export default class Rep {
     } catch ( err ) {this.bot.logger.error(err); return}
 
     // Construct Paginator
-    const paginator = new Paginator(data, 5);
+    const paginator = new Paginator(data);
     const components = paginator.getPaginationComponents( page );
 
     // Construct Embed
     const e = new MessageEmbed()
-      .setColor("#0099ff")
+      .setColor('DARK_GOLD')
       .setTitle("Rep Board")
       .setDescription(paginator._prepareData(page));
 
