@@ -55,7 +55,15 @@ export default class ZenDB {
   }
 
 
-  async fetch () {}
+  async fetch (sql, values=[]) {
+    // Validation
+    if (sql.indexOf("SELECT") === -1 ) throw "Not a fetch query";
+
+    const result = await this.pool.query(sql, values);
+    if (result.rows.length === 0) return null;
+    return result.rows;
+  }
+
 
   /**
    * @param {string} sql
@@ -63,10 +71,9 @@ export default class ZenDB {
    * 
    * @returns {object | null} result
    */
-  async fetchOne (sql, values) {
+  async fetchOne (sql, values=[]) {
     // Validation
     if (sql.indexOf("SELECT") === -1 ) throw "Not a fetch query";
-    if (!values) values = [];
 
     // Pool query
     const result = await this.pool.query(sql, values);
@@ -80,10 +87,9 @@ export default class ZenDB {
    * @param {string} sql 
    * @param {array} values 
    */
-  async execute (sql, values) {
+  async execute (sql, values=[]) {
     // Validation
     // if (sql.indexOf("INSERT") === -1) throw "Not an execute query";
-    if ( !values ) values = [];
 
     // Create Connection
     const conn = await this.pool.connect();
@@ -105,21 +111,4 @@ export default class ZenDB {
   }
 
 }
-// ----------------------------------------------------------------
-//                             Imports
-// ----------------------------------------------------------------
-// ----------------------------------------------------------------
-//                             Imports
-// ----------------------------------------------------------------
-// ----------------------------------------------------------------
-//                             Imports
-// ----------------------------------------------------------------
-// ----------------------------------------------------------------
-//                             Imports
-// ----------------------------------------------------------------
-// ----------------------------------------------------------------
-//                             Imports
-// ----------------------------------------------------------------
-// ----------------------------------------------------------------
-//                             Imports
-// ----------------------------------------------------------------
+

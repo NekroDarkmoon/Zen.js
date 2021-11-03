@@ -154,8 +154,34 @@ export default class Rep {
     // Data builder
     let page = interaction.options.getInteger('page');
     page = !page ? 1 : page;
-    const data = ["fsegeaf", "sgfaergaegae", "fearfea", "freafeaf", "AEfeargae"];
-    
+    let data = null;
+
+    // Fetch rep data
+    try {
+      const sql = `SELECT * FROM rep WHERE server_id=$1 ORDER BY rep DESC`;
+      const values = [interaction.guild.id];
+
+      let result = await this.bot.db.fetch(sql, values); 
+      if ( !result ) { console.log("hel"); return;}
+
+      // Modify results to needs
+      let modifiedResult = []
+      let count = 1;
+      result.forEach( async (row) => { 
+        const user = this.bot.users.cache.get(row.user_id);
+
+        const temp = {};
+        temp.rank = count;
+        temp.user = ( user ) ? user.username : (await this.bot.users.fetch(row.user_id)).username;
+        temp.rep = row.rep; 
+        count += 1;
+
+        modifiedResult.push(temp);
+      });
+
+      data = modifiedResult;
+    } catch ( err ) {this.bot.logger.error(err); return}
+
     // Construct Paginator
     const paginator = new Paginator(data, 5);
     const components = paginator.getPaginationComponents( page );
@@ -164,7 +190,7 @@ export default class Rep {
     const e = new MessageEmbed()
       .setColor("#0099ff")
       .setTitle("Rep Board")
-      .setDescription(data.toString());
+      .setDescription(paginator._prepareData(page));
 
     // Send reply 
     await interaction.reply({

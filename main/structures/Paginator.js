@@ -1,7 +1,13 @@
 // ----------------------------------------------------------------
 //                             Imports
 // ----------------------------------------------------------------
-import { Interaction, MessageActionRow, MessageButton, MessageEmbed } from "discord.js";
+import { 
+  Interaction,
+  MessageActionRow,
+  MessageButton, 
+  MessageEmbed } from "discord.js";
+
+import columnify from "columnify";
 
 
 // ----------------------------------------------------------------
@@ -9,13 +15,13 @@ import { Interaction, MessageActionRow, MessageButton, MessageEmbed } from "disc
 // ----------------------------------------------------------------
 export default class Paginator {
   /**
-   * @param {*} data
+   * @param {Array} data
    * @param {Number} max_pages 
    */
-  constructor ( data, max_pages ) {
+  constructor ( data, max_pages=null ) {
     this.collector = null;
     this.data = data;
-    this.max_page = max_pages;
+    this.max_pages = max_pages ? max_pages : Math.ceil( data / 15 );
   }
 
   /**
@@ -69,7 +75,10 @@ export default class Paginator {
     });
   }
 
-
+  /**
+   * 
+   * @param {*} msgInteraction 
+   */
   collect ( msgInteraction ) {
     if (!this.collector) throw "No collector found";
 
@@ -103,10 +112,40 @@ export default class Paginator {
         components: []
       });
     });
+  }
 
+  _prepareData (page) {
+    const maxLines = 15;
+    const data = this.data;
+    const dataLen = data.length;
+    // Splice array for 15 values if exists  
+
+    console.log(((page-1)*maxLines) , (page*maxLines - 1));
+    const display = data.splice( ((page-1)*maxLines) , (page*maxLines - 1));
+    
+    // Tabulate data for display
+    const tabulated = Paginator.tabulate(display) 
+
+    return tabulated;
   }
 
 
+  static tabulate (data) {
+    console.log(data);
+    // Data builder
+    const options = {
+      columnSplitter: '|',
+      config: {
+				" Rank ": { align: "center" },
+				" Points ": { align: "right" }
+			}
+    }
+
+    const columns = columnify(data, options);
+
+
+    return `\`\`\`\n${columns}\n\`\`\``;
+  } 
 
 
 }

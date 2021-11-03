@@ -76,6 +76,9 @@ export default class Zen extends Client{
     await this.CommandHandler.loadCommands();
     await this.CommandHandler.registerCommands();
 
+    // Cache builders
+    // TODO: Build Caches
+
     // Set token
     this.login(this.config.token);
     this.setMaxListeners(20);
