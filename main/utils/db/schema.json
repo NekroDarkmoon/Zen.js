@@ -11,7 +11,7 @@
     "user_id": "BIGINT NOT NULL,",
     "channel_id": "BIGINT NOT NULL,",
     "last_msg": "DATE NOT NULL,",
-    "ADD": "PRIMARY KEY (server_id, user_id)" 
+    "PRIMARY KEY": " (server_id, user_id)" 
   },
 
   "quests": {
@@ -21,14 +21,14 @@
     "type": "TEXT,",
     "posted_on": "DATE DEFAULT CURRENT_DATE,",
     "msg": "TEXT,",
-    "ADD": "PRIMARY KEY (server_id, user_id)" 
+    "PRIMARY KEY": "(server_id, user_id)" 
   },
 
   "playchns": {
     "server_id": "BIGINT NOT NULL,",
     "user_id": "BIGINT NOT NULL,",
     "map": "BOOLEAN DEFAULT FALSE,",   
-    "ADD": "PRIMARY KEY (server_id, user_id)" 
+    "PRIMARY KEY": "(server_id, user_id)" 
   },
 
   "rep": {
@@ -44,6 +44,6 @@
     "user_id": "BIGINT NOT NULL,",
     "xp": "INT NOT NULL,",
     "level": "INT NOT NULL,",
-    "ADD": "PRIMARY KEY (server_id, user_id)" 
+    "PRIMARY KEY": " (server_id, user_id)" 
   }
 }

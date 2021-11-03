@@ -4,6 +4,7 @@
 import Zen from "../Zen.js";
 import { SlashCommandBuilder } from "@discordjs/builders"
 import { Interaction } from "discord.js";
+import { Permissions } from "discord.js";
 
 
 // ----------------------------------------------------------------
@@ -35,6 +36,11 @@ export default class Rep {
           )
           .addIntegerOption( opt => opt.setName('amount').setDescription('Reputation amount given'))
       )
+      .addSubcommand( subcommand =>
+        subcommand
+          .setName('repbaord')
+          .setDescription('Display the reputation board for the server.')
+      )
   }
 
   /**
@@ -51,6 +57,9 @@ export default class Rep {
     const sub = interaction.options.getSubcommand();
     if (sub === "get") await this.getRep(interaction);
     else if (sub === "giverep") await this.giveRep(interaction);
+    else if (sub === 'repboard') await this.repBoard(interaction);
+
+    return;
   }
 
   /**
@@ -69,7 +78,6 @@ export default class Rep {
       const values = [interaction.guild.id, user.id];
 
       const result = await this.bot.db.fetchOne(sql, values);
-      console.log(result);
       const rep = result ? result.rep : 0 ;
 
       const msg = `Member \`${user.username}\` has \`${rep}\` rep.`;
@@ -86,12 +94,42 @@ export default class Rep {
    */
   async giveRep ( interaction ) {
     // Data builder
+    const member = interaction.member;
     const user = interaction.options.getUser('target');
     let rep = interaction.options.getInteger('amount');
     rep = (!rep || rep === 0) ? 1 : rep;
 
-    // Validation
-     
+    // Validation - Bot check
+    if (user.bot) { 
+      const msg = `Error: Bot. \`Unable to give rep to a bot.\``;
+      await interaction.reply({content: msg, ephemeral: true});
+      return;
+    }
+
+    // Validation - Self check
+    if (!member.permissions.has(Permissions.FLAGS.ADMINISTRATOR) &&
+        member.id === user.id) {
+      const msg = `Error: Sabatoge. \`Unable to give rep to yourself.\``;
+      await interaction.reply({content: msg, ephemeral: true});
+      return;
+    }
+
+    // Validation - Amount check
+    if ( !member.permissions.has(Permissions.FLAGS.ADMINISTRATOR) && rep !== 1){
+      const msg = `Error: Permissions not met. \`Unable to give more than 1 rep.\``;
+      await interaction.reply({content: msg, ephemeral: true});
+      return;
+    }
+
+    // TODO: Complete time validation query
+    // Validation - Time check
+    try {
+      const sql = `SELECT * FROM logger WHERE server_id=$1 and user_id=$2`;
+      const values = [interaction.guild.id, member.id];
+      const res = await this.bot.db.fetchOne(sql, values);
+      console.log(res);
+
+    } catch ( err ) { this.bot.logger.error(err) }
 
     // Execute Db transaction
     try {
@@ -101,12 +139,19 @@ export default class Rep {
                    DO UPDATE SET rep = rep.rep + $3;`
       const values = [interaction.guild.id, user.id, rep];
       await this.bot.db.execute(sql, values);
-    } catch (err) {
-      this.bot.logger.error(err);
-    }
+
+    } catch (err) { this.bot.logger.error(err) }
 
     const msg = `Gave \`${user.username}\` \`${rep}\` rep`;
     await interaction.reply(msg);
+  }
+
+  /**
+   * Displays the top members on the repBoard
+   * @param {Interaction} interaction 
+   */
+  async repBoard (interaction) {
+
   }
 
 }
