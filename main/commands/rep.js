@@ -117,14 +117,14 @@ export default class Rep {
     // Validation - Self check
     if (!member.permissions.has(Permissions.FLAGS.ADMINISTRATOR) &&
         member.id === user.id) {
-      const msg = `Error: Sabatoge. \`Unable to give rep to yourself.\``;
+      const msg = `Error: Sabotage. \`Unable to give rep to yourself.\``;
       await interaction.reply({content: msg, ephemeral: true});
       return;
     }
 
     // Validation - Amount check
     if ( !member.permissions.has(Permissions.FLAGS.ADMINISTRATOR) && rep !== 1){
-      const msg = `Error: Permissions not met. \`Unable to give more than 1 rep.\``;
+      const msg = `Error: Permissions not met. \`Amount cannot be anything other than 1.\``;
       await interaction.reply({content: msg, ephemeral: true});
       return;
     }
@@ -135,7 +135,7 @@ export default class Rep {
       const sql = `SELECT * FROM logger WHERE server_id=$1 and user_id=$2`;
       const values = [interaction.guild.id, member.id];
       const res = await this.bot.db.fetchOne(sql, values);
-      console.log(res);
+      // console.log(res);
 
     } catch ( err ) { this.bot.logger.error(err) }
 

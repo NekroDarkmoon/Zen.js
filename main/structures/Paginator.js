@@ -86,8 +86,6 @@ export default class Paginator {
       
       // Get page number
       const pageNum = JSON.parse(btnInteraction.component.customId).page;
-      console.log(pageNum)
-
       // Prepate data for pageNumber
       const data = this._prepareData(pageNum)
 
@@ -125,7 +123,7 @@ export default class Paginator {
     const dataLen = data.length;
     // Splice array for 15 values if exists  
     // TODO: Add check for no content
-    const display = data.splice( ((page-1)*maxLines) , (page*maxLines - 1));
+    const display = data.slice( ((page-1)*maxLines) , (page*maxLines - 1));
     
     // Tabulate data for display
     const tabulated = Paginator.tabulate(display) 
