@@ -10,14 +10,14 @@ import { Interaction, MessageActionRow, MessageButton, Permissions } from "disco
 // ----------------------------------------------------------------
 export default class Ban {
   constructor () {
-    this.name = 'ban';
-    this.description = 'Bans a user from the server.';
+    this.name = 'unban';
+    this.description = 'Unbans a user from the server.';
     this.global = false;
     this.data = new SlashCommandBuilder()
       .setName(this.name)
       .setDescription(this.description)
       .addUserOption(opt => opt.setName('target').setDescription('Selected User').setRequired(true))
-      .addStringOption(opt => opt.setName('reason').setDescription('Reason for ban.'));
+      .addStringOption(opt => opt.setName('reason').setDescription('Reason for unban.'));
   }
 
   /**
@@ -39,19 +39,19 @@ export default class Ban {
     
     // Inital reply
     interaction.reply({
-      content: `\`Are you sure you wish to ban ${user.username}\``,
+      content: `\`Are you sure you wish to unban ${user.username}\``,
       // ephemeral: true,
       components: [
         new MessageActionRow()
           .addComponents(
             new MessageButton()
-              .setCustomId("confirmBan")
+              .setCustomId("confirmUnban")
               .setLabel('✔')
               .setStyle('SUCCESS')
           )
           .addComponents(
             new MessageButton()
-              .setCustomId("denyBan")
+              .setCustomId("denyUnban")
               .setLabel('✖')
               .setStyle('DANGER')
           )
@@ -71,9 +71,9 @@ export default class Ban {
     });
 
     collector.on('collect', async btnInteraction => {
-      if (btnInteraction.component.customId === "confirmBan") {
+      if (btnInteraction.component.customId === "confirmUnban") {
         await interaction.guild.members.ban(user.id);
-        const msg = `Banned ${user.username} for the following reason:\n${reason}`;
+        const msg = `Unbanned ${user.username} for the following reason:\n${reason}`;
         await btnInteraction.update({content: msg, ephemeral: false});
 
         // TODO: Log it 
