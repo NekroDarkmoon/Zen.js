@@ -41,6 +41,8 @@ export default class MessageCreateEvent {
    * @param {Message} message 
    */
   async levelHandler ( message ) {
+    // Validation - Bot
+    if ( message.author.bot ) return;
 
   }
 
@@ -58,8 +60,8 @@ export default class MessageCreateEvent {
 			m => /(?<!no )(?<![A-z])th(a?n(k|x(?!s))s?)(?![A-z])/gi.test(m.content),   // Permutations or Abbreviations of thanks, but not preceeded by "no"
 			m => /(?<![A-z])ty(vm)?(?![A-z])/gi.test(m.content),                       // "tyvm" or just "ty"
 			m => /(?<![A-z])dankee?(?![A-z])/gi.test(m.content),                       // Constains "danke"
-			m => /(?<![A-z])ありがとう?(?![A-z])/gi.test(m.content),                       // Constains "danke"
-			m => /:upvote:/gi.test(m.content)                                          // The +1 emoji
+			m => /(?<![A-z])ありがとう?(?![A-z])/gi.test(m.content),                    // Constains "arigato"
+			m => /:upvote:/gi.test(m.content)                                          // The upvote emoji
 		  ].some(test=> test(msg));
     };
     // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++

@@ -1,7 +1,6 @@
 // ----------------------------------------------------------------
 //                             Imports
 // ----------------------------------------------------------------
-import Command from "../structures/Command.js";
 import { SlashCommandBuilder } from "@discordjs/builders"
 import { Interaction } from "discord.js";
 
