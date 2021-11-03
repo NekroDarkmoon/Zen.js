@@ -37,6 +37,13 @@ export default class Rep {
       )
       .addSubcommand( subcommand =>
         subcommand
+          .setName('setrep')
+          .setDescription('Set the reputation points of a user')
+          .addUserOption( opt => opt.setName('target').setDescription('Selected User').setRequired(true))
+          .addIntegerOption( opt => opt.setName('amount').setDescription('New Amount').setRequired(true))
+      )
+      .addSubcommand( subcommand =>
+        subcommand
           .setName('repboard')
           .setDescription('Display the reputation board for the server.')
           .addIntegerOption( option => option.setName('page').setDescription('Selected page to view.'))
@@ -58,6 +65,7 @@ export default class Rep {
     if (sub === "get") await this.getRep(interaction);
     else if (sub === "giverep") await this.giveRep(interaction);
     else if (sub === 'repboard') await this.repBoard(interaction, args);
+    else if (sub === 'setrep') await this.setRep(interaction);
 
     return;
   }
@@ -145,6 +153,39 @@ export default class Rep {
     const msg = `Gave \`${user.username}\` \`${rep}\` rep`;
     await interaction.reply(msg);
   }
+
+
+  /**
+   * Sets a users rep to an amount
+   * @param {Interaction} interaction 
+   */
+  async setRep ( interaction ) {
+    // Data Builder
+    const member = interaction.member;
+    const user = interaction.options.getUser('target');
+    const rep = interaction.options.getInteger('amount');
+
+    // Validation - Admin
+    if (!member.permissions.has(Permissions.FLAGS.ADMINISTRATOR)) {
+      const msg = `Error: Permissions not met. \`Unable to use command.\``;
+      await interaction.reply({content: msg, ephemeral: true});
+      return;
+    }
+
+    // Set new rep
+    try {
+      const sql = `INSERT INTO rep (server_id, user_id, rep)
+                   VALUES ($1, $2, $3)
+                   ON CONFLICT ON CONSTRAINT server_user
+                   DO UPDATE SET rep = $3;`
+      const values = [interaction.guild.id, user.id, rep];
+      await this .bot.db.execute(sql, values);
+    } catch ( err ) {this.bot.logger.error(err)}
+
+    const msg = `\`${user.username}\` now has \`${rep}\` rep`;
+    await interaction.reply(msg);
+  } 
+
 
   /**
    * Displays the top members on the repBoard

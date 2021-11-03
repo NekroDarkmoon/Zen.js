@@ -76,12 +76,12 @@ export default class Zen extends Client{
     await this.CommandHandler.loadCommands();
     await this.CommandHandler.registerCommands();
 
-    // Cache builders
-    // TODO: Build Caches
-
     // Set token
     this.login(this.config.token);
     this.setMaxListeners(20);
+
+    // Cache Builder
+    await this.buildCaches();
 
   }
 
@@ -120,10 +120,8 @@ export default class Zen extends Client{
     return true;
   }
 
-  // async createListeners () {
-  //   this.once('ready', this.onReady.bind(this));
-  //   this.on('interactionCreate', this.onInteractionCreate.bind(this));
-  //   this.ws.on('INTERACTION_CREATE', this.onInteractionCreate.bind(this));
-  //   this.on('messageCreate', this.onMessageCreate.bind(this));
-  // }
+
+  async buildCaches () {
+  }
+
 }
