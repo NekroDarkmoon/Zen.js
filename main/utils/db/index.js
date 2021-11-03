@@ -110,5 +110,34 @@ export default class ZenDB {
     }
   }
 
+  /**
+   * 
+   * @param {Array<String>} sqlArray 
+   * @param {Array<Array>} valArray 
+   */
+  async executeMany( sqlArray, valArray ) {
+    // Validation - Match Array Size
+
+    const conn = await this.pool.connect();
+
+    try {
+      for (let pos = 0; pos < sqlArray.length; pos++) {
+        const sql = sqlArray[pos];
+        const values = valArray[pos] || [];
+        await conn.query(sql, values);
+      }
+
+      await conn.query('COMMIT');
+    } catch ( err ) {
+      await conn.query('ROLLBACK');
+      console.error(err);
+    } finally {
+      conn.release();
+    }
+
+
+  }
+
+
 }
 
