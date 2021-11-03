@@ -10,7 +10,8 @@
     "server_id": "BIGINT NOT NULL,",
     "user_id": "BIGINT NOT NULL,",
     "channel_id": "BIGINT NOT NULL,",
-    "last_msg": "DATE NOT NULL,",
+    "last_msg": "DATE DEFAULT CURRENT_DATE,",
+    "last_rep": "DATE NOT NULL,",
     "PRIMARY KEY": " (server_id, user_id)" 
   },
 

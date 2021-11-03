@@ -2,10 +2,9 @@
 //                             Imports
 // ----------------------------------------------------------------
 import Zen from "../Zen.js";
+import Paginator from "../structures/Paginator.js";
 import { SlashCommandBuilder } from "@discordjs/builders"
-import { Interaction } from "discord.js";
-import { Permissions } from "discord.js";
-
+import { Interaction, MessageEmbed, Permissions } from "discord.js";
 
 // ----------------------------------------------------------------
 //                             Command
@@ -38,8 +37,9 @@ export default class Rep {
       )
       .addSubcommand( subcommand =>
         subcommand
-          .setName('repbaord')
+          .setName('repboard')
           .setDescription('Display the reputation board for the server.')
+          .addIntegerOption( option => option.setName('page').setDescription('Selected page to view.'))
       )
   }
 
@@ -47,7 +47,7 @@ export default class Rep {
    * @param {Interaction} interaction
    * @returns {Promise<void>}
    * */
-  execute = async (interaction) => {
+  execute = async (interaction, ...args) => {
     // Get Bot & interface
     /** @type {Zen} */
     const bot = interaction.client;
@@ -57,7 +57,7 @@ export default class Rep {
     const sub = interaction.options.getSubcommand();
     if (sub === "get") await this.getRep(interaction);
     else if (sub === "giverep") await this.giveRep(interaction);
-    else if (sub === 'repboard') await this.repBoard(interaction);
+    else if (sub === 'repboard') await this.repBoard(interaction, args);
 
     return;
   }
@@ -151,7 +151,34 @@ export default class Rep {
    * @param {Interaction} interaction 
    */
   async repBoard (interaction) {
+    // Data builder
+    let page = interaction.options.getInteger('page');
+    page = !page ? 1 : page;
+    const data = ["fsegeaf", "sgfaergaegae", "fearfea", "freafeaf", "AEfeargae"];
+    
+    // Construct Paginator
+    const paginator = new Paginator(data, 5);
+    const components = paginator.getPaginationComponents( page );
 
+    // Construct Embed
+    const e = new MessageEmbed()
+      .setColor("#0099ff")
+      .setTitle("Rep Board")
+      .setDescription(data.toString());
+
+    // Send reply 
+    await interaction.reply({
+      embeds: [e],
+      components: [components]
+    });
+
+    // Create collector
+    paginator.createCollector( interaction );
+
+    // Start Collecting
+    try {
+      paginator.collect( interaction );
+    } catch ( err ) { this.bot.logger.error(err) }
   }
 
 }
