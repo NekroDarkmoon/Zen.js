@@ -2,8 +2,8 @@
 //                             Imports
 // ----------------------------------------------------------------
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { Interaction } from "discord.js";
-import Zen from "../Zen";
+import { GuildMember, Interaction, MessageEmbed, User } from "discord.js";
+import Zen from "../Zen.js";
 
 // ----------------------------------------------------------------
 //                             Imports
@@ -20,8 +20,8 @@ export default class Info {
         sub
           .setName('user')
           .setDescription("Displays a user's information.")
-          .addUserOption( opt => opt.setName('target').setDescription("Selected User.")
-                                    .setRequired(true))
+          .addUserOption( opt => opt.setName('target').setDescription("Selected User."))
+          .addIntegerOption( opt => opt.setName('id').setDescription("ID"))
       )
       .addSubcommand( sub => 
         sub
@@ -58,24 +58,70 @@ export default class Info {
     // Handler
     switch (sub) {
       case "user":
-
-        return;
+        await this.userInfo( interaction ); return;        
       case "server":
-        return;
+        await this.severInfo( interaction ); return;        
       case "self":
-        return;
+        await this.selfInfo( interaction ); return;        
       case "role":
-        return;
+        await this.roleInfo( interaction ); return;        
     } 
   }
 
-
+  /**
+   * 
+   * @param {Interaction} interaction 
+   */
   async userInfo (interaction) {
-    
+    // Defer reply
+    await interaction.deferReply();
+    // Data builder
+    /** @type {User || GuildMember} */
+    const user = interaction.options.getUser('target');
+    const member = await interaction.guild.members.fetch(user.id);
+    const e = new MessageEmbed()
+
+    // Basic information
+    e.setAuthor(user.username);
+    e.addField('ID', user.id, true);
+    // Get shared servers
+    const shared = "In Progress";
+    e.addField('Servers', shared, true);
+    // Joined
+    const joined = member.joinedAt.toDateString();
+    e.addField("Joined", joined, true);
+    // Created
+    const created = user.createdAt.toDateString();
+    e.addField("Created", created, true);
+    // Get roles
+    const roles = member.roles.cache;
+    if (roles) {
+      const roleNames = roles.map(role => (role.name).replace('@', '@\u200b'));
+      const data = (roles.length > 10) ? `${roles.length} roles`: roleNames.join(', ');
+      e.addField("Roles", data, false);
+    }
+
+    // Add color
+    const color = user.hexAccentColor || '0xf2f6f7';
+    e.setColor(color); 
+    // Add Avatar
+    const avatar = user.avatarURL();
+    if (avatar) e.setThumbnail(avatar);
+
+    // TODO: Add last message
+
+    // Set Footer
+    const footer = Date()
+    e.setFooter(`Generated at ${footer}`);
+
+    // Send embed
+    await interaction.editReply({embeds: [e]});
   }
   
-  async selfInfo (interaction) {}
   async serverInfo (interaction) {}
+
+  
+  async selfInfo (interaction) {}
   async roleInfo (interaction) {}
 
 }
