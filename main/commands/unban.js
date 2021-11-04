@@ -72,7 +72,7 @@ export default class Ban {
 
     collector.on('collect', async btnInteraction => {
       if (btnInteraction.component.customId === "confirmUnban") {
-        await interaction.guild.members.ban(user.id);
+        await interaction.guild.members.unban(user.id);
         const msg = `Unbanned ${user.username} for the following reason:\n${reason}`;
         await btnInteraction.update({content: msg, ephemeral: false});
 

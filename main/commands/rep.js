@@ -140,6 +140,7 @@ export default class Rep {
     } catch ( err ) { this.bot.logger.error(err) }
 
     // Execute Db transaction
+    // TODO: Convert to executeMany
     try {
       const sql = `INSERT INTO rep (server_id, user_id, rep)
                    VALUES ($1, $2, $3)
