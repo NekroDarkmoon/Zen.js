@@ -4,6 +4,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { Interaction, MessageEmbed, Permissions, User } from "discord.js";
 import Zen from "../Zen.js";
+import os from 'os';
 
 // ----------------------------------------------------------------
 //                             Imports
@@ -226,8 +227,8 @@ export default class Info {
 
     // Add member count
     const memCount = guild.memberCount;
-    const botCount = (guild.members.cache.map(mem => mem.user.bot)).length;
-    e.addField("Members", `Total: ${memCount} (${botCount} bots)`);
+    const botCount = Array.from(guild.members.cache.filter(mem => mem.user.bot));
+    e.addField("Members", `Total: ${memCount} (${botCount.length} bots)`);
     // Add role count
     if (roles) {
       const data = (roles.length > 10) ? `${roles.length} roles`: roles.join(', ');
@@ -256,8 +257,42 @@ export default class Info {
     await interaction.editReply({embeds:[e]});
   }
 
+  /**
+   * 
+   * @param {Interaction} interaction 
+   */ 
+  async selfInfo (interaction) {
+    // Defer Reply
+    await interaction.deferReply();
+    // // Data Builder
+    // const bot = this.bot;
+    // const e = new MessageEmbed();
+
+    // // Add Title & Description
+    // e.setTitle(bot.application.name || "Not Set");
+    // e.setDescription(bot.application.description || "Not Set");
+
+    // // Add ID, Shards, GuildCount, MemberCount & Commands count
+    // e.addField("ID", bot.application.id, true);
+    // e.addField("Guilds", (bot.guilds.cache).length, true);
+    // e.addField("Members", bot.users.cache.length, true);
+    // e.addField("Commands", bot.application.commands.cache.length, true);
   
-  async selfInfo (interaction) {}
-  async roleInfo (interaction) {}
+    // // Add Uptime
+    // // e.addField("Usage", usage, true);
+    // // Add CPU & MEM usage
+
+    // // Add links
+    // const links = `\`\``;
+    // // Add Created at
+    // e.setFooter(`Created At: ${bot.application.createdAt.toDateString()}`);
+    // await interaction.editReply({embeds:[e]});
+  }
+  
+
+  async roleInfo (interaction) {
+    await interaction.reply("Implementation missing");
+  }
+
 
 }
