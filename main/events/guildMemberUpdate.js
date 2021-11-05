@@ -24,9 +24,7 @@ export default class GuildMemberUpdateEvent {
     /** @type {Zen} */
     const bot = guild.client;
     if (!this.bot) this.bot = bot;
-    console.log(`Joined a new guild - ${guild.name}`);
 
-    // TODO: Create a setup for the user
   };
 
 }

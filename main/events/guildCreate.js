@@ -1,7 +1,7 @@
 // ----------------------------------------------------------------
 //                             Imports
 // ----------------------------------------------------------------
-import { Message } from "discord.js";
+import { Guild } from "discord.js";
 import Zen from "../Zen.js";
 
 
@@ -16,13 +16,37 @@ export default class GuildCreateEvent {
   }
 
   /**
-   * @param {Message} message 
+   * @param {Guild} guild 
    * @returns {Promise<void>}
    */
-  execute = async ( message ) => {
+  execute = async ( guild ) => {
     // Data builder
     /** @type {Zen} */
-    const bot = message.client;
+    const bot = guild.client;
     if (!this.bot) this.bot = bot;
+    const ownerId = guild.ownerId;
+    const prefix = bot.config.prefix;
+    const loggingChannel = null;
+
+    console.log(`Joined a new guild - ${guild.name}`);
+
+    // Make a db connection to add to db
+    try {
+      let sql = `SELECT * FROM settings WHERE server_id=$1`;
+      let values = [guild.id];
+      
+      const res = await bot.db.fetchOne(sql, values);
+
+      if (!res) {
+        sql = `INSERT INTO settings values($1, $2, $3, $4, $5);`;
+        values = [guild.id, ownerId, prefix, loggingChannel, true];
+        await bot.db.execute(sql, values);
+        console.log(`Registering new guild settings ${values}`);
+      } else {
+        console.log("Guild already has settings stored in db.");
+      }      
+    } catch (err) {console.error(err);}
+
+    // TODO: Setup
   };
 }

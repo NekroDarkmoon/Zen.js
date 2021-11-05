@@ -3,6 +3,7 @@
 // ----------------------------------------------------------------
 import { Message } from "discord.js";
 import Zen from "../Zen.js";
+import {chunkify, msgSanatize} from "../utils/utils.js";
 
 
 // ----------------------------------------------------------------
@@ -27,6 +28,8 @@ export default class MessageUpdateEvent {
 
     // Validation - Bot
     if (message.author.bot) return;
+
+    
 
   };
 

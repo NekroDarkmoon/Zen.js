@@ -3,7 +3,8 @@
     "server_id": "BIGINT PRIMARY KEY NOT NULL,",
     "owner_id": "BIGINT NOT NULL,",
     "prefix": "TEXT DEFAULT NULL,",
-    "logging_chn": "BIGINT"
+    "logging_chn": "BIGINT,",
+    "setup": "BOOLEAN NOT NULL DEFAULT FALSE"
   },
 
   "logger": {
