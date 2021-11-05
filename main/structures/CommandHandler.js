@@ -122,7 +122,6 @@ export default class CommandHandler {
       .filter((file) => file.endsWith(".js"));
 
     const promises = commandFiles.map( async file => {
-      console.log(`Importing ${file}`);
       const cmdClass = (await import(`../commands/${file}`)).default;
       const command = new cmdClass();
       this.commands.set(command.name, command);

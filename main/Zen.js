@@ -94,6 +94,7 @@ export default class Zen extends Client{
       .readdirSync(`./main/events`)
       .filter((file) => file.endsWith(".js"));
     
+    console.info(`Registering ${eventFiles.length} Events.`);
     eventFiles.forEach( async file => {
       const eventClass = (await import(`./events/${file}`)).default;
       const event = new eventClass();
