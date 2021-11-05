@@ -27,7 +27,9 @@ export default class MessageDeleteEvent {
     if (!this.bot) this.bot = bot;
 
     // Validation - Bot
-    if (message.author.bot) return;
+    if (message.author?.bot) return;
+    // Validation - Cached
+    if (!message.content) return; 
     // Validation - regex
     const regex = "^[^\"\'\.\w]";
     // Validation - lenght
@@ -48,11 +50,11 @@ export default class MessageDeleteEvent {
     if (!chnId) return;
 
     // Databuilder
-    const author = message.member;
+    const author = message.author;
     const origChannel = message.channel;
     const content = message.content;
     const guild = message.guild;
-    const attachs = message.attachments || null;
+    const attachs = Array.from(message.attachments.map(a => a.url));
 
     // Send to logging channel
     try {
@@ -61,16 +63,15 @@ export default class MessageDeleteEvent {
       const limit = 1024;
       // Sanatize and chunk
       const contentArray = chunkify(msgSanatize(content), limit);
-      console.log(contentArray);
       // Create Embed
       const e = new MessageEmbed().setTitle("Deleted Message Log");
-      e.addField("Author", author.nickname, true);
+      e.addField("Author", `${author.username}#${author.discriminator}`, true);
       e.addField("AuthorID", author.id, true);
-      e.addField("Channel", origChannel.name , true);
-      if ( attachs ) e.addField("Attachments", attachs, false);
+      e.addField("Channel", origChannel.name , false);
+      if ( attachs.length ) e.addField("Attachments", attachs.join(',\n'), false);
 
       contentArray.forEach( chunk => {
-        e.addField("Content", chunk, false);
+        e.addField("Content", chunk.toString(), false);
       });
 
       await logChn.send({embeds: [e]});

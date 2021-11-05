@@ -36,7 +36,7 @@ export default class Setup {
   execute = async ( interaction ) => {
     // Data builder
     /** @type {Zen} */
-    const bot = message.client;
+    const bot = interaction.client;
     if (!this.bot) this.bot = bot;
 
     // Validation - Permissions
@@ -61,11 +61,29 @@ export default class Setup {
    * @param {Interaction} interaction 
    */
   async setupLogChn ( interaction ) {
+    // Defer reply
+    await interaction.deferReply();
     // Data builder
-    const channel = interaction.options.getChannelOption('loggingchannel');
+    const channel = interaction.options.getChannel('channel');
     const guild = interaction.guild;
-    const owner =     
+    const ownerId = guild.ownerId;
 
-    // 
+    // Update db
+    try {
+      const sql = `INSERT INTO settings (server_id, owner_id, logging_chn)
+                   VALUES ($1, $2, $3)
+                   ON CONFLICT (server_id) 
+                   DO UPDATE SET logging_chn = $3;`
+      const values = [guild.id, ownerId, channel.id];
+      await this.bot.db.execute(sql, values);
+
+      const msg = `Logging channel set to \`${channel.name}\``;
+      await interaction.editReply(msg);
+
+    } catch ( err ) {
+      console.error(err);
+      await interaction.editReply("Error - Logging Channel not set.");
+      return;
+    }
   }
 }
