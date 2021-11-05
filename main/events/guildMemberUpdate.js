@@ -1,7 +1,7 @@
 // ----------------------------------------------------------------
 //                             Imports
 // ----------------------------------------------------------------
-import { Message } from "discord.js";
+import { Guild } from "discord.js";
 import Zen from "../Zen.js";
 
 
@@ -16,17 +16,17 @@ export default class GuildMemberUpdateEvent {
   }
 
   /**
-   * @param {Message} message 
+   * @param {Guild} guild 
    * @returns {Promise<void>}
    */
-  execute = async ( message ) => {
+  execute = async ( guild ) => {
     // Data builder
     /** @type {Zen} */
-    const bot = message.client;
+    const bot = guild.client;
     if (!this.bot) this.bot = bot;
+    console.log(`Joined a new guild - ${guild.name}`);
 
-    // Validation - Bot
-    if (message.author.bot) return;
+    // TODO: Create a setup for the user
   };
 
 }
