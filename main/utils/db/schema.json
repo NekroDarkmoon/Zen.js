@@ -15,6 +15,7 @@
     "channel_id": "BIGINT NOT NULL,",
     "last_msg": "DATE DEFAULT CURRENT_DATE,",
     "last_rep": "DATE NOT NULL,",
+    "msg_count": "BIGINT NOT NULL,",
     "PRIMARY KEY": " (server_id, user_id)" 
   },
 
