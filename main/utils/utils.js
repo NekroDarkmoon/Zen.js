@@ -1,6 +1,7 @@
 // ----------------------------------------------------------------
 //                             Imports
 // ----------------------------------------------------------------
+import Zen from "../Zen.js";
 
 
 // ----------------------------------------------------------------
@@ -23,7 +24,6 @@ export function chunkify( str, chunkSize ) {
   return chunks;
 }
 
-
 // ----------------------------------------------------------------
 //                         Sanitize String
 // ----------------------------------------------------------------
@@ -38,8 +38,30 @@ export function msgSanatize ( str ) {
 
 
 // ----------------------------------------------------------------
-//                             Imports
+//                     Cache - Logging Channels
 // ----------------------------------------------------------------
+/**
+ * 
+ * @param {Zen} bot 
+ * @returns {Object} cache
+ */
+export async function cacheLogChns( bot ) {
+  try {
+    const cache = {};
+    const sql = 'SELECT * FROM settings';
+    const res = await bot.db.fetch(sql);
+    
+    // Add to object
+    res.forEach( entry => {
+      if (entry.logging_chn) cache[entry.server_id] = entry.logging_chn;
+    });
+
+    return cache;
+
+  } catch ( e ) {
+    console.error("An error occured in building logging cache: ", e);
+  }
+}
 // ----------------------------------------------------------------
 //                             Imports
 // ----------------------------------------------------------------

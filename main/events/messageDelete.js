@@ -10,11 +10,14 @@ import Zen from "../Zen.js";
 //                            Ready Event
 // ----------------------------------------------------------------
 export default class MessageDeleteEvent {
-  constructor () {
+  constructor (bot) {
     this.name = "messageDelete";
     /** @type {boolean} */
     this.once = false;
+    /** @type {Zen} */
+    this.bot = bot;
   }
+
 
   /**
    * @param {Message} message 
@@ -26,27 +29,28 @@ export default class MessageDeleteEvent {
     const bot = message.client;
     if (!this.bot) this.bot = bot;
 
+    try {await this.logEvent(message)}
+    catch ( e ) {console.error(e); return;}
+  }
+
+
+  /**
+   * 
+   * @param {Message} message 
+   * @returns 
+   */
+  async logEvent( message ) {
     // Validation - Bot
     if (message.author?.bot) return;
-    // Validation - Cached
-    if (!message.content) return; 
+    // Validation - Partial
+    if (message.partial) return;
     // Validation - regex
     const regex = "^[^\"\'\.\w]";
-    // Validation - lenght
+    // Validation - length
     if (message.content.length < 3) return;
 
-
     // Get logging channel
-    let chnId = null;
-    try {
-      const sql = 'SELECT * FROM settings WHERE server_id=$1';
-      const vals = [message.guild.id];
-      const res = await bot.db.fetchOne(sql, vals);
-
-      if (!res.logging_chn) return;
-      chnId = res.logging_chn;
-    } catch ( err ) {console.error(err);}
-
+    const chnId = this.bot.caches.loggingChns[message.guild.id] || null;
     if (!chnId) return;
 
     // Databuilder
@@ -77,7 +81,6 @@ export default class MessageDeleteEvent {
       await logChn.send({embeds: [e]});
 
     } catch ( err ) {console.error(err);}
-
-  };
+  }  
 
 }

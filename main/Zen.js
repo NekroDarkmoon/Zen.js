@@ -6,6 +6,7 @@ const { Client, Message, Intents } = discord;
 
 import ZenDB from './utils/db/index.js';
 import CommandHandler from './structures/CommandHandler.js';
+import { cacheLogChns } from './utils/utils.js';
 import fs from "fs";
 import winston from 'winston';
 
@@ -59,6 +60,10 @@ export default class Zen extends Client{
 
     /** @type {winston.Logger} */
     this.logger = logger;
+
+    this.caches = {
+      loggingChns: {}
+    };
   }
 
 
@@ -97,7 +102,7 @@ export default class Zen extends Client{
     console.info(`Registering ${eventFiles.length} Events.`);
     eventFiles.forEach( async file => {
       const eventClass = (await import(`./events/${file}`)).default;
-      const event = new eventClass();
+      const event = new eventClass(this);
       if ( event.once ) this.once(event.name, (...args) => event.execute(...args));
       else { this.on(event.name, (...args) => event.execute(...args)); }
     });
@@ -123,6 +128,7 @@ export default class Zen extends Client{
 
 
   async buildCaches () {
+   this.caches.loggingChns = await cacheLogChns(this);
   }
 
 }
