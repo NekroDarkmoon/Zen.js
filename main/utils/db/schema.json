@@ -4,6 +4,8 @@
     "owner_id": "BIGINT NOT NULL,",
     "prefix": "TEXT DEFAULT NULL,",
     "logging_chn": "BIGINT,",
+    "levels": "BOOLEAN DEFAULT NULL," ,
+    "rep": "BOOLEAN DEFAULT NULL,",
     "setup": "BOOLEAN NOT NULL DEFAULT FALSE"
   },
 

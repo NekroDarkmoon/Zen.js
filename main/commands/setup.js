@@ -27,6 +27,20 @@ export default class Setup {
               .setRequired(true)
           )
       )
+      .addSubcommand( sub =>
+        sub
+          .setName('enablelevels')
+          .setDescription('Enable the leveling system for this guild')
+          .addBooleanOption( c => c.setName('choice').setDescription('True/False')
+                                    .setRequired(true))
+      )
+      .addSubcommand( sub =>
+        sub
+          .setName('enablerep')
+          .setDescription('Enable the reputation system for this guild')
+          .addBooleanOption( c => c.setName('choice').setDescription('True/False')
+                                    .setRequired(true))
+      )
   }
 
   /**
@@ -46,12 +60,21 @@ export default class Setup {
       return; 
     }
 
+    // Defer reply
+    await interaction.deferReply();
+
     // Command Handler
     const sub = interaction.options.getSubcommand();
     switch (sub) {
       case 'loggingchannel':
         await this.setupLogChn( interaction );
         return;
+      case 'enablelevels': 
+        await this.enableLevels( interaction );
+        return
+      case 'enablerep':
+        await this.enableRep( interaction );
+        return
     };    
   }
 
@@ -61,8 +84,6 @@ export default class Setup {
    * @param {Interaction} interaction 
    */
   async setupLogChn ( interaction ) {
-    // Defer reply
-    await interaction.deferReply();
     // Data builder
     const channel = interaction.options.getChannel('channel');
     const guild = interaction.guild;
@@ -70,11 +91,9 @@ export default class Setup {
 
     // Update db
     try {
-      const sql = `INSERT INTO settings (server_id, owner_id, logging_chn)
-                   VALUES ($1, $2, $3)
-                   ON CONFLICT (server_id) 
-                   DO UPDATE SET logging_chn = $3;`
-      const values = [guild.id, ownerId, channel.id];
+      const sql = `UPDATE settings SET logging_chn=$2
+                   WHERE server_id=$1`
+      const values = [guild.id, channel.id];
       await this.bot.db.execute(sql, values);
 
       const msg = `Logging channel set to \`${channel.name}\``;
@@ -85,5 +104,60 @@ export default class Setup {
       await interaction.editReply("Error - Logging Channel not set.");
       return;
     }
+  }
+
+  /**
+   * 
+   * @param {Interaction} interaction 
+   */
+  async enableLevels ( interaction ) {
+    // Data Builder
+    const answer = interaction.options.getBoolean('choice');
+    const guild = interaction.guild;
+
+    // Update db
+    try {
+      const sql = `UPDATE settings SET levels=$2
+                   WHERE server_id=$1`
+      const vals = [guild.id, answer];
+      await this.bot.db.execute(sql, vals);
+
+      const msg = `Enabled leveling system.`
+      await interaction.editReply(msg);
+
+    } catch (e) {
+      console.error(e);
+      await interaction.editReply("Error - Unable to update setting");
+      return; 
+    }
+
+  }
+
+
+  /**
+   * 
+   * @param {Interaction} interaction 
+   */
+  async enableRep ( interaction ) {
+    // Data Builder
+    const answer = interaction.options.getBoolean('choice');
+    const guild = interaction.guild;
+
+    // Update DB
+    try {
+      const sql = `UPDATE settings SET rep=$2
+                   WHERE server_id=$1`
+      const vals = [guild.id, answer];
+      await this.bot.db.execute(sql, vals);
+
+      const msg = `Enabled reputation system.`
+      await interaction.editReply(msg);
+
+    } catch (e) {
+      console.error(e);
+      await interaction.editReply("Error - Unable to update setting");
+      return; 
+    }
+
   }
 }

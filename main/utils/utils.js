@@ -49,7 +49,7 @@ export async function cacheLogChns( bot ) {
   try {
     const cache = {};
     const sql = 'SELECT * FROM settings';
-    const res = await bot.db.fetch(sql);
+    const res = await bot.db.fetch(sql) || [];
     
     // Add to object
     res.forEach( entry => {

@@ -9,10 +9,12 @@ import Zen from "../Zen.js";
 //                            Ready Event
 // ----------------------------------------------------------------
 export default class MessageCreateEvent {
-  constructor () {
+  constructor ( bot ) {
     this.name = "messageCreate";
     /** @type {boolean} */
     this.once = false;
+    /** @type {Zen} */
+    this.bot = bot;
   }
 
   /**
