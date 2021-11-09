@@ -96,6 +96,9 @@ export default class Setup {
       const values = [guild.id, channel.id];
       await this.bot.db.execute(sql, values);
 
+      // Update Cache
+      this.bot.caches.loggingChns[guild.id] = channel.id;
+      // Send Interaction Update
       const msg = `Logging channel set to \`${channel.name}\``;
       await interaction.editReply(msg);
 
@@ -122,6 +125,9 @@ export default class Setup {
       const vals = [guild.id, answer];
       await this.bot.db.execute(sql, vals);
 
+      // Update Cache
+      this.bot.caches.features[guild.id].levels = answer;
+      // Send Interaction Update
       const msg = `Enabled leveling system.`
       await interaction.editReply(msg);
 
@@ -149,7 +155,9 @@ export default class Setup {
                    WHERE server_id=$1`
       const vals = [guild.id, answer];
       await this.bot.db.execute(sql, vals);
-
+      // Update Cache
+      this.bot.caches.features[guild.id].rep = answer;
+      // Send Interaction Update
       const msg = `Enabled reputation system.`
       await interaction.editReply(msg);
 

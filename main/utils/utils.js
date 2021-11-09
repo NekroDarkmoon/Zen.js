@@ -1,6 +1,7 @@
 // ----------------------------------------------------------------
 //                             Imports
 // ----------------------------------------------------------------
+import { levels } from "logform";
 import Zen from "../Zen.js";
 
 
@@ -38,6 +39,15 @@ export function msgSanatize ( str ) {
 
 
 // ----------------------------------------------------------------
+//                         Export Cachers
+// ----------------------------------------------------------------
+export const caches = {
+  cacheLogChns: cacheLogChns,
+  cacheEnabled: cacheEnabled
+}
+
+
+// ----------------------------------------------------------------
 //                     Cache - Logging Channels
 // ----------------------------------------------------------------
 /**
@@ -45,26 +55,58 @@ export function msgSanatize ( str ) {
  * @param {Zen} bot 
  * @returns {Object} cache
  */
-export async function cacheLogChns( bot ) {
+async function cacheLogChns( bot ) {
+  console.log("Building Logger Cache");
   try {
     const cache = {};
     const sql = 'SELECT * FROM settings';
     const res = await bot.db.fetch(sql) || [];
-    
     // Add to object
     res.forEach( entry => {
       if (entry.logging_chn) cache[entry.server_id] = entry.logging_chn;
     });
-
     return cache;
 
   } catch ( e ) {
-    console.error("An error occured in building logging cache: ", e);
+    console.error("An error occured while building logging cache: ", e);
   }
 }
+
+
 // ----------------------------------------------------------------
-//                             Imports
+//                     Cache - Enabled Features
 // ----------------------------------------------------------------
+/**
+ * 
+ * @param {Zen} bot 
+ * @returns {{
+ *  server_id: {
+ *    levels: Boolean,
+ *    rep: Boolean,  
+ * }}} cache
+ */
+async function cacheEnabled( bot ) {
+  console.log("Building Features Cache");
+  try {
+    const cache = {}
+    const sql = 'SELECT * FROM settings';
+    const res = await bot.db.fetch(sql) || [];
+    // Add to cache
+    res.forEach( server => {
+      const enabled = {
+        levels: server.levels,
+        rep: server.rep,
+      };
+
+      cache[server.server_id] = enabled;
+    });
+    return cache;
+
+  } catch ( e ) {
+    console.error("An error occured while building features cache");
+  }
+
+}
 // ----------------------------------------------------------------
 //                             Imports
 // ----------------------------------------------------------------

@@ -6,7 +6,7 @@ const { Client, Message, Intents } = discord;
 
 import ZenDB from './utils/db/index.js';
 import CommandHandler from './structures/CommandHandler.js';
-import { cacheLogChns } from './utils/utils.js';
+import { caches } from './utils/utils.js';
 import fs from "fs";
 import winston from 'winston';
 
@@ -62,7 +62,8 @@ export default class Zen extends Client{
     this.logger = logger;
 
     this.caches = {
-      loggingChns: {}
+      loggingChns: {},
+      features: {}
     };
   }
 
@@ -128,7 +129,8 @@ export default class Zen extends Client{
 
 
   async buildCaches () {
-   this.caches.loggingChns = await cacheLogChns(this);
+   this.caches.loggingChns = await caches.cacheLogChns(this);
+   this.caches.features = await caches.cacheEnabled(this);
   }
 
 }
