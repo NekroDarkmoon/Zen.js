@@ -129,15 +129,15 @@ export default class Rep {
       return;
     }
 
-    // TODO: Complete time validation query
-    // Validation - Time check
-    try {
-      const sql = `SELECT * FROM logger WHERE server_id=$1 and user_id=$2`;
-      const values = [interaction.guild.id, member.id];
-      const res = await this.bot.db.fetchOne(sql, values);
-      // console.log(res);
+    // // TODO: Complete time validation query
+    // // Validation - Time check
+    // try {
+    //   const sql = `SELECT * FROM logger WHERE server_id=$1 and user_id=$2`;
+    //   const values = [interaction.guild.id, member.id];
+    //   const res = await this.bot.db.fetchOne(sql, values);
+    //   // console.log(res);
 
-    } catch ( err ) { this.bot.logger.error(err) }
+    // } catch ( err ) { this.bot.logger.error(err) }
 
     // Execute Db transaction
     // TODO: Convert to executeMany
