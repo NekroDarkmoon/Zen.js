@@ -94,7 +94,7 @@ export default class Levels {
       // Message Builder
       const xp = res ? res.xp : 0;
       const level = res ? res.level : 0;
-      const nXp = this.levelUp(level);
+      const nXp = this.calcXp(level);
       const missXp = nXp - xp;
       const msgCount = res2 ? res2.mes_count : 0;
       // Message
@@ -156,7 +156,7 @@ export default class Levels {
    * @param {Number} level 
    * @returns {Number} xp
    */
-  levelUp ( level ) {
+  calcXp ( level ) {
     const baseXp = 400;
     const inc = 200;
     return Math.floor((baseXp * level) + (inc * level * (level - 1 ) * 0.5 ));
@@ -165,9 +165,12 @@ export default class Levels {
 
   /**
    * 
-   * @param {*} xp 
+   * @param {Number} xp
+   * @returns {Number} level 
    */
   calcLevel ( xp ) {
-      
+      let level = 1;
+      while (xp >= this.calcXp(level)) level += 1;
+      return (level)
   }
 }
