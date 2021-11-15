@@ -133,6 +133,7 @@ export default class Levels {
     if (!member.permissions.has(Permissions.FLAGS.ADMINISTRATOR)) {
       const msg = `Error: Permissions not ment. \`Administrator\` `;
       await interaction.editReply(msg);
+      return;
     }
 
     // Get Existing
@@ -177,7 +178,44 @@ export default class Levels {
     await interaction.editReply(msg);
   }
 
-  async setXp ( interaction ) {}
+  /**
+   * 
+   * @param {Interaction} interaction 
+   */
+  async setXp ( interaction ) {
+    // Data builder
+    const member = interaction.member;
+    const guild = interaction.guild;
+    const user = interaction.options.getUser('target');
+    const xp = interaction.options.getInteger('amount');
+    // Validation - Admin
+    if (!member.permissions.has(Permissions.FLAGS.ADMINISTRATOR)) {
+      const msg = `Error: Permissions not ment. \`Administrator\` `;
+      await interaction.editReply(msg);
+      return;
+    }
+    // Get level
+    const level = this.calcLevel(xp);
+    // Overwrite if exists
+    try {
+      const sql = `INSERT INTO xp (server_id, user_id, xp, level)
+                    VALUES ($1, $2, $3, $4)
+                    ON CONFLICT (server_id, user_id) 
+                    DO UPDATE SET xp=$3, 
+                                  level=$4;`
+      const vals = [guild.id, user.id, xp, level];
+      await this.bot.db.execute(sql, vals);
+
+      const msg = `User \`${user.username}\` now has \`${xp}\`xp.`; 
+      await interaction.editReply(msg);
+    } catch ( e ) {
+      console.error(e);
+      await interaction.editReply("Error: Unable to Complete Interaction.");
+      return;
+    }
+  }
+
+
   async xpBoard ( interaction, args ) {}
 
 
