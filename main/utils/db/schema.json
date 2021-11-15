@@ -14,7 +14,7 @@
     "user_id": "BIGINT NOT NULL,",
     "channel_id": "BIGINT NOT NULL,",
     "last_msg": "DATE DEFAULT CURRENT_DATE,",
-    "last_rep": "DATE NOT NULL,",
+    "last_rep_given": "DATE,",
     "msg_count": "BIGINT NOT NULL,",
     "PRIMARY KEY": " (server_id, user_id)" 
   },
@@ -49,6 +49,7 @@
     "user_id": "BIGINT NOT NULL,",
     "xp": "INT NOT NULL,",
     "level": "INT NOT NULL,",
+    "last_xp": "DATE DEFAULT CURRENT_DATE,",
     "PRIMARY KEY": " (server_id, user_id)" 
   }
 }

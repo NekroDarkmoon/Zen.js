@@ -11,7 +11,7 @@ import { Interaction, MessageEmbed, Permissions } from "discord.js";
 // ----------------------------------------------------------------
 export default class Levels {
   constructor () {
-    this.name = 'levels';
+    this.name = 'xp';
     this.description = 'Commands Related to the Levelling system';
     this.global = false;
     this.data = new SlashCommandBuilder()
@@ -33,7 +33,11 @@ export default class Levels {
               .setDescription('Selected User')
               .setRequired(true)
           )
-          .addIntegerOption( opt => opt.setName('amount').setDescription('XP given'))
+          .addIntegerOption( opt => 
+            opt
+              .setName('amount')
+              .setDescription('XP given')
+              .setRequired(true))
       )
       .addSubcommand( subcommand =>
         subcommand
@@ -122,6 +126,7 @@ export default class Levels {
   async giveXp ( interaction ) {
     // Data builder
     const member = interaction.member;
+    const guild = interaction.guild;
     const user = interaction.options.getUser('target');
     const xp = interaction.options.getInteger('amount');
     // Validation - Admin
@@ -138,13 +143,38 @@ export default class Levels {
       existing = await this.bot.db.fetchOne(sql, vals); 
     } catch ( e ) {
       console.error(e);
-      await interaction.editReply("Error: Unable to complete.")
+      await interaction.editReply("Error: Unable to complete.");
+      return;
     } 
     // Calculate Updated details
-    const fXp = existing ? existing[2] + xp : xp;
-    const level = existing ? existing[3] : 0;
+    const fXp = existing ? existing.xp + xp : xp;
+    const level = this.calcLevel(fXp);
 
 
+    // Update db with new data
+    try {      
+      if (!existing) {
+        const sql = `INSERT INTO xp(server_id, user_id, xp, level)
+                                VALUES ($1, $2, $3, $4);`;
+        const vals = [guild.id, user.id, fXp, level];
+
+        await this.bot.db.execute(sql, vals);
+      } else {
+        const sql = `UPDATE xp SET xp=$1,
+                                   level=$2,
+                                   last_xp=$3
+                                   WHERE server_id=$4 AND user_id=$5`;
+        const vals = [fXp, level, interaction.createdAt, guild.id, user.id];
+        await this.bot.db.execute(sql, vals);
+      }
+    } catch ( e ) {
+      console.error(e);
+      await interaction.editReply("Error: Unable to Complete.");
+      return;
+    }
+    
+    const msg = `Gave \`${xp}\`xp to \`${user.username}\`. \`Accumulated xp: ${fXp}\` `;
+    await interaction.editReply(msg);
   }
 
   async setXp ( interaction ) {}
