@@ -216,7 +216,70 @@ export default class Levels {
   }
 
 
-  async xpBoard ( interaction, args ) {}
+  /**
+   * 
+   * @param {Interaction} interaction 
+   * @param {*} args 
+   */
+  async xpBoard ( interaction, args ) {
+    // Data builder
+    let page = interaction.options.getInteger('page');
+    page = !page ? 1 : page;
+    let data = null;
+
+    // Fetch xp data
+    try {
+      const sql = `SELECT * FROM xp WHERE server_id=$1 ORDER BY xp DESC`;
+      const vals = [interaction.guild.id];
+      const res = await this.bot.db.fetch(sql, vals);
+      if ( !res ) {
+        const msg = `This server has no one with xp.`;
+        await interaction.editReply(msg);
+        return;
+      }
+
+      // Modify results to needs
+      const modifiedResult = [];
+      let count = 1;
+      res.forEach( async (row) => {
+        const user = this.bot.users.cache.get(row.user_id);
+
+        const temp = {
+          rank: count,
+          user: (user) ? user.username : (await this.bot.users.fetch(row.user_id)).username,
+          xp: row.xp,
+          level: row.level
+        };
+
+        count += 1;
+        modifiedResult.push(temp);
+      });
+
+      data = modifiedResult;
+    } catch ( e ) {console.error(e); return;}
+
+    // Construct Paginator
+    const paginator = new Paginator(data);
+    const components = paginator.getPaginationComponents( page );
+
+    // Construct Embed
+    const e = new MessageEmbed()
+      .setColor(interaction.member.user.hexAccentColor)
+      .setTitle("XP Board")
+      .setDescription(paginator._prepareData(page))
+    
+    // Send Reply
+    await interaction.editReply({
+      embeds: [e],
+      components: [components]
+    });
+
+    // Create Collector
+    paginator.createCollector( interaction );
+    try {
+      paginator.collect( interaction );
+    } catch ( e ) {console.error(e); return;}
+  }
 
 
   /**
