@@ -41,6 +41,11 @@ export default class Setup {
           .addBooleanOption( c => c.setName('choice').setDescription('True/False')
                                     .setRequired(true))
       )
+      .addSubcommand( sub =>
+        sub
+          .setName('rolereward')
+          .setDescription('Set up role rewards for different systems.')
+      )
   }
 
   /**

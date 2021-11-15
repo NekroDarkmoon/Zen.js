@@ -52,6 +52,11 @@ export default class Levels {
           .setDescription('Display the leveling board for the server.')
           .addIntegerOption( option => option.setName('page').setDescription('Selected page to view.'))
       )
+      .addSubcommand( sub =>
+        sub
+          .setName('rewards')
+          .setDescription('Display Rewards Associated with XP.')
+      )
   }
 
   /**
@@ -72,6 +77,7 @@ export default class Levels {
     else if (sub === "givexp") await this.giveXp(interaction);
     else if (sub === 'xpboard') await this.xpBoard(interaction, args);
     else if (sub === 'setxp') await this.setXp(interaction);
+    else if (sub === 'rewards') await this.rewards(interaction);
 
     return;
   }
@@ -276,6 +282,65 @@ export default class Levels {
 
     // Create Collector
     paginator.createCollector( interaction );
+    try {
+      paginator.collect( interaction );
+    } catch ( e ) {console.error(e); return;}
+  }
+
+
+  /**
+   * 
+   * @param {Interaction} interaction 
+   */
+  async rewards ( interaction ) {
+    // Data Builder
+    const page = 1;
+    let data = null;
+
+    // Fetch Rewards Data
+    try {
+      const sql = `SELECT * FROM rewards WHERE server_id=$1 AND type=$2
+                   ORDER BY val ASC;`;
+      const vals = [interaction.guild.id, this.name];
+      const res = await this.bot.db.fetch(sql, vals);
+      if ( !res ) {
+        const msg = `This server has no rewards set up for ${this.name}`;
+        await interaction.editReply(msg);
+        return;
+      }
+
+      // Modify resuts to datafy
+      data = [];
+      let count = 1;
+      res.forEach( async row => {
+        const role = interaction.guild.roles.cache.get(row.role_id);
+        const temp = {
+          role: role ? role.name : (await interaction.guild.roles.fetch(row.role_id)),
+          level: row.val,
+        };
+
+        count += 1;
+        data.push(temp);
+      });
+    } catch ( e ) {console.error(e); return;}
+
+    // Construct Paginator
+    const paginator = new Paginator(data);
+    const components = paginator.getPaginationComponents( page );
+
+    // Construct Embed
+    const e = new MessageEmbed()
+      .setColor(interaction.member.user.hexAccentColor)
+      .setTitle('Rewards - XP')
+      .setDescription(paginator._prepareData(page));
+
+    await interaction.editReply({
+      embeds: [e],
+      components: [components]
+    });
+
+    paginator.createCollector( interaction );
+
     try {
       paginator.collect( interaction );
     } catch ( e ) {console.error(e); return;}

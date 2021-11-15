@@ -44,6 +44,13 @@
     "CONSTRAINT": "server_user UNIQUE (server_id, user_id)"
   },
 
+  "rewards": {
+    "server_id": "BIGINT PRIMARY KEY NOT NULL,",
+    "role_id": "BIGINT NOT NULL,",
+    "val": "INTEGER NOT NULL,",
+    "type": "TEXT NOT NULL"
+  },
+
   "xp": {
     "server_id": "BIGINT NOT NULL,",
     "user_id": "BIGINT NOT NULL,",
