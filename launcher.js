@@ -3,35 +3,8 @@
 // ----------------------------------------------------------------
 import Zen from "./main/Zen.js";
 import ZenDB from "./main/utils/db/index.js";
-import winston from "winston";
 import { readFile } from 'fs/promises';
-
-
-// ----------------------------------------------------------------
-//                             Logger 
-// ----------------------------------------------------------------
-/**
- * @param {string} level
- * @returns {winston.Logger}
- */
-function setupLogger (level) {
-  const options = {
-    level: level,
-    transports: [
-      new winston.transports.Console({
-        level: level,
-        colorize: true
-      }),
-      new winston.transports.File({
-        filename: './.logs/error.log',
-        level: level,
-        colorize: true
-      }),
-    ]
-  };
-
-  return winston.createLogger(options);
-}
+import setupLogger from './main/utils/logger.js';
 
 
 // ----------------------------------------------------------------
@@ -40,6 +13,7 @@ function setupLogger (level) {
 async function main () {
 
   // Setup Logger
+  // const logger = setupLogger('info');
   const logger = setupLogger('info');
   console.info("Logger setup. Switching to logger.");
 
