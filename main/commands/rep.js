@@ -246,7 +246,6 @@ export default class Rep {
 
     // Create collector
     paginator.createCollector( interaction );
-
     // Start Collecting
     try {
       paginator.collect( interaction );
