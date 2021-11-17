@@ -3,6 +3,7 @@
 // ----------------------------------------------------------------
 import { Message } from "discord.js";
 import Zen from "../Zen.js";
+import {handleXpMsg} from "../commands/level.js"
 
 
 // ----------------------------------------------------------------
@@ -29,10 +30,11 @@ export default class MessageCreateEvent {
 
     // Validation - Bot
     if (message.author.bot) return;
+    // Validation - Command
 
 
     // Fire sub events
-    await this.levelHandler(message);
+    await this.xpHandler(message);
     await this.repHandler(message);
 
   };
@@ -42,10 +44,17 @@ export default class MessageCreateEvent {
    * 
    * @param {Message} message 
    */
-  async levelHandler ( message ) {
-    // Validation - Bot
-    if ( message.author.bot ) return;
+  async xpHandler ( message ) {
+    // Validation - Length
+    if (message.content.length < 10) return;
+    // Validation Bot Filter
+    const _checkMsg = (msg) => {
+      return  /(^[^\"\'\.\w])/.test(msg.content);
+    };
+    if (_checkMsg(message)) return;
 
+    // Handle it in the commands file
+    const res = await handleXpMsg.bind(this)( message );
   }
 
 

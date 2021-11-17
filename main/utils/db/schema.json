@@ -13,8 +13,8 @@
     "server_id": "BIGINT NOT NULL,",
     "user_id": "BIGINT NOT NULL,",
     "channel_id": "BIGINT NOT NULL,",
-    "last_msg": "DATE DEFAULT CURRENT_DATE,",
-    "last_rep_given": "DATE,",
+    "last_msg": "TIMESTAMP DEFAULT CURRENT_DATE,",
+    "last_rep_given": "TIMESTAMP,",
     "msg_count": "BIGINT NOT NULL,",
     "PRIMARY KEY": " (server_id, user_id)" 
   },
@@ -24,7 +24,7 @@
     "user_id": "BIGINT NOT NULL,",
     "quest_id": "INT NOT NULL,",
     "type": "TEXT,",
-    "posted_on": "DATE DEFAULT CURRENT_DATE,",
+    "posted_on": "TIMESTAMP DEFAULT CURRENT_DATE,",
     "msg": "TEXT,",
     "PRIMARY KEY": "(server_id, user_id)" 
   },
@@ -40,7 +40,7 @@
     "server_id": "BIGINT NOT NULL,",
     "user_id": "BIGINT NOT NULL,",
     "rep": "INT NOT NULL,",
-    "last_given": "DATE DEFAULT CURRENT_DATE,",
+    "last_given": "TIMESTAMP DEFAULT CURRENT_DATE,",
     "CONSTRAINT": "server_user UNIQUE (server_id, user_id)"
   },
 
@@ -57,7 +57,7 @@
     "user_id": "BIGINT NOT NULL,",
     "xp": "INT NOT NULL,",
     "level": "INT NOT NULL,",
-    "last_xp": "DATE DEFAULT CURRENT_DATE,",
+    "last_xp": "TIMESTAMP DEFAULT CURRENT_DATE,",
     "PRIMARY KEY": " (server_id, user_id)" 
   }
 }

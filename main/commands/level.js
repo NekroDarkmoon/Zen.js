@@ -4,7 +4,7 @@
 import Zen from "../Zen.js";
 import Paginator from "../structures/Paginator.js";
 import { SlashCommandBuilder } from "@discordjs/builders"
-import { Interaction, MessageEmbed, Permissions } from "discord.js";
+import { Interaction, Message, MessageEmbed, Permissions } from "discord.js";
 
 // ----------------------------------------------------------------
 //                             Command
@@ -104,12 +104,12 @@ export default class Levels {
       // Message Builder
       const xp = res ? res.xp : 0;
       const level = res ? res.level : 0;
-      const nXp = this.calcXp(level);
+      const nXp = Levels.calcXp(level);
       const missXp = nXp - xp;
       const msgCount = res2 ? res2.mes_count : 0;
       // Message
       let msg = `You are level ${level}, with ${xp} xp.\n`;
-      msg += `Level ${level+1} requires a total of ${nXp} xp: You need ${missXp} more.`
+      msg += `Level ${level+1} requires a total of ${nXp} xp: You need ${missXp} more xp.`
 
       const e = new MessageEmbed()
         .setThumbnail(user.avatarURL())
@@ -155,7 +155,7 @@ export default class Levels {
     } 
     // Calculate Updated details
     const fXp = existing ? existing.xp + xp : xp;
-    const level = this.calcLevel(fXp);
+    const level = Levels.calcLevel(fXp);
 
 
     // Update db with new data
@@ -201,7 +201,7 @@ export default class Levels {
       return;
     }
     // Get level
-    const level = this.calcLevel(xp);
+    const level = Levels.calcLevel(xp);
     // Overwrite if exists
     try {
       const sql = `INSERT INTO xp (server_id, user_id, xp, level)
@@ -363,7 +363,7 @@ export default class Levels {
    * @param {Number} level 
    * @returns {Number} xp
    */
-  calcXp ( level ) {
+  static calcXp ( level ) {
     const baseXp = 400;
     const inc = 200;
     return Math.floor((baseXp * level) + (inc * level * (level - 1 ) * 0.5 ));
@@ -375,9 +375,77 @@ export default class Levels {
    * @param {Number} xp
    * @returns {Number} level 
    */
-  calcLevel ( xp ) {
+  static calcLevel ( xp ) {
       let level = 1;
-      while (xp >= this.calcXp(level)) level += 1;
+      while (xp >= Levels.calcXp(level)) level += 1;
       return (level)
   }
+
+  /**
+   * 
+   * @param {String} msg 
+   * @returns {Number} xp
+   */
+  static genXp ( msg ) {
+    return Math.floor(Math.random() * (15, 25) + 15);
+  }
 }
+
+/**
+ * 
+ * @param {Message} message 
+ */
+export async function handleXpMsg ( message ) {
+  // DataBuilder
+  const guild = message.guild;
+  const author = message.member;
+  const time = message.createdAt;
+  let eXp = null;
+  let eLevel = null;
+
+  // Get Existing Data
+  try {
+    const sql = `SELECT * FROM xp WHERE server_id=$1 AND user_id=$2;`
+    const vals = [guild.id, author.id];
+    const res = await this.bot.db.fetchOne(sql, vals);
+
+    if (res) {
+      const eTime = res.last_xp;
+      if ((time.getTime() - eTime.getTime()) / 1000 < 60 ) return;
+      eXp = res.xp;
+      eLevel = res.level;
+    }
+
+  } catch ( e ) {
+    this.bot.logger.error( e );
+    return false;
+  }
+
+  // Get XP and Level
+  const xp = Levels.genXp(message.content);
+  const level = Levels.calcLevel(xp + eXp);
+  // Add to DB
+  try {
+    const sql = `INSERT INTO xp (server_id, user_id, xp, level, last_xp)
+                    VALUES ($1, $2, $3, $4, $5)
+                    ON CONFLICT (server_id, user_id) 
+                    DO UPDATE SET xp = xp.xp + $3,
+                                  level = $4,
+                                  last_xp = $5;`
+    const vals = [guild.id, author.id, xp, level, time];
+    await this.bot.db.execute(sql, vals);
+  } catch ( e ) {
+    this.bot.logger.error( e );
+    return false;
+  }
+
+  // Create Object for Emitter
+  if (level > eLevel) {  
+    const lEvent = {message, level};
+    this.bot.emit('leveledUp', lEvent);
+  }
+
+  return true;
+}
+
+

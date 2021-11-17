@@ -68,7 +68,7 @@ export default class MessageUpdateEvent {
       const oContentArray = chunkify(msgSanatize(oldContent), limit);
       const nContentArray = chunkify(msgSanatize(newContent), limit);
       // Create Embed
-      const e = new MessageEmbed().setTitle("Deleted Message Log");
+      const e = new MessageEmbed().setTitle("Edited Message Log");
       e.addField("Author", `${author.username}#${author.discriminator}`, true);
       e.addField("AuthorID", author.id, true);
       e.addField("Channel", oc.name , false);

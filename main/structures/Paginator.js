@@ -8,7 +8,6 @@ import {
   MessageEmbed } from "discord.js";
 
 import columnify from "columnify";
-import { config } from "winston";
 
 
 // ----------------------------------------------------------------
