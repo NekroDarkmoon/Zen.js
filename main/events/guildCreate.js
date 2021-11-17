@@ -41,9 +41,9 @@ export default class GuildCreateEvent {
         sql = `INSERT INTO settings values($1, $2, $3, $4, $5);`;
         values = [guild.id, ownerId, prefix, loggingChannel, true];
         await bot.db.execute(sql, values);
-        console.log(`Registering new guild settings ${values}`);
+        this.bot.logger.info(`Registering new guild settings ${values}`);
       } else {
-        console.log("Guild already has settings stored in db.");
+        this.bot.logger.info("Guild already has settings stored in db.");
       }      
     } catch (err) {console.error(err);}
 
