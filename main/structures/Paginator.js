@@ -60,7 +60,7 @@ export default class Paginator {
    * @param {Interaction} msgInteraction
    * @param {number} time
    */
-  createCollector (msgInteraction, time=1000*30) {
+  startCollector (msgInteraction, time=1000*30) {
     // Data builder
     /** @type {Interaction.channel} */
     const channel = msgInteraction.channel;
@@ -73,6 +73,8 @@ export default class Paginator {
       filter,
       time: time
     });
+
+    this.collect( msgInteraction );
   }
 
   /**
@@ -120,7 +122,6 @@ export default class Paginator {
   _prepareData (page) {
     const maxLines = 15;
     const data = this.data;
-    const dataLen = data.length;
     // Splice array for 15 values if exists  
     // TODO: Add check for no content
     const display = data.slice( ((page-1)*maxLines) , (page*maxLines - 1));

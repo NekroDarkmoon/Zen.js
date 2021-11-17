@@ -244,12 +244,8 @@ export default class Rep {
       components: [components]
     });
 
-    // Create collector
-    paginator.createCollector( interaction );
     // Start Collecting
-    try {
-      paginator.collect( interaction );
-    } catch ( err ) { this.bot.logger.error(err) }
+    try {paginator.startCollector( interaction )}
+    catch ( e ) {this.logger.error( e ); return;}
   }
-
 }

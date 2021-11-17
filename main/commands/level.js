@@ -280,11 +280,9 @@ export default class Levels {
       components: [components]
     });
 
-    // Create Collector
-    paginator.createCollector( interaction );
-    try {
-      paginator.collect( interaction );
-    } catch ( e ) {console.error(e); return;}
+    // Start Collecting
+    try {paginator.startCollector( interaction )}
+    catch ( e ) {this.logger.error( e ); return;}
   }
 
 
@@ -339,11 +337,10 @@ export default class Levels {
       components: [components]
     });
 
-    paginator.createCollector( interaction );
+    // Start Collecting
+    try {paginator.startCollector( interaction )}
+    catch ( e ) {this.logger.error( e ); return;}
 
-    try {
-      paginator.collect( interaction );
-    } catch ( e ) {console.error(e); return;}
   }
 
 
