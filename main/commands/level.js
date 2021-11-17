@@ -264,8 +264,16 @@ export default class Levels {
       data = modifiedResult;
     } catch ( e ) {console.error(e); return;}
 
+    // Decide on tabulated format
+    const config = {
+      rank: {align: "center"},
+      user: {align: "left", midWidth: 20, maxWidth: 25},
+      xp: {align: "center", minWidth: 8},
+      level: {align: "center", minWidth: 4},
+    };
+
     // Construct Paginator
-    const paginator = new Paginator(data);
+    const paginator = new Paginator(data, config);
     const components = paginator.getPaginationComponents( page );
 
     // Construct Embed
@@ -322,8 +330,14 @@ export default class Levels {
       });
     } catch ( e ) {console.error(e); return;}
 
+    // Setup Formatter
+    const pageConf = {
+      role: {align: "left", minWidth: 20},
+      level: {align: "center", minWidth: 4}
+    }
+
     // Construct Paginator
-    const paginator = new Paginator(data);
+    const paginator = new Paginator(data, pageConf);
     const components = paginator.getPaginationComponents( page );
 
     // Construct Embed

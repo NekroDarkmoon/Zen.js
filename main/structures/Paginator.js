@@ -8,6 +8,7 @@ import {
   MessageEmbed } from "discord.js";
 
 import columnify from "columnify";
+import { config } from "winston";
 
 
 // ----------------------------------------------------------------
@@ -16,11 +17,13 @@ import columnify from "columnify";
 export default class Paginator {
   /**
    * @param {Array} data
+   * @param {Object} config
    * @param {Number} max_pages 
    */
-  constructor ( data, max_pages=null ) {
+  constructor ( data, config={}, max_pages=null ) {
     this.collector = null;
     this.data = data;
+    this.config = config;
     this.max_pages = max_pages ? max_pages : Math.ceil( data.length / 15 );
   }
 
@@ -127,7 +130,7 @@ export default class Paginator {
     const display = data.slice( ((page-1)*maxLines) , (page*maxLines - 1));
     
     // Tabulate data for display
-    const tabulated = Paginator.tabulate(display) 
+    const tabulated = this.tabulate(display) 
     return tabulated;
   }
 
@@ -136,12 +139,11 @@ export default class Paginator {
    * @param {Array<{}>} data 
    * @returns 
    */
-  static tabulate (data) {
+  tabulate (data) {
     // Data builder
-  
-    // TODO: Fix this 
     const options = {
-      columnSplitter: '|',
+      columnSplitter: ' | ',
+      config: this.config
     }
 
     const columns = columnify(data, options);

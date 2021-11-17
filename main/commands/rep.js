@@ -228,8 +228,15 @@ export default class Rep {
       data = modifiedResult;
     } catch ( err ) {this.bot.logger.error(err); return}
 
+    // Setup Formatter
+    const pageConf = {
+      rank: {align: "center"},
+      user: {align: "left", midWidth: 20, maxWidth: 25},
+      rep: {align: "center", minWidth: 5}
+    };
+
     // Construct Paginator
-    const paginator = new Paginator(data);
+    const paginator = new Paginator(data, pageConf);
     const components = paginator.getPaginationComponents( page );
 
     // Construct Embed
