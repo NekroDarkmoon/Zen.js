@@ -41,11 +41,55 @@ export default class Setup {
           .addBooleanOption( c => c.setName('choice').setDescription('True/False')
                                     .setRequired(true))
       )
-      .addSubcommand( sub =>
-        sub
-          .setName('rolereward')
+      .addSubcommandGroup( group =>
+        group
+          .setName('rolerewards')
           .setDescription('Set up role rewards for different systems.')
-      )
+          .addSubcommand( sub =>
+            sub
+              .setName('set')
+              .setDescription('Set a role as a reward.')
+              .addStringOption( str => 
+                str
+                  .setName('system')
+                  .setDescription('Select the system for which the reward is awarded.')
+                  .setRequired(true)
+                  .addChoice('Rep', 'rep')
+                  .addChoice('Xp', 'xp')
+              )
+              .addRoleOption( role =>
+                role
+                  .setName('target')
+                  .setDescription('Selected role for reward.')
+                  .setRequired(true)
+              )
+              .addIntegerOption( int =>
+                int
+                  .setName('value')
+                  .setDescription('Value for when reward is awarded')
+                  .setRequired(true)
+              )
+          )
+          .addSubcommand( sub =>
+            sub
+              .setName('remove')
+              .setDescription('Remove a role as a reward.')
+              .addStringOption( str => 
+                str
+                  .setName('system')
+                  .setDescription('Select the system for which the reward is awarded.')
+                  .setRequired(true)
+                  .addChoice('Rep', 'rep')
+                  .addChoice('Xp', 'xp')
+              )
+              .addRoleOption( role =>
+                role
+                  .setName('target')
+                  .setDescription('Selected role to remove.')
+                  .setRequired(true)
+              )
+          )
+      ) // Next SubCommand
   }
 
   /**
@@ -64,9 +108,10 @@ export default class Setup {
       await interaction.reply({content: msg, ephemeral: true});
       return; 
     }
-
     // Defer reply
     await interaction.deferReply();
+    // Sanity Check if records exist in table.
+    await this.sanityCheck(interaction);
 
     // Command Handler
     const sub = interaction.options.getSubcommand();
@@ -76,11 +121,46 @@ export default class Setup {
         return;
       case 'enablelevels': 
         await this.enableLevels( interaction );
-        return
+        return;
       case 'enablerep':
         await this.enableRep( interaction );
-        return
+        return;
+      case 'set':
+        await this.createReward( interaction );
+        return;
+      case 'remove':
+        await this.removeReward( interaction);
     };    
+  }
+
+  /**
+   * 
+   * @param {Interaction} interaction 
+   * @returns 
+   */
+  async sanityCheck( interaction ) {
+    // Data Builder
+    const guild = interaction.guild;
+    const owner = guild.ownerId;
+
+    // Check if not exists then add.
+    try {
+      let sql = `SELECT * FROM settings WHERE server_id=$1 AND owner_id=$2;`
+      let vals = [guild.id, owner];
+      const res = await this.bot.db.fetchOne(sql, vals);
+
+      if (res) return;
+      // Add to db
+      sql = `INSERT INTO settings (server_id, owner_id)
+                         VALUES ($1, $2);`;
+      vals = [guild.id, owner];
+      await this.bot.db.execute(sql, vals);
+      return;
+    } catch ( e ) {
+      this.bot.logger.error( e );
+      await interaction.editReply('Error: \`Internal Server Error\`. Contact Bot Owner');
+      return;
+    }
   }
 
 
@@ -170,6 +250,62 @@ export default class Setup {
       console.error(e);
       await interaction.editReply("Error - Unable to update setting");
       return; 
+    }
+
+  }
+
+  /**
+   * 
+   * @param {Interaction} interaction 
+   */
+  async createReward ( interaction ) {
+    // Data Builder
+    const guild = interaction.guild;
+    const system = interaction.options.getString('system');
+    const role = interaction.options.getRole('target');
+    const value = interaction.options.getInteger('value');
+    
+    // Add to DB
+    try {
+      const sql = `INSERT INTO rewards (server_id, role_id, type, val)
+                              VALUES ($1, $2, $3, $4);`
+      const vals = [guild.id, role.id, system, value];
+      await this.bot.db.execute(sql, vals);
+
+      // Send reply
+      const msg = `\`${role.name}\` has been set as a reward for the \`${system}\` system`;
+      await interaction.editReply(msg);
+    } catch ( e ) {
+      this.bot.logger.error(e);
+      return;
+    }
+  }
+
+
+  /**
+   * 
+   * @param {Interaction} interaction 
+   */
+  async removeReward ( interaction ) {
+    // Data Builder
+    const guild = interaction.guild;
+    const role = interaction.options.getRole('target');
+    const system = interaction.options.getString('system');
+
+    // Remove from DB if exists
+    try {
+      const sql = `DELETE FROM rewards WHERE EXISTS
+                  (SELECT * FROM rewards WHERE 
+                    server_id=$1 AND role_id=$2 AND type=$3);`
+      const vals = [guild.id, role.id, system];
+      await this.bot.db.execute(sql, vals); 
+      // Send reply
+      const msg = `\`${role.name}\` has been set as a reward for the \`${system}\` system`;
+      await interaction.editReply(msg);
+
+    } catch ( e ) {
+      this.bot.logger.error(e);
+      return;
     }
 
   }
