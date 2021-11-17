@@ -34,8 +34,8 @@ export default class MessageCreateEvent {
 
 
     // Fire sub events
-    await this.xpHandler(message);
-    await this.repHandler(message);
+    if (bot.caches.features[message.guild.id]?.levels) await this.xpHandler(message);
+    if (bot.caches.features[message.guild.id]?.rep) await this.repHandler(message);
 
   };
 
