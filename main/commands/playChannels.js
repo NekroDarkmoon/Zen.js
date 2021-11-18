@@ -52,23 +52,29 @@ export default class PlayChannels {
         sub
          .setName('add')
          .setDescription('Choose users to add to the channel.')
-         .addChannelOption( chn => 
+         .addChannelOption( chn =>
             chn
-              .setName('channel')
-              .setDescription('Selected Channel to add users to.')
+              .setName('textchannel')
+              .setDescription('Selected text channel to delete.')
+              .setRequired(true)
+          )
+          .addChannelOption( chn =>
+            chn
+              .setName('voicechannel')
+              .setDescription('Associated voice channel to delete.')
               .setRequired(true)
           )
           .addUserOption( usr =>
-            usr.setName('user01').setDescription("User 01").setRequired(true)
+            usr.setName('user1').setDescription("User 01").setRequired(true)
           )
-          .addUserOption( usr => usr.setName('user02').setDescription("User 02"))
-          .addUserOption( usr => usr.setName('user03').setDescription("User 03"))
-          .addUserOption( usr => usr.setName('user04').setDescription("User 04"))
-          .addUserOption( usr => usr.setName('user05').setDescription("User 05"))
-          .addUserOption( usr => usr.setName('user06').setDescription("User 06"))
-          .addUserOption( usr => usr.setName('user07').setDescription("User 07"))
-          .addUserOption( usr => usr.setName('user08').setDescription("User 08"))
-          .addUserOption( usr => usr.setName('user09').setDescription("User 09"))
+          .addUserOption( usr => usr.setName('user2').setDescription("User 02"))
+          .addUserOption( usr => usr.setName('user3').setDescription("User 03"))
+          .addUserOption( usr => usr.setName('user4').setDescription("User 04"))
+          .addUserOption( usr => usr.setName('user5').setDescription("User 05"))
+          .addUserOption( usr => usr.setName('user6').setDescription("User 06"))
+          .addUserOption( usr => usr.setName('user7').setDescription("User 07"))
+          .addUserOption( usr => usr.setName('user8').setDescription("User 08"))
+          .addUserOption( usr => usr.setName('user9').setDescription("User 09"))
           .addUserOption( usr => usr.setName('user10').setDescription("User 10"))
       )
       .addSubcommand( sub =>
@@ -77,21 +83,27 @@ export default class PlayChannels {
           .setDescription('Choose users to remove from a channel.')
           .addChannelOption( chn =>
             chn
-              .setName('channel')
-              .setDescription('Selected Channel to remove users from.')
+              .setName('textchannel')
+              .setDescription('Selected text channel to delete.')
+              .setRequired(true)
+          )
+          .addChannelOption( chn =>
+            chn
+              .setName('voicechannel')
+              .setDescription('Associated voice channel to delete.')
               .setRequired(true)
           )
           .addUserOption( usr =>
-            usr.setName('user01').setDescription("User 01").setRequired(true)
+            usr.setName('user1').setDescription("User 01").setRequired(true)
           )
-          .addUserOption( usr => usr.setName('user02').setDescription("User 02"))
-          .addUserOption( usr => usr.setName('user03').setDescription("User 03"))
-          .addUserOption( usr => usr.setName('user04').setDescription("User 04"))
-          .addUserOption( usr => usr.setName('user05').setDescription("User 05"))
-          .addUserOption( usr => usr.setName('user06').setDescription("User 06"))
-          .addUserOption( usr => usr.setName('user07').setDescription("User 07"))
-          .addUserOption( usr => usr.setName('user08').setDescription("User 08"))
-          .addUserOption( usr => usr.setName('user09').setDescription("User 09"))
+          .addUserOption( usr => usr.setName('user2').setDescription("User 02"))
+          .addUserOption( usr => usr.setName('user3').setDescription("User 03"))
+          .addUserOption( usr => usr.setName('user4').setDescription("User 04"))
+          .addUserOption( usr => usr.setName('user5').setDescription("User 05"))
+          .addUserOption( usr => usr.setName('user6').setDescription("User 06"))
+          .addUserOption( usr => usr.setName('user7').setDescription("User 07"))
+          .addUserOption( usr => usr.setName('user8').setDescription("User 08"))
+          .addUserOption( usr => usr.setName('user9').setDescription("User 09"))
           .addUserOption( usr => usr.setName('user10').setDescription("User 10"))  
       )
       .addSubcommand( sub =>
@@ -336,13 +348,143 @@ export default class PlayChannels {
    * 
    * @param {Interaction} interaction 
    */ 
-  async addUsers ( interaction ) {}
+  async addUsers ( interaction ) {
+    // Data Builder
+    const guild = interaction.guild;
+    const author = interaction.member;
+    /**@type {Channel} */
+    const tChannel = interaction.options.getChannel('textchannel');
+    /**@type {Channel} */
+    const vChannel = interaction.options.getChannel('voicechannel');
+    /**@type {CategoryChannel} */
+    const cat = await guild.channels.fetch(this.bot.caches.playCats[guild.id]);
+    let users = [];
+    let count = 1
+    while ( count <= 10 ) {
+      try { users.push(interaction.options.getUser(`user${count}`)) }
+      catch ( e ) {}
+      count += 1;
+    }
+    // Sanitize - Empty
+    users = users.filter(u => u);
+    // Validation - Play Channel
+    if (tChannel.parentId !== cat.id || vChannel.parentId !== cat.id ) {
+      await interaction.editReply(`Error: Channel(s) aren't play channel(s).`);
+      return;
+    } 
+    // Validation - Type
+    if (!(tChannel.type === 'GUILD_TEXT' && vChannel.type === 'GUILD_VOICE')) {
+      await interaction.editReply(`Error: Selected Channels are not the appropriate type.`);
+      return;
+    }
+    // DB Fetch
+    try {
+      let sql = 'SELECT * FROM playchns WHERE server_id=$1 AND user_id=$2;';
+      let vals = [guild.id, author.user.id];
+      let res = await this.bot.db.fetchOne(sql, vals);
+      // Validation - Owned
+      if (!res) {
+        await interaction.editReply('Error: This Channel does not belong to you.');
+        return;
+      }
+      const ownedChns = res.chns;
+      if (author.user.id !== guild.ownerId) {
+        if ( !(ownedChns.includes(tChannel.id) && ownedChns.includes(vChannel.id)) ) {
+          await interaction.editReply('Error: This Channel does not belong to you.');
+          return;
+        }
+      }
+
+      // Add users to channels
+      users.forEach( async user => {
+        await tChannel.permissionOverwrites.edit(user.id, {SEND_MESSAGES: true});
+        await vChannel.permissionOverwrites.edit(user.id, {SPEAK: true});
+      });
+
+      // Reply
+      let msg = `User(s) `;
+      users.forEach( u => msg += `${u.username} `);
+      msg += `] have been added to <#${tChannel.id}> and <#${vChannel.id}>`;
+      await interaction.editReply(msg);
+
+      return;
+    } catch ( e ) {
+      this.bot.logger.error( e );
+      await interaction.reply('Error: Something Went Wrong.');
+      return;
+    }
+  }
 
   /**
    * 
    * @param {Interaction} interaction 
    */ 
-  async removeUsers ( interaction ) {}
+  async removeUsers ( interaction ) {
+        // Data Builder
+    const guild = interaction.guild;
+    const author = interaction.member;
+    /**@type {Channel} */
+    const tChannel = interaction.options.getChannel('textchannel');
+    /**@type {Channel} */
+    const vChannel = interaction.options.getChannel('voicechannel');
+    /**@type {CategoryChannel} */
+    const cat = await guild.channels.fetch(this.bot.caches.playCats[guild.id]);
+    let users = [];
+    let count = 1
+    while ( count <= 10 ) {
+      try { users.push(interaction.options.getUser(`user${count}`)) }
+      catch ( e ) {}
+      count += 1;
+    }
+    // Sanitize - Empty
+    users = users.filter(u => u);
+    // Validation - Play Channel
+    if (tChannel.parentId !== cat.id || vChannel.parentId !== cat.id ) {
+      await interaction.editReply(`Error: Channel(s) aren't play channel(s).`);
+      return;
+    } 
+    // Validation - Type
+    if (!(tChannel.type === 'GUILD_TEXT' && vChannel.type === 'GUILD_VOICE')) {
+      await interaction.editReply(`Error: Selected Channels are not the appropriate type.`);
+      return;
+    }
+    // DB Fetch
+    try {
+      let sql = 'SELECT * FROM playchns WHERE server_id=$1 AND user_id=$2;';
+      let vals = [guild.id, author.user.id];
+      let res = await this.bot.db.fetchOne(sql, vals);
+      // Validation - Owned
+      if (!res) {
+        await interaction.editReply('Error: This Channel does not belong to you.');
+        return;
+      }
+      const ownedChns = res.chns;
+      if (author.user.id !== guild.ownerId) {
+        if ( !(ownedChns.includes(tChannel.id) && ownedChns.includes(vChannel.id)) ) {
+          await interaction.editReply('Error: This Channel does not belong to you.');
+          return;
+        }
+      }
+
+      // Add users to channels
+      users.forEach( async user => {
+        await tChannel.permissionOverwrites.delete(user.id);
+        await vChannel.permissionOverwrites.delete(user.id);
+      });
+      
+      // Reply
+      let msg = `User(s) `;
+      users.forEach( u => msg += `${u.username} `);
+      msg += ` have been removed from <#${tChannel.id}> and <#${vChannel.id}>`;
+      await interaction.editReply(msg);
+      
+      return;
+    } catch ( e ) {
+      this.bot.logger.error( e );
+      await interaction.reply('Error: Something Went Wrong.');
+      return;
+    }
+  }
 
   /**
    * 
