@@ -403,8 +403,8 @@ export default class PlayChannels {
 
       // Reply
       let msg = `User(s) `;
-      users.forEach( u => msg += `${u.username} `);
-      msg += `] have been added to <#${tChannel.id}> and <#${vChannel.id}>`;
+      users.forEach( u => msg += `\`${u.username}\` `);
+      msg += `have been added to <#${tChannel.id}> and <#${vChannel.id}>`;
       await interaction.editReply(msg);
 
       return;
@@ -474,8 +474,8 @@ export default class PlayChannels {
       
       // Reply
       let msg = `User(s) `;
-      users.forEach( u => msg += `${u.username} `);
-      msg += ` have been removed from <#${tChannel.id}> and <#${vChannel.id}>`;
+      users.forEach( u => msg += `\`${u.username}\` `);
+      msg += `have been removed from <#${tChannel.id}> and <#${vChannel.id}>`;
       await interaction.editReply(msg);
       
       return;
@@ -490,7 +490,43 @@ export default class PlayChannels {
    * 
    * @param {Interaction} interaction 
    */ 
-  async mentionUsers ( interaction ) {}
+  async mentionUsers ( interaction ) {
+    // Data builder
+    const guild = interaction.guild;
+    const author = interaction.member;
+    const channel = interaction.channel;
+    const cat = await guild.channels.fetch(this.bot.caches.playCats[guild.id]);
+    let ownedChns = null;
 
+    // DB data
+    try {
+      const sql = 'SELECT * FROM playchns WHERE server_id=$1 AND user_id=$2;';
+      const vals = [guild.id, author.user.id];
+      const res = await this.bot.db.fetchOne(sql, vals);
 
+      if (res) { ownedChns = res.chns}
+    } catch ( e ) {this.bot.logger.error(e)}
+
+    // Validation - Owner
+    if (ownedChns) {
+      if (!ownedChns.includes(channel.id)) {
+        await interaction.editReply("Error: This channel doesn't belong to you.");
+        return;
+      } 
+    } else {
+      await interaction.editReply("Error: This channel doesn't belong to you.");
+      return;     
+    }
+   
+    // Get Perms of a channel
+    const chnPerms = channel.permissionOverwrites.cache;
+    const users = chnPerms
+      .filter( perm => perm.type === 'member' )
+      .map(perm => perm.id);
+
+    // Send Mention
+    let msg = ``;
+    users.forEach( u => msg += `<@!${u}> `);
+    await interaction.editReply(msg);
+  }
 }
