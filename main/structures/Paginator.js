@@ -142,7 +142,10 @@ export default class Paginator {
     // Data builder
     const options = {
       columnSplitter: ' | ',
-      config: this.config
+      config: this.config,
+      headingTransform: function (heading) {
+        return `--${heading.toUpperCase()}--`;
+      }
     }
 
     const columns = columnify(data, options);

@@ -2,7 +2,7 @@
 //                             Imports
 // ----------------------------------------------------------------
 import { SlashCommandBuilder } from "@discordjs/builders"
-import { Interaction, Permissions } from "discord.js";
+import { Channel, Interaction, Permissions } from "discord.js";
 
 
 // ----------------------------------------------------------------
@@ -39,6 +39,15 @@ export default class Setup {
           .setName('enablerep')
           .setDescription('Enable the reputation system for this guild')
           .addBooleanOption( c => c.setName('choice').setDescription('True/False')
+                                    .setRequired(true))
+      )
+      .addSubcommand( sub =>
+        sub
+          .setName('enableplaychns')
+          .setDescription('Enable the play channel system for this guild')
+          .addBooleanOption( b => b.setName('choice').setDescription('True/False')
+                                    .setRequired(true))
+          .addChannelOption( c => c.setName('channel').setDescription('Selected Category for Personal Channels')
                                     .setRequired(true))
       )
       .addSubcommandGroup( group =>
@@ -129,7 +138,9 @@ export default class Setup {
         await this.createReward( interaction );
         return;
       case 'remove':
-        await this.removeReward( interaction);
+        await this.removeReward( interaction );
+      case 'enableplaychns':
+        await this.enablePlayChannels( interaction );
     };    
   }
 
@@ -307,6 +318,42 @@ export default class Setup {
       this.bot.logger.error(e);
       return;
     }
+  }
 
+
+  /**
+   * @param {Interaction} interaction
+   */
+  async enablePlayChannels ( interaction ) {
+    // Data Builder
+    const answer = interaction.options.getBoolean('choice');
+    let channel = interaction.options.getChannel('channel');
+    const guild = interaction.guild;
+
+    if (!(channel.type === 'GUILD_CATEGORY')) {
+      const msg = `Error: Selected Channel must be of type Category.`;
+      await interaction.editReply(msg);
+      return;
+    }
+
+    if (!answer) channel = null;
+
+    // Update Db
+    try {
+      const sql = `UPDATE settings SET playchns=$1, playcat=$2
+                    WHERE server_id=$3;`;
+      const vals = [answer, channel?.id, guild.id];
+      await this.bot.db.execute(sql, vals);
+      // Update Cache
+      this.bot.caches.features[guild.id].playchns = answer;
+      this.bot.caches.playCats[guild.id] = channel?.id || null;
+      // Send Reply
+      const msg = `Playchannel settings updated.`;
+      await interaction.editReply(msg);
+    } catch ( e ) {
+      this.bot.logger.error( e );
+      interaction.editReply(`Error: Something went wrong.`);
+      return;
+    }
   }
 }

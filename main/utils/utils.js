@@ -43,7 +43,8 @@ export function msgSanatize ( str ) {
 // ----------------------------------------------------------------
 export const caches = {
   cacheLogChns: cacheLogChns,
-  cacheEnabled: cacheEnabled
+  cacheEnabled: cacheEnabled,
+  cachePlayChns: cachePlayChns
 }
 
 
@@ -64,6 +65,31 @@ async function cacheLogChns( bot ) {
     // Add to object
     res.forEach( entry => {
       if (entry.logging_chn) cache[entry.server_id] = entry.logging_chn;
+    });
+    return cache;
+
+  } catch ( e ) {
+    console.error("An error occured while building logging cache: ", e);
+  }
+}
+
+// ----------------------------------------------------------------
+//                     Cache - Play Categories
+// ----------------------------------------------------------------
+/**
+ * 
+ * @param {Zen} bot 
+ * @returns {Object} cache
+ */
+async function cachePlayChns( bot ) {
+  console.log("Building PlayChannels Cache");
+  try {
+    const cache = {};
+    const sql = 'SELECT * FROM settings';
+    const res = await bot.db.fetch(sql) || [];
+    // Add to object
+    res.forEach( entry => {
+      if (entry.playcat) cache[entry.server_id] = entry.playcat;
     });
     return cache;
 
@@ -95,6 +121,7 @@ async function cacheEnabled( bot ) {
     res.forEach( server => {
       const enabled = {
         levels: server.levels,
+        playchns: server.playchns,
         rep: server.rep,
       };
 
@@ -105,7 +132,6 @@ async function cacheEnabled( bot ) {
   } catch ( e ) {
     console.error("An error occured while building features cache");
   }
-
 }
 
 

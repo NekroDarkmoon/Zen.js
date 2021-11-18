@@ -64,7 +64,8 @@ export default class Zen extends Client{
 
     this.caches = {
       loggingChns: {},
-      features: {}
+      features: {},
+      playCats: {}
     };
   }
 
@@ -131,6 +132,7 @@ export default class Zen extends Client{
 
   async buildCaches () {
    this.caches.loggingChns = await caches.cacheLogChns(this);
+   this.caches.playCats = await caches.cachePlayChns(this);
    this.caches.features = await caches.cacheEnabled(this);
   }
 

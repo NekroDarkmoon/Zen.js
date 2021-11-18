@@ -231,8 +231,8 @@ export default class Rep {
     // Setup Formatter
     const pageConf = {
       rank: {align: "center"},
-      user: {align: "left", midWidth: 20, maxWidth: 25},
-      rep: {align: "center", minWidth: 5}
+      user: {align: "left"},
+      rep: {align: "center", minWidth: 4}
     };
 
     // Construct Paginator
