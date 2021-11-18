@@ -4,8 +4,8 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import {
   CategoryChannel,
+  Channel,
   Interaction, 
-  MessageEmbed,
   Permissions } from "discord.js";
 import Zen from "../Zen.js";
 
@@ -37,8 +37,14 @@ export default class PlayChannels {
           .setDescription('Delete a personal channel')
           .addChannelOption( chn =>
             chn
-              .setName('channel')
-              .setDescription('Selected channel to delete.')
+              .setName('textchannel')
+              .setDescription('Selected text channel to delete.')
+              .setRequired(true)
+          )
+          .addChannelOption( chn =>
+            chn
+              .setName('voicechannel')
+              .setDescription('Associated voice channel to delete.')
               .setRequired(true)
           )
       )
@@ -257,7 +263,74 @@ export default class PlayChannels {
    * 
    * @param {Interaction} interaction 
    */ 
-  async deleteChn ( interaction ) {}
+  async deleteChn ( interaction ) {
+    // Data Builder
+    const guild = interaction.guild;
+    const author = interaction.member;
+    /**@type {Channel} */
+    const tChannel = interaction.options.getChannel('textchannel');
+    /**@type {Channel} */
+    const vChannel = interaction.options.getChannel('voicechannel');
+    /**@type {CategoryChannel} */
+    const cat = await guild.channels.fetch(this.bot.caches.playCats[guild.id]);
+
+    // Validation - Play Channel
+    if (tChannel.parentId !== cat.id || vChannel.parentId !== cat.id ) {
+      await interaction.editReply(`Error: Channel(s) aren't play channel(s).`);
+      return;
+    } 
+
+    // Validation - Type
+    if (!(tChannel.type === 'GUILD_TEXT' && vChannel.type === 'GUILD_VOICE')) {
+      await interaction.editReply(`Error: Selected Channels are not the appropriate type.`);
+      return;
+    }
+
+    // DB Fetch
+    try {
+      let sql = 'SELECT * FROM playchns WHERE server_id=$1 AND user_id=$2;';
+      let vals = [guild.id, author.user.id];
+      let res = await this.bot.db.fetchOne(sql, vals);
+
+      // Validation - Owned
+      if (!res) {
+        await interaction.editReply('Error: This Channel does not belong to you.');
+        return;
+      }
+      const ownedChns = res.chns;
+      if (author.user.id !== guild.ownerId) {
+        if ( !(ownedChns.includes(tChannel.id) && ownedChns.includes(vChannel.id)) ) {
+          await interaction.editReply('Error: This Channel does not belong to you.');
+          return;
+        }
+      }
+      // TODO: Ask for confirmation
+
+      // Modify channels array
+      const chns = res.chns.filter( id => !(id === tChannel.id || id === vChannel.id));
+
+      // Delete Channels
+      await tChannel.delete();
+      await vChannel.delete();
+
+      // Remove from DB
+      sql = `UPDATE playchns SET
+                        count=playchns.count - $1,
+                        chns=$2
+                        WHERE server_id=$3 AND user_id=$4`;
+      vals = [1, chns, guild.id, author.user.id];
+      await this.bot.db.execute(sql, vals);
+
+      // Reply
+      const msg = `Selected Channels have been Successfully Deleted`;
+      await interaction.editReply(msg);
+      return;
+    } catch ( e ) {
+      this.bot.logger.error( e );
+      await interaction.reply('Error: Something Went Wrong.');
+      return;
+    }
+  }
 
   /**
    * 
