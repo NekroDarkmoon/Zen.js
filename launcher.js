@@ -6,7 +6,6 @@ import ZenDB from "./main/utils/db/index.js";
 import { readFile } from 'fs/promises';
 import setupLogger from './main/utils/logger.js';
 
-
 // ----------------------------------------------------------------
 //                              Main 
 // ----------------------------------------------------------------

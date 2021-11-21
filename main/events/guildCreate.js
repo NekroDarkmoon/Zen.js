@@ -47,6 +47,8 @@ export default class GuildCreateEvent {
       }      
     } catch (err) {console.error(err);}
 
+    // Rebuild Cache
+    await bot.buildCaches();
     // TODO: Setup
   };
 }
