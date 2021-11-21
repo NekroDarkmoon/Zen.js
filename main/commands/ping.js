@@ -1,24 +1,24 @@
 // ----------------------------------------------------------------
 //                             Imports
 // ----------------------------------------------------------------
-import { SlashCommandBuilder } from "@discordjs/builders"
-import { Interaction } from "discord.js";
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { Interaction } from 'discord.js';
 
 export default class Ping {
-  constructor () {
-    this.name = 'ping';
-    this.description = 'Responds with a latency to the server.';
-    this.global = false;
-    this.data = new SlashCommandBuilder()
-      .setName(this.name)
-      .setDescription(this.description);
-  }
+	constructor() {
+		this.name = 'ping';
+		this.description = 'Responds with a latency to the server.';
+		this.global = false;
+		this.data = new SlashCommandBuilder()
+			.setName(this.name)
+			.setDescription(this.description);
+	}
 
-  /**
-   * @param {Interaction} interaction
-   * @returns {Promise<void>}
-   * */
-  execute = async (interaction) => {
-    await interaction.reply("Pong!");
-  }
+	/**
+	 * @param {Interaction} interaction
+	 * @returns {Promise<void>}
+	 * */
+	execute = async interaction => {
+		await interaction.reply('Pong!');
+	};
 }

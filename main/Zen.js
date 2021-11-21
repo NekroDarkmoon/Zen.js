@@ -7,120 +7,121 @@ const { Client, Message, Intents } = discord;
 import ZenDB from './utils/db/index.js';
 import CommandHandler from './structures/CommandHandler.js';
 import { caches } from './utils/utils.js';
-import fs from "fs";
+import fs from 'fs';
 import winston from 'winston';
 
-
 // ----------------------------------------------------------------
-//                             Zen 
+//                             Zen
 // ----------------------------------------------------------------
 /**
  * Main class for Zen
  * @class Zen
  */
-export default class Zen extends Client{
-  /**
-   * @param {ZenConfig} config 
-   * @param {ZenDB} db 
-   * @param {winston.Logger} logger 
-   */
-  constructor (config, db, logger) {
-    // Init Client with intents and partials
-    super({
-      intents: [
-        Intents.FLAGS.GUILDS,
-        Intents.FLAGS.GUILD_BANS,
-        Intents.FLAGS.GUILD_MEMBERS,
-        Intents.FLAGS.GUILD_MESSAGES,
-        Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-      ],
-      partials: ['MESSAGE', 'CHANNEL', 'REACTION', 'GUILD_MEMBER']
-    });
+export default class Zen extends Client {
+	/**
+	 * @param {ZenConfig} config
+	 * @param {ZenDB} db
+	 * @param {winston.Logger} logger
+	 */
+	constructor(config, db, logger) {
+		// Init Client with intents and partials
+		super({
+			intents: [
+				Intents.FLAGS.GUILDS,
+				Intents.FLAGS.GUILD_BANS,
+				Intents.FLAGS.GUILD_MEMBERS,
+				Intents.FLAGS.GUILD_MESSAGES,
+				Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+			],
+			partials: ['MESSAGE', 'CHANNEL', 'REACTION', 'GUILD_MEMBER'],
+		});
 
-    /** @type {ZenConfig} */
-    this.config = config;
+		/** @type {ZenConfig} */
+		this.config = config;
 
-    /** @type {CommandHandler} */
-    this.CommandHandler = new CommandHandler(this.config);
+		/** @type {CommandHandler} */
+		this.CommandHandler = new CommandHandler(this.config);
 
-    /** @type {ZenDB} */
-    this.db = db;
+		/** @type {ZenDB} */
+		this.db = db;
 
-    /** @type {winston.Logger} */
-    this.logger = logger;
+		/** @type {winston.Logger} */
+		this.logger = logger;
 
-    this.caches = {
-      loggingChns: {},
-      features: {},
-      playCats: {}
-    };
-  }
+		this.caches = {
+			loggingChns: {},
+			features: {},
+			playCats: {},
+		};
+	}
 
+	/**
+	 * @returns {Promise<void>}
+	 * @memberof Zen
+	 */
+	async start() {
+		if (!this.config.token) throw new Error('No discord token provided');
 
-  /**
-   * @returns {Promise<void>}
-   * @memberof Zen
-   */
-  async start () {
-    if (!this.config.token) throw new Error("No discord token provided");
+		// Setup event listeners
+		await this.setupEventListeners();
 
-    // Setup event listeners
-    await this.setupEventListeners();
-    
-    // Setup commands & interactions
-    await this.CommandHandler.loadCommands();
-    await this.CommandHandler.registerCommands();
+		// Setup commands & interactions
+		await this.CommandHandler.loadCommands();
+		await this.CommandHandler.registerCommands();
 
-    // Set token
-    this.login(this.config.token);
-    this.setMaxListeners(20);
+		// Set token
+		this.login(this.config.token);
+		this.setMaxListeners(20);
 
-    // Cache Builder
-    await this.buildCaches();
+		// Cache Builder
+		await this.buildCaches();
+	}
 
-  }
+	/**
+	 * @returns {Promise<void>}
+	 * @memberof Zen
+	 */
+	async setupEventListeners() {
+		const eventFiles = fs
+			.readdirSync(`./main/events`)
+			.filter(file => file.endsWith('.js'));
 
-  /**
-   * @returns {Promise<void>}
-   * @memberof Zen
-   */
-  async setupEventListeners () {
-    const eventFiles = fs
-      .readdirSync(`./main/events`)
-      .filter((file) => file.endsWith(".js"));
-    
-    console.info(`Registering ${eventFiles.length} Events.`);
-    eventFiles.forEach( async file => {
-      const eventClass = (await import(`./events/${file}`)).default;
-      const event = new eventClass(this);
-      if ( event.once ) this.once(event.name, (...args) => event.execute(...args));
-      else { this.on(event.name, (...args) => event.execute(...args)); }
-    });
-  }
+		console.info(`Registering ${eventFiles.length} Events.`);
+		eventFiles.forEach(async file => {
+			const eventClass = (await import(`./events/${file}`)).default;
+			const event = new eventClass(this);
+			if (event.once)
+				this.once(event.name, (...args) => event.execute(...args));
+			else {
+				this.on(event.name, (...args) => event.execute(...args));
+			}
+		});
+	}
 
+	/**
+	 *
+	 * @param {object} data
+	 * @returns {boolean}
+	 * @memberof Zen
+	 */
+	async fetchPartial(data) {
+		if (data.partial) {
+			try {
+				await data.fetch();
+			} catch (err) {
+				console.error(
+					`Something went wrong when fetching partial ${data.id}: `,
+					error
+				);
+				return false;
+			}
+		}
+		return true;
+	}
 
-  /**
-   * 
-   * @param {object} data 
-   * @returns {boolean}
-   * @memberof Zen
-   */
-  async fetchPartial (data) {
-    if (data.partial) {
-      try {await data.fetch()}
-      catch (err) {
-        console.error(`Something went wrong when fetching partial ${data.id}: `, error);
-        return false;
-      }
-    }
-    return true;
-  }
-
-
-  async buildCaches () {
-   this.caches.loggingChns = await caches.cacheLogChns(this);
-   this.caches.playCats = await caches.cachePlayChns(this);
-   this.caches.features = await caches.cacheEnabled(this);
-  }
-
+	async buildCaches() {
+		this.caches.loggingChns = await caches.cacheLogChns(this);
+		this.caches.playCats = await caches.cachePlayChns(this);
+		this.caches.features = await caches.cacheEnabled(this);
+	}
 }
