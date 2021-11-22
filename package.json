@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://gitlab.com/NekroDarkmoon/zen.git"
+    "url": "https://github.com/NekroDarkmoon/Zen.git"
   },
-  "author": "",
+  "author": "NekroDarkmoon",
   "license": "MIT",
   "bugs": {
-    "url": "https://gitlab.com/NekroDarkmoon/zen/issues"
+    "url": "https://github.com/NekroDarkmoon/Zen/issues"
   },
-  "homepage": "https://gitlab.com/NekroDarkmoon/zen#readme",
+  "homepage": "https://github.com/NekroDarkmoon/Zen",
   "dependencies": {
     "@discordjs/builders": "^0.7.0",
     "@discordjs/rest": "^0.1.0-canary.0",
