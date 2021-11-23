@@ -2,6 +2,7 @@
 //                             Imports
 // ----------------------------------------------------------------
 import { SlashCommandBuilder } from '@discordjs/builders';
+import { ChannelType } from 'discord-api-types';
 import { CategoryChannel, Channel, Interaction, Permissions } from 'discord.js';
 import Zen from '../Zen.js';
 
@@ -31,35 +32,44 @@ export default class PlayChannels {
 				sub
 					.setName('delete')
 					.setDescription('Delete a personal channel')
-					.addChannelOption(chn =>
+					.addChannelOption(chn => {
 						chn
 							.setName('textchannel')
 							.setDescription('Selected text channel to delete.')
-							.setRequired(true)
-					)
-					.addChannelOption(chn =>
+							.setRequired(true);
+						chn.channelTypes = [ChannelType.GuildText];
+						return chn;
+					})
+					.addChannelOption(chn => {
 						chn
 							.setName('voicechannel')
 							.setDescription('Associated voice channel to delete.')
-							.setRequired(true)
-					)
+							.setRequired(true);
+						chn.channelTypes = [ChannelType.GuildVoice];
+						return chn;
+					})
 			)
 			.addSubcommand(sub =>
 				sub
 					.setName('add')
 					.setDescription('Choose users to add to the channel.')
-					.addChannelOption(chn =>
+					.addChannelOption(chn => {
 						chn
 							.setName('textchannel')
 							.setDescription('Selected text channel to delete.')
-							.setRequired(true)
-					)
-					.addChannelOption(chn =>
+							.setRequired(true);
+
+						chn.channelTypes = [ChannelType.GuildText];
+						return chn;
+					})
+					.addChannelOption(chn => {
 						chn
 							.setName('voicechannel')
 							.setDescription('Associated voice channel to delete.')
-							.setRequired(true)
-					)
+							.setRequired(true);
+						chn.channelTypes = [ChannelType.GuildVoice];
+						return chn;
+					})
 					.addUserOption(usr =>
 						usr.setName('user1').setDescription('User 01').setRequired(true)
 					)
@@ -77,18 +87,22 @@ export default class PlayChannels {
 				sub
 					.setName('remove')
 					.setDescription('Choose users to remove from a channel.')
-					.addChannelOption(chn =>
+					.addChannelOption(chn => {
 						chn
 							.setName('textchannel')
 							.setDescription('Selected text channel to delete.')
-							.setRequired(true)
-					)
-					.addChannelOption(chn =>
+							.setRequired(true);
+						chn.channelTypes = [ChannelType.GuildText];
+						return chn;
+					})
+					.addChannelOption(chn => {
 						chn
 							.setName('voicechannel')
 							.setDescription('Associated voice channel to delete.')
-							.setRequired(true)
-					)
+							.setRequired(true);
+						chn.channelTypes = [ChannelType.GuildVoice];
+						return chn;
+					})
 					.addUserOption(usr =>
 						usr.setName('user1').setDescription('User 01').setRequired(true)
 					)
@@ -283,14 +297,6 @@ export default class PlayChannels {
 			return;
 		}
 
-		// Validation - Type
-		if (!(tChannel.type === 'GUILD_TEXT' && vChannel.type === 'GUILD_VOICE')) {
-			await interaction.editReply(
-				`Error: Selected Channels are not the appropriate type.`
-			);
-			return;
-		}
-
 		// DB Fetch
 		try {
 			let sql = 'SELECT * FROM playchns WHERE server_id=$1 AND user_id=$2;';
@@ -335,6 +341,7 @@ export default class PlayChannels {
 			await this.bot.db.execute(sql, vals);
 
 			// Reply
+			//
 			const msg = `Selected Channels have been Successfully Deleted`;
 			await interaction.editReply(msg);
 			return;
@@ -374,13 +381,7 @@ export default class PlayChannels {
 			await interaction.editReply(`Error: Channel(s) aren't play channel(s).`);
 			return;
 		}
-		// Validation - Type
-		if (!(tChannel.type === 'GUILD_TEXT' && vChannel.type === 'GUILD_VOICE')) {
-			await interaction.editReply(
-				`Error: Selected Channels are not the appropriate type.`
-			);
-			return;
-		}
+
 		// DB Fetch
 		try {
 			let sql = 'SELECT * FROM playchns WHERE server_id=$1 AND user_id=$2;';
@@ -456,13 +457,7 @@ export default class PlayChannels {
 			await interaction.editReply(`Error: Channel(s) aren't play channel(s).`);
 			return;
 		}
-		// Validation - Type
-		if (!(tChannel.type === 'GUILD_TEXT' && vChannel.type === 'GUILD_VOICE')) {
-			await interaction.editReply(
-				`Error: Selected Channels are not the appropriate type.`
-			);
-			return;
-		}
+
 		// DB Fetch
 		try {
 			let sql = 'SELECT * FROM playchns WHERE server_id=$1 AND user_id=$2;';
