@@ -8,6 +8,7 @@ import {
 	MessageButton,
 	Permissions,
 } from 'discord.js';
+import ButtonUI from '../utils/ui/button.js';
 
 // ----------------------------------------------------------------
 //                             Imports
@@ -45,24 +46,36 @@ export default class Kick {
 		const reason = interaction.options.getString('reason') || '';
 		const channel = interaction.channel;
 
+		// Create UI
+		const confirm = new ButtonUI({
+			style: 3,
+			label: '✔',
+			customId: 'confirmKick',
+		}).toComponent();
+
+		const deny = new ButtonUI({
+			style: 4,
+			label: '✖',
+			customId: 'denyKick',
+		}).toComponent();
+
 		// Inital reply
 		interaction.reply({
 			content: `\`Are you sure you wish to kick ${user.username}\``,
 			// ephemeral: true,
 			components: [
-				new MessageActionRow()
-					.addComponents(
-						new MessageButton()
-							.setCustomId('confirmKick')
-							.setLabel('✔')
-							.setStyle('SUCCESS')
-					)
-					.addComponents(
-						new MessageButton()
-							.setCustomId('denyKick')
-							.setLabel('✖')
-							.setStyle('DANGER')
-					),
+				new MessageActionRow().addComponents(confirm, deny),
+				// 	new MessageButton()
+				// 		.setCustomId('confirmKick')
+				// 		.setLabel('✔')
+				// 		.setStyle('SUCCESS')
+				// )
+				// .addComponents(
+				// 	new MessageButton()
+				// 		.setCustomId('denyKick')
+				// 		.setLabel('✖')
+				// 		.setStyle('DANGER')
+				// ),
 			],
 		});
 
