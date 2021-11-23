@@ -113,7 +113,7 @@ export default class Info {
 		if (roles) {
 			const roleNames = roles.map(role => role.name.replace('@', '@\u200b'));
 			const data =
-				roles.length > 10 ? `${roles.length} roles` : roleNames.join(', ');
+				roles.size > 10 ? `${roles.size} roles` : roleNames.join(', ');
 			e.addField('Roles', data, false);
 		}
 
