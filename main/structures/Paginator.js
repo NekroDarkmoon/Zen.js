@@ -123,7 +123,7 @@ export default class Paginator {
 		const data = this.data;
 		// Splice array for 15 values if exists
 		// TODO: Add check for no content
-		const display = data.slice((page - 1) * maxLines, page * maxLines - 1);
+		const display = data.slice((page - 1) * maxLines, page * maxLines);
 
 		// Tabulate data for display
 		const tabulated = this.tabulate(display);
