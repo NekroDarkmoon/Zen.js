@@ -338,7 +338,12 @@ export default class PlayChannels {
 			vals = [1, chns, guild.id, author.user.id];
 			await this.bot.db.execute(sql, vals);
 
-			// Reply
+			// Validation - Deleted message in selected channel
+			if (interaction.channelId === tChannel.id) {
+				return;
+			}
+
+			// Interaction Reply
 			const msg = `Selected Channels have been Successfully Deleted`;
 			await interaction.editReply(msg);
 			return;
