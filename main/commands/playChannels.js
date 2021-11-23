@@ -2,7 +2,6 @@
 //                             Imports
 // ----------------------------------------------------------------
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { ChannelType } from 'discord-api-types';
 import { CategoryChannel, Channel, Interaction, Permissions } from 'discord.js';
 import Zen from '../Zen.js';
 
@@ -37,7 +36,7 @@ export default class PlayChannels {
 							.setName('textchannel')
 							.setDescription('Selected text channel to delete.')
 							.setRequired(true);
-						chn.channelTypes = [ChannelType.GuildText];
+						chn.channelTypes = [0];
 						return chn;
 					})
 					.addChannelOption(chn => {
@@ -45,7 +44,7 @@ export default class PlayChannels {
 							.setName('voicechannel')
 							.setDescription('Associated voice channel to delete.')
 							.setRequired(true);
-						chn.channelTypes = [ChannelType.GuildVoice];
+						chn.channelTypes = [2];
 						return chn;
 					})
 			)
@@ -56,18 +55,17 @@ export default class PlayChannels {
 					.addChannelOption(chn => {
 						chn
 							.setName('textchannel')
-							.setDescription('Selected text channel to delete.')
+							.setDescription('Selected text channel to add users too.')
 							.setRequired(true);
-
-						chn.channelTypes = [ChannelType.GuildText];
+						chn.channelTypes = [0];
 						return chn;
 					})
 					.addChannelOption(chn => {
 						chn
 							.setName('voicechannel')
-							.setDescription('Associated voice channel to delete.')
+							.setDescription('Associated voice channel to add users too.')
 							.setRequired(true);
-						chn.channelTypes = [ChannelType.GuildVoice];
+						chn.channelTypes = [2];
 						return chn;
 					})
 					.addUserOption(usr =>
@@ -90,17 +88,17 @@ export default class PlayChannels {
 					.addChannelOption(chn => {
 						chn
 							.setName('textchannel')
-							.setDescription('Selected text channel to delete.')
+							.setDescription('Selected text channel to remove users from.')
 							.setRequired(true);
-						chn.channelTypes = [ChannelType.GuildText];
+						chn.channelTypes = [0];
 						return chn;
 					})
 					.addChannelOption(chn => {
 						chn
 							.setName('voicechannel')
-							.setDescription('Associated voice channel to delete.')
+							.setDescription('Associated voice channel to remove users from.')
 							.setRequired(true);
-						chn.channelTypes = [ChannelType.GuildVoice];
+						chn.channelTypes = [2];
 						return chn;
 					})
 					.addUserOption(usr =>
@@ -341,7 +339,6 @@ export default class PlayChannels {
 			await this.bot.db.execute(sql, vals);
 
 			// Reply
-			//
 			const msg = `Selected Channels have been Successfully Deleted`;
 			await interaction.editReply(msg);
 			return;
