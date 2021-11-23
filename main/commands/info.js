@@ -165,7 +165,8 @@ export default class Info {
 			totals[type] += 1;
 
 			if (!secrets[type]) secrets[type] = 0;
-			if (!defPerms.has(perms.VIEW_CHANNEL)) secrets[type] += 1;
+			if (!chn.permissionsFor(defRole).has(perms.VIEW_CHANNEL))
+				secrets[type] += 1;
 			else if (type === 'GUILD_VOICE' && !(perms.CONNECT || perms.SPEAK))
 				secrets[type] += 1;
 		});
@@ -182,11 +183,15 @@ export default class Info {
 			GUILD_CATEGORY: ':open_file_folder:',
 			GUILD_TEXT: '<:text_channel:586339098172850187>',
 			GUILD_VOICE: '<:voice_channel:586339098524909604>',
+			GUILD_NEWS: ':loudspeaker:',
+			GUILD_PUBLIC_THREAD: ':thread:',
 		};
+
 		for (const [key, value] of Object.entries(totals)) {
 			const secret = secrets[key];
 			try {
 				const emoji = key_to_emoji[key];
+				if (!emoji) continue;
 				if (secret) channelInfo.push(`${emoji} ${value} (${secret}) locked.`);
 				else channelInfo.push(`${emoji} ${value}`);
 			} catch (err) {
@@ -220,7 +225,7 @@ export default class Info {
 		};
 		const info = [];
 		for (const [feature, label] of Object.entries(all_features)) {
-			if (features.includes(feature)) info.push(`:white_check_mark:: ${label}`);
+			if (features.includes(feature)) info.push(`:white_check_mark: ${label}`);
 		}
 
 		// Add feature List
@@ -228,12 +233,12 @@ export default class Info {
 		// Add channel List
 		e.addField('Channels', channelInfo.join('\n'), true);
 		// Add Boosts
-		if (guild.premiumTier == 'NONE') {
+		if (guild.premiumTier !== 'NONE') {
 			let boosts = `Level ${guild.premiumTier.charAt(
 				guild.premiumTier.length - 1
 			)}`;
 			boosts += `\n${guild.premiumSubscriptionCount} boosts`;
-			e.addField('Boosts', boosts, true);
+			e.addField('Boosts', boosts, false);
 		}
 		// Add NSFW Information
 		const nsfw_lvl = {
@@ -249,7 +254,7 @@ export default class Info {
 		const botCount = Array.from(
 			guild.members.cache.filter(mem => mem.user.bot)
 		);
-		e.addField('Members', `Total: ${memCount} (${botCount.length} bots)`);
+		e.addField('Members', `Total: ${memCount} (${botCount.length} bots)`, true);
 		// Add role count
 		if (roles) {
 			const data =
