@@ -40,7 +40,6 @@ export default class MessageReactionRemoveEvent {
 		if (user.partial) user = await user.fetch();
 
 		// Data Builder
-		const member = reaction.message.member;
 		const member = reaction.message.member
 			? reaction.message.member
 			: await reaction.message.guild.members.fetch(reaction.message.author.id);
