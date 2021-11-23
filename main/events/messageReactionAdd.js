@@ -40,7 +40,10 @@ export default class MessageReactionAddEvent {
 		if (user.partial) user = await user.fetch();
 
 		// Data Builder
-		const member = reaction.message.member;
+		const member = reaction.message.member
+			? reaction.message.member
+			: await reaction.message.guild.members.fetch(reaction.message.author.id);
+		if (member.partial) member = await member.fetch();
 		const guild = reaction.message.guild;
 		const rep = 1;
 
