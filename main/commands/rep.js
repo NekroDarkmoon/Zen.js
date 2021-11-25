@@ -268,7 +268,7 @@ export default class Rep {
 		// Send reply
 		await interaction.reply({
 			embeds: [e],
-			components: [components],
+			components: components,
 		});
 
 		// Start Collecting

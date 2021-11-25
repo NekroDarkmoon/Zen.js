@@ -8,6 +8,7 @@ import {
 	MessageEmbed,
 } from 'discord.js';
 
+import { View } from './view.js';
 import columnify from 'columnify';
 
 // ----------------------------------------------------------------
@@ -24,36 +25,70 @@ export default class Paginator {
 		this.data = data;
 		this.config = config;
 		this.max_pages = max_pages ? max_pages : Math.ceil(data.length / 15);
+		this.view = new View();
 	}
 
 	/**
 	 *
-	 * @param {*} page
+	 * @param {Number} page
 	 * @returns {MessageActionRow} actionRow
 	 */
 	getPaginationComponents(page) {
-		// TODO: Add << >> and select menu
-		return new MessageActionRow()
-			.addComponents(
-				new MessageButton()
-					.setCustomId(JSON.stringify({ name: 'page', page: page - 1 }))
-					.setLabel('◀')
-					.setStyle('PRIMARY')
-					.setDisabled(page < 2)
+		// TODO: select menu
+		console.log(View.randomHex(16));
+
+		const firstPage = new MessageButton()
+			.setCustomId(JSON.stringify({ name: 'page', page: 1, type: 'first' }))
+			.setLabel('≪')
+			.setStyle('PRIMARY')
+			.setDisabled(page < 2);
+
+		const prevButton = new MessageButton()
+			.setCustomId(
+				JSON.stringify({ name: 'page', page: page - 1, type: 'prev' })
 			)
-			.addComponents(
-				new MessageButton()
-					.setCustomId(JSON.stringify({ name: 'page', page: page }))
-					.setLabel('⟳')
-					.setStyle('SECONDARY')
+			.setLabel('◀')
+			.setStyle('PRIMARY')
+			.setDisabled(page < 2);
+
+		// const current = new MessageButton()
+		// 	.setCustomId(View.randomHex(16))
+		// 	.setLabel('⟳')
+		// 	.setStyle('SECONDARY');
+
+		const nextButton = new MessageButton()
+			.setCustomId(
+				JSON.stringify({ name: 'page', page: page + 1, type: 'next' })
 			)
-			.addComponents(
-				new MessageButton()
-					.setCustomId(JSON.stringify({ name: 'page', page: page + 1 }))
-					.setLabel('▶')
-					.setStyle('PRIMARY')
-					.setDisabled(page >= this.max_pages)
-			);
+			.setLabel('▶')
+			.setStyle('PRIMARY')
+			.setDisabled(page >= this.max_pages);
+
+		const lastButton = new MessageButton()
+			.setCustomId(
+				JSON.stringify({ name: 'page', page: this.max_pages, type: 'last' })
+			)
+			.setLabel('≫')
+			.setStyle('PRIMARY')
+			.setDisabled(page >= this.max_pages);
+
+		const stop = new MessageButton()
+			.setCustomId(JSON.stringify({ name: 'page', page: -1, type: 'stop' }))
+			.setLabel('Stop')
+			.setStyle('DANGER');
+
+		// Add Buttons to view
+		this.view.clearComponents();
+		this.view.addComponents([
+			firstPage,
+			prevButton,
+			// current,
+			nextButton,
+			lastButton,
+			stop,
+		]);
+
+		return this.view.toComponents();
 	}
 
 	/**
@@ -88,6 +123,14 @@ export default class Paginator {
 		this.collector.on('collect', async btnInteraction => {
 			// Get page number
 			const pageNum = JSON.parse(btnInteraction.component.customId).page;
+			const type = JSON.parse(btnInteraction.component.customId).type;
+
+			// End if stop
+			if (type === 'stop') {
+				await this.collector.stop();
+				return;
+			}
+
 			// Prepate data for pageNumber
 			const data = this._prepareData(pageNum);
 
@@ -99,9 +142,11 @@ export default class Paginator {
 
 			// Update components
 			const components = this.getPaginationComponents(pageNum);
+			console.log('Imhere');
+			console.log(components);
 
 			await btnInteraction.update({
-				components: [components],
+				components: components,
 				embeds: [e],
 			});
 		});

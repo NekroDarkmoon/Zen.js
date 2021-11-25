@@ -50,6 +50,15 @@ export class View {
 
 	/**
 	 *
+	 * @param {Array<ComponentType.Button | ComponentType.SelectMenu>} components
+	 * @param {Number} row
+	 */
+	addComponents(components, row = 0) {
+		components.forEach(comp => this._children.push(comp));
+	}
+
+	/**
+	 *
 	 * @param {ComponentType.Button | ComponentType.SelectMenu} component
 	 * @param {Number} row
 	 */
@@ -134,11 +143,28 @@ export class View {
 			this._collector.on('end', a => f(a));
 		}
 	}
+
+	/**
+	 *
+	 * @param {Number} size
+	 * @returns {String}
+	 */
+	static randomHex(size) {
+		return [...Array(size)]
+			.map(() => Math.floor(Math.random() * 16).toString(16))
+			.join('');
+	}
 }
 
 // ----------------------------------------------------------------
 //                     Sample Confirm Deny View
 // ----------------------------------------------------------------
+/**
+ *
+ * @param {String} id
+ * @param {Number} timeout
+ * @returns {View}
+ */
 export function confirmDenyView(id, timeout = 180) {
 	// Create Buttons
 	const confirmButton = new MessageButton()
@@ -160,7 +186,7 @@ export function confirmDenyView(id, timeout = 180) {
 }
 
 // ----------------------------------------------------------------
-//                             Imports
+//
 // ----------------------------------------------------------------
 
 // ----------------------------------------------------------------
