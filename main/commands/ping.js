@@ -4,6 +4,10 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Interaction } from 'discord.js';
 
+/**
+ * @class
+ * @augments Command
+ */
 export default class Ping {
 	constructor() {
 		this.name = 'ping';
@@ -15,9 +19,9 @@ export default class Ping {
 	}
 
 	/**
-	 * @param {Interaction} interaction
-	 * @returns {Promise<void>}
-	 * */
+	 *
+	 *
+	 */
 	execute = async interaction => {
 		await interaction.reply('Pong!');
 	};

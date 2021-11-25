@@ -3,7 +3,6 @@
 // ----------------------------------------------------------------
 import discord from 'discord.js';
 import { Collection } from '@discordjs/collection';
-import Command from './Command.js';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
 import fs from 'fs';
