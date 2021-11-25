@@ -299,7 +299,7 @@ export default class Levels {
 		// Send Reply
 		await interaction.editReply({
 			embeds: [e],
-			components: [components],
+			components: components,
 		});
 
 		// Start Collecting
@@ -370,7 +370,7 @@ export default class Levels {
 
 		await interaction.editReply({
 			embeds: [e],
-			components: [components],
+			components: components,
 		});
 
 		// Start Collecting
