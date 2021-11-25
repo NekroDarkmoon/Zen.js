@@ -56,22 +56,17 @@ export default class Kick {
 
 		const collector = view.createCollector(channel, interaction);
 
-		collector.on('collect', async btnInteraction => {
+		const f = async btnInteraction => {
 			if (btnInteraction.component.customId === 'confirmKick') {
 				await interaction.guild.members.kick(user.id);
 				const msg = `Kicked ${user.username} for the following reason:\n${reason}`;
 				await btnInteraction.update({ content: msg, ephemeral: false });
-
-				// TODO: Log it
 			} else {
 				await btnInteraction.update({ content: 'Action Cancelled.' });
 			}
-		});
+		};
 
-		collector.on('end', async collection => {
-			await interaction.editReply({
-				components: [],
-			});
-		});
+		view.collect(interaction, f);
+		view.end(interaction);
 	};
 }

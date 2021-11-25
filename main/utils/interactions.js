@@ -118,18 +118,21 @@ export class View {
 		return collector;
 	}
 
-	async collect(f) {
-		this._collector.on('collect', f);
+	async collect(interaction, f) {
+		this._collector.on('collect', a => f(a));
 	}
 
 	async end(interaction, f = null) {
 		if (!f) {
-			await interaction.editReply({
-				components: [],
-			});
+			f = async collection => {
+				await interaction.editReply({
+					components: [],
+				});
+			};
+			this._collector.on('end', a => f(a));
+		} else {
+			this._collector.on('end', a => f(a));
 		}
-
-		this._collector.on('end', f);
 	}
 }
 
