@@ -6,8 +6,8 @@ const { Client, Message, Intents } = discord;
 
 import ZenDB from './utils/db/index.js';
 import CommandHandler from './structures/CommandHandler.js';
+import EventHandler from './structures/EventHandler.js';
 import { caches } from './utils/utils.js';
-import fs from 'fs';
 import winston from 'winston';
 
 // ----------------------------------------------------------------
@@ -42,6 +42,9 @@ export default class Zen extends Client {
 		/** @type {CommandHandler} */
 		this.CommandHandler = new CommandHandler(this.config);
 
+		/** @type {EventHandler} */
+		this.EventHandler = new EventHandler(this);
+
 		/** @type {ZenDB} */
 		this.db = db;
 
@@ -63,11 +66,13 @@ export default class Zen extends Client {
 		if (!this.config.token) throw new Error('No discord token provided');
 
 		// Setup event listeners
-		await this.setupEventListeners();
+		await this.EventHandler.loadEvents(this);
 
 		// Setup commands & interactions
 		await this.CommandHandler.loadCommands();
 		await this.CommandHandler.registerCommands();
+
+		// TODO: Perform Permission Hnadling for slash commands
 
 		// Set token
 		this.login(this.config.token);
@@ -75,27 +80,6 @@ export default class Zen extends Client {
 
 		// Cache Builder
 		await this.buildCaches();
-	}
-
-	/**
-	 * @returns {Promise<void>}
-	 * @memberof Zen
-	 */
-	async setupEventListeners() {
-		const eventFiles = fs
-			.readdirSync(`./main/events`)
-			.filter(file => file.endsWith('.js'));
-
-		console.info(`Registering ${eventFiles.length} Events.`);
-		eventFiles.forEach(async file => {
-			const eventClass = (await import(`./events/${file}`)).default;
-			const event = new eventClass(this);
-			if (event.once)
-				this.once(event.name, (...args) => event.execute(...args));
-			else {
-				this.on(event.name, (...args) => event.execute(...args));
-			}
-		});
 	}
 
 	/**

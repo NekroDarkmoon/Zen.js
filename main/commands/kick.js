@@ -8,6 +8,7 @@ import {
 	MessageButton,
 	Permissions,
 } from 'discord.js';
+import { confirmDenyView } from '../utils/interactions.js';
 
 // ----------------------------------------------------------------
 //                             Imports
@@ -44,56 +45,28 @@ export default class Kick {
 		const user = interaction.options.getUser('target');
 		const reason = interaction.options.getString('reason') || '';
 		const channel = interaction.channel;
+		const view = confirmDenyView('Kick');
 
 		// Inital reply
 		interaction.reply({
 			content: `\`Are you sure you wish to kick ${user.username}\``,
 			// ephemeral: true,
-			components: [
-				new MessageActionRow()
-					.addComponents(
-						new MessageButton()
-							.setCustomId('confirmKick')
-							.setLabel('✔')
-							.setStyle('SUCCESS')
-					)
-					.addComponents(
-						new MessageButton()
-							.setCustomId('denyKick')
-							.setLabel('✖')
-							.setStyle('DANGER')
-					),
-			],
+			components: view.toComponents(),
 		});
 
-		// Filter
-		const filter = btnInteraction => {
-			return interaction.user.id === btnInteraction.user.id;
-		};
+		const collector = view.createCollector(channel, interaction);
 
-		// Collectors
-		const collector = channel.createMessageComponentCollector({
-			filter,
-			max: 1,
-			time: 1000 * 15,
-		});
-
-		collector.on('collect', async btnInteraction => {
+		const f = async btnInteraction => {
 			if (btnInteraction.component.customId === 'confirmKick') {
 				await interaction.guild.members.kick(user.id);
 				const msg = `Kicked ${user.username} for the following reason:\n${reason}`;
 				await btnInteraction.update({ content: msg, ephemeral: false });
-
-				// TODO: Log it
 			} else {
 				await btnInteraction.update({ content: 'Action Cancelled.' });
 			}
-		});
+		};
 
-		collector.on('end', async collection => {
-			await interaction.editReply({
-				components: [],
-			});
-		});
+		view.collect(interaction, f);
+		view.end(interaction);
 	};
 }
