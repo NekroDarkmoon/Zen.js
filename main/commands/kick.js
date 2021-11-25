@@ -8,7 +8,7 @@ import {
 	MessageButton,
 	Permissions,
 } from 'discord.js';
-import { confirmDenyView } from '../utils/interactions.js';
+import { confirmDenyView } from '../utils/ui/view.js';
 
 // ----------------------------------------------------------------
 //                             Imports
