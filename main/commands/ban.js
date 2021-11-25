@@ -8,6 +8,7 @@ import {
 	MessageButton,
 	Permissions,
 } from 'discord.js';
+import { confirmDenyView } from '../utils/interactions.js';
 
 // ----------------------------------------------------------------
 //                             Imports
@@ -44,56 +45,28 @@ export default class Ban {
 		const user = interaction.options.getUser('target');
 		const reason = interaction.options.getString('reason') || '';
 		const channel = interaction.channel;
+		const view = confirmDenyView('Ban');
 
 		// Inital reply
 		interaction.reply({
 			content: `\`Are you sure you wish to ban ${user.username}\``,
 			// ephemeral: true,
-			components: [
-				new MessageActionRow()
-					.addComponents(
-						new MessageButton()
-							.setCustomId('confirmBan')
-							.setLabel('✔')
-							.setStyle('SUCCESS')
-					)
-					.addComponents(
-						new MessageButton()
-							.setCustomId('denyBan')
-							.setLabel('✖')
-							.setStyle('DANGER')
-					),
-			],
+			components: view.toComponents(),
 		});
 
-		// Filter
-		const filter = btnInteraction => {
-			return interaction.user.id === btnInteraction.user.id;
-		};
+		const collector = view.createCollector(channel, interaction);
 
-		// Collectors
-		const collector = channel.createMessageComponentCollector({
-			filter,
-			max: 1,
-			time: 1000 * 15,
-		});
-
-		collector.on('collect', async btnInteraction => {
+		const f = async btnInteraction => {
 			if (btnInteraction.component.customId === 'confirmBan') {
 				await interaction.guild.members.ban(user.id);
 				const msg = `Banned ${user.username} for the following reason:\n${reason}`;
 				await btnInteraction.update({ content: msg, ephemeral: false });
-
-				// TODO: Log it
 			} else {
 				await btnInteraction.update({ content: 'Action Cancelled.' });
 			}
-		});
+		};
 
-		collector.on('end', async collection => {
-			await interaction.editReply({
-				components: [],
-			});
-		});
+		view.collect(f);
+		view.end(interaction);
 	};
 }

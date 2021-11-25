@@ -8,7 +8,7 @@ import {
 	MessageButton,
 	Permissions,
 } from 'discord.js';
-import ButtonUI from '../utils/ui/button.js';
+import { confirmDenyView } from '../utils/interactions.js';
 
 // ----------------------------------------------------------------
 //                             Imports
@@ -45,51 +45,16 @@ export default class Kick {
 		const user = interaction.options.getUser('target');
 		const reason = interaction.options.getString('reason') || '';
 		const channel = interaction.channel;
-
-		// Create UI
-		const confirm = new ButtonUI({
-			style: 3,
-			label: '✔',
-			customId: 'confirmKick',
-		}).toComponent();
-
-		const deny = new ButtonUI({
-			style: 4,
-			label: '✖',
-			customId: 'denyKick',
-		}).toComponent();
+		const view = confirmDenyView('Kick');
 
 		// Inital reply
 		interaction.reply({
 			content: `\`Are you sure you wish to kick ${user.username}\``,
 			// ephemeral: true,
-			components: [
-				new MessageActionRow().addComponents(confirm, deny),
-				// 	new MessageButton()
-				// 		.setCustomId('confirmKick')
-				// 		.setLabel('✔')
-				// 		.setStyle('SUCCESS')
-				// )
-				// .addComponents(
-				// 	new MessageButton()
-				// 		.setCustomId('denyKick')
-				// 		.setLabel('✖')
-				// 		.setStyle('DANGER')
-				// ),
-			],
+			components: view.toComponents(),
 		});
 
-		// Filter
-		const filter = btnInteraction => {
-			return interaction.user.id === btnInteraction.user.id;
-		};
-
-		// Collectors
-		const collector = channel.createMessageComponentCollector({
-			filter,
-			max: 1,
-			time: 1000 * 15,
-		});
+		const collector = view.createCollector(channel, interaction);
 
 		collector.on('collect', async btnInteraction => {
 			if (btnInteraction.component.customId === 'confirmKick') {
