@@ -11,7 +11,7 @@ import UIItem from './item.js';
 export default class ButtonUI extends UIItem {
 	/**
 	 *
-	 * @param {ButtonStyle} style
+	 * @param {ButtonStyle | String} style
 	 * @param {String} label
 	 * @param {Boolean} disabled
 	 * @param {String} customId
@@ -31,8 +31,6 @@ export default class ButtonUI extends UIItem {
 		// Super
 		super();
 
-		const button = new MessageButton();
-
 		// Check if both url and id are set
 		if (customId && url) throw 'Cannot mix both url and customId with Button';
 		this._providedCustomId = customId ? customId : null;
@@ -44,43 +42,57 @@ export default class ButtonUI extends UIItem {
 				.join('');
 		}
 
-		// Set custom ID
-		button.setCustomId(customId);
-
 		// Set style to link if url set
 		if (url) {
 			style = ButtonStyle.Link;
-			button.setURL(url);
 		}
 
-		// Add additional properties
-		if (label) button.setLabel(label);
-		button.setStyle(style);
-		if (emoji) button.setEmoji(emoji);
-		if (disabled) button.setDisabled(disabled);
+		// Set Button Style based on input
+		if (style > 4 || style < 0) throw 'Invalid Button Style.';
+		if (!typeof style === Number) {
+			switch (style.toLowerCase()) {
+				case 'primary':
+					style = ButtonStyle.Primary;
+					break;
+				case 'success':
+					style = ButtonStyle.Success;
+					break;
+				case 'danger':
+					style = ButtonStyle.Danger;
+					break;
+				default:
+					style = ButtonStyle.Secondary;
+			}
+		}
 
-		this._underlying = button;
-		this.type = ComponentType.Button;
+		// Create button
+		this._underlying = new MessageButton({
+			label: label,
+			customId: customId,
+			style: style,
+			emoji: emoji,
+			url: url,
+			disabled: disabled,
+		});
+
+		this._type = ComponentType.Button;
 		this.row = row;
-
-		console.log(this._underlying);
 	}
 
+	/** @override */
 	toComponent() {
 		return this._underlying;
 	}
+
+	/** @override */
+	fromComponent() {
+		return this._underlying.toJSON();
+	}
+
+	/**
+	 * @override
+	 */
+	isDispatchable() {
+		return this.customId ? true : false;
+	}
 }
-
-// ----------------------------------------------------------------
-//                             Imports
-// ----------------------------------------------------------------
-
-// ----------------------------------------------------------------
-//                             Imports
-// ----------------------------------------------------------------
-// ----------------------------------------------------------------
-//                             Imports
-// ----------------------------------------------------------------
-// ----------------------------------------------------------------
-//                             Imports
-// ----------------------------------------------------------------

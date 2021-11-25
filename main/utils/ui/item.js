@@ -1,6 +1,7 @@
 // ----------------------------------------------------------------
 //                             Imports
 // ----------------------------------------------------------------
+import { ComponentType } from 'discord-api-types/v9';
 import {} from 'discord.js';
 
 // ----------------------------------------------------------------
@@ -13,7 +14,12 @@ export default class UIItem {
 		this._providedCustomId = false;
 	}
 
+	/** @returns {ComponentType.Button | ComponentType.SelectMenu} */
 	toComponent() {}
+	/** @returns {{}} */
+	fromComponent() {}
+	/** @returns {boolean} */
+	isDispatchable() {}
 }
 
 // ----------------------------------------------------------------
