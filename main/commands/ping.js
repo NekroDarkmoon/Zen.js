@@ -3,9 +3,14 @@
 // ----------------------------------------------------------------
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Interaction } from 'discord.js';
+import Command from '../structures/Command.js';
 
-export default class Ping {
+/**
+ * @inheritdoc
+ */
+export default class Ping extends Command {
 	constructor() {
+		super();
 		this.name = 'ping';
 		this.description = 'Responds with a latency to the server.';
 		this.global = false;
@@ -14,11 +19,7 @@ export default class Ping {
 			.setDescription(this.description);
 	}
 
-	/**
-	 * @param {Interaction} interaction
-	 * @returns {Promise<void>}
-	 * */
-	execute = async interaction => {
+	execute = async ({ interaction }) => {
 		await interaction.reply('Pong!');
 	};
 }

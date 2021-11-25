@@ -28,7 +28,7 @@ export default class InteractionCreateEvent {
 		if (!command) return;
 
 		try {
-			await command.execute(interaction);
+			await command.execute({ interaction });
 		} catch (err) {
 			// TODO: Convert to logger
 			console.error(err);
