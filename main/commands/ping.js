@@ -3,7 +3,6 @@
 // ----------------------------------------------------------------
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Interaction } from 'discord.js';
-import Command from '../structures/Command.js';
 
 /**
  * @class
@@ -11,7 +10,6 @@ import Command from '../structures/Command.js';
  */
 export default class Ping {
 	constructor() {
-		super();
 		this.name = 'ping';
 		this.description = 'Responds with a latency to the server.';
 		this.global = false;
