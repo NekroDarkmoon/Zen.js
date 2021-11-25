@@ -27,6 +27,8 @@ export default class ReadyEvent {
 		const tag = bot.user.tag;
 		const guildCount = bot.guilds.cache.size;
 
-		this.bot.logger.info(`Logged in as ${tag}!. Currently in ${guildCount}`);
+		this.bot.logger.info(
+			`Logged in as ${tag}!. Currently in ${guildCount} Guilds.`
+		);
 	};
 }
