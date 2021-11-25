@@ -27,6 +27,12 @@ export default class GuildCreateEvent {
 		const prefix = bot.config.prefix;
 		const loggingChannel = null;
 
+		// Validation - Guild Count
+		if (bot.guilds.cache.size > 73) {
+			await guild.leave();
+			bot.logger.warn(`73 Guilds Limit reached - Left ${guild.name}.`);
+		}
+
 		console.log(`Joined a new guild - ${guild.name}`);
 
 		// Make a db connection to add to db
