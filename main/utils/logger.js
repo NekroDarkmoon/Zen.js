@@ -1,13 +1,14 @@
-import fs from 'fs';
 import winston from 'winston';
 const { createLogger, format, transports } = winston;
 const { combine, colorize, splat, timestamp, printf } = format;
 
+// Logger Function
 export default function setupLogger(level) {
-	const format = printf(({ level, message, timestamp, metadata }) => {
+	// Basic Formatter
+	const format = printf(({ level, message, timestamp, stack }) => {
 		let msg = `${timestamp} [${level}] : ${message}`;
-		if (metadata) msg += JSON.stringify(metadata);
-
+		if (stack) msg += `\n  ${stack} \n`;
+		// if (meta) msg += '\n' + JSON.stringify(meta);
 		return msg;
 	});
 
@@ -17,8 +18,12 @@ export default function setupLogger(level) {
 		transports: [
 			new transports.Console({ level: level }),
 			new transports.File({
+				filename: './.logs/combined.log',
+				level: 'info',
+			}),
+			new transports.File({
 				filename: './.logs/error.log',
-				level: level,
+				level: 'error',
 			}),
 		],
 	});
