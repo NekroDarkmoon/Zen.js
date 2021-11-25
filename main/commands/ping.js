@@ -6,9 +6,10 @@ import { Interaction } from 'discord.js';
 import Command from '../structures/Command.js';
 
 /**
- * @inheritdoc
+ * @class
+ * @augments Command
  */
-export default class Ping extends Command {
+export default class Ping {
 	constructor() {
 		super();
 		this.name = 'ping';
@@ -19,7 +20,11 @@ export default class Ping extends Command {
 			.setDescription(this.description);
 	}
 
-	execute = async ({ interaction }) => {
+	/**
+	 *
+	 *
+	 */
+	execute = async interaction => {
 		await interaction.reply('Pong!');
 	};
 }
