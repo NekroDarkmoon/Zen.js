@@ -21,6 +21,7 @@ export default class Paginator {
 	 * @param {Number} max_pages
 	 */
 	constructor(data, config = {}, max_pages = null) {
+		this.id = View.randomHex(16);
 		this.collector = null;
 		this.data = data;
 		this.config = config;
@@ -92,7 +93,6 @@ export default class Paginator {
 	/**
 	 *
 	 * @param {Interaction} msgInteraction
-	 * @param {number} time
 	 */
 	startCollector(interaction) {
 		// Get Collector
