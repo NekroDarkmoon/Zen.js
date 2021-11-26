@@ -78,6 +78,9 @@ export default class Rep {
 		const bot = interaction.client;
 		if (!this.bot) this.bot = bot;
 
+		// Defer Reply
+		await interaction.deferReply();
+
 		// Execute based on subcommand
 		const sub = interaction.options.getSubcommand();
 		if (sub === 'get') await this.getRep(interaction);
@@ -108,7 +111,7 @@ export default class Rep {
 			const rep = result ? result.rep : 0;
 
 			const msg = `Member \`${user.username}\` has \`${rep}\` rep.`;
-			await interaction.reply(msg);
+			await interaction.editReply(msg);
 		} catch (err) {
 			this.bot.logger.error({ message: err });
 		}
@@ -128,7 +131,7 @@ export default class Rep {
 		// Validation - Bot check
 		if (user.bot) {
 			const msg = `Error: Bot. \`Unable to give rep to a bot.\``;
-			await interaction.reply({ content: msg, ephemeral: true });
+			await interaction.editReply({ content: msg, ephemeral: true });
 			return;
 		}
 
@@ -138,14 +141,14 @@ export default class Rep {
 			member.id === user.id
 		) {
 			const msg = `Error: Sabotage. \`Unable to give rep to yourself.\``;
-			await interaction.reply({ content: msg, ephemeral: true });
+			await interaction.editreply({ content: msg, ephemeral: true });
 			return;
 		}
 
 		// Validation - Amount check
 		if (!member.permissions.has(Permissions.FLAGS.ADMINISTRATOR) && rep !== 1) {
 			const msg = `Error: Permissions not met. \`Amount cannot be anything other than 1.\``;
-			await interaction.reply({ content: msg, ephemeral: true });
+			await interaction.editreply({ content: msg, ephemeral: true });
 			return;
 		}
 
@@ -173,7 +176,7 @@ export default class Rep {
 		}
 
 		const msg = `Gave \`${user.username}\` \`${rep}\` rep`;
-		await interaction.reply(msg);
+		await interaction.editreply(msg);
 	}
 
 	/**
@@ -189,7 +192,7 @@ export default class Rep {
 		// Validation - Admin
 		if (!member.permissions.has(Permissions.FLAGS.ADMINISTRATOR)) {
 			const msg = `Error: Permissions not met. \`Unable to use command.\``;
-			await interaction.reply({ content: msg, ephemeral: true });
+			await interaction.editreply({ content: msg, ephemeral: true });
 			return;
 		}
 
@@ -206,7 +209,7 @@ export default class Rep {
 		}
 
 		const msg = `\`${user.username}\` now has \`${rep}\` rep`;
-		await interaction.reply(msg);
+		await interaction.editreply(msg);
 	}
 
 	/**
@@ -227,7 +230,7 @@ export default class Rep {
 			let result = await this.bot.db.fetch(sql, values);
 			if (!result) {
 				const msg = `This server has no one with reputation points.`;
-				await interaction.reply(msg);
+				await interaction.editreply(msg);
 				return;
 			}
 
@@ -271,7 +274,7 @@ export default class Rep {
 			.setDescription(paginator._prepareData(page));
 
 		// Send reply
-		await interaction.reply({
+		await interaction.editreply({
 			embeds: [e],
 			components: paginator.components,
 		});
