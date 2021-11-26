@@ -1,7 +1,12 @@
 // ----------------------------------------------------------------
 //                             Imports
 // ----------------------------------------------------------------
-import {} from 'discord.js';
+import {
+	Interaction,
+	Message,
+	MessageCollector,
+	MessageEmbed,
+} from 'discord.js';
 import { View } from './View.js';
 import columnify from 'columnify';
 
@@ -12,7 +17,7 @@ export class Pages extends View {
 	constructor(max_pages = null, timeout = 180) {
 		super(timeout);
 
-		this.max_pages = max_pages;
+		this.max_pages = max_pages ? max_pages : 1;
 		this._currPage = 1;
 		this.components = this.createComponents(1);
 	}
@@ -36,6 +41,41 @@ export class Pages extends View {
 		this.addComponents(comps);
 		return this.toComponents();
 	}
+
+	/**
+	 *
+	 * @param {Interaction} interaction
+	 * @param {Number} maxClicks
+	 * @returns {MessageCollector}
+	 * @override
+	 */
+	async onInteraction(interaction, maxClicks = 0) {
+		return super.onInteraction(interaction, maxClicks);
+	}
+
+	/**
+	 *
+	 * @param {Interaction} interaction
+	 * @override
+	 */
+	async onStop(interaction) {
+		if (!this._collector) throw 'No collector exists.';
+
+		this._collector.on('end', async collection => {
+			await interaction.editReply({
+				components: [],
+			});
+			this.__stopped = true;
+		});
+
+		return;
+	}
+
+	/**
+	 *
+	 * @param {Number} page
+	 */
+	_prepareData(page) {}
 
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	//                              Buttons
@@ -91,9 +131,100 @@ export class Pages extends View {
 			.setStyle('DANGER');
 	}
 }
+
 // ----------------------------------------------------------------
-//                             Imports
+//                      Tabulated Data Paginator
 // ----------------------------------------------------------------
+class TabulatedPages extends Pages {
+	constructor(action, data, config = {}, max_pages = null, timeout = 180) {
+		max_pages = max_pages ? max_pages : Math.ceil(data.length / 15);
+		super(max_pages, timeout);
+		this.customId = action;
+		this.data = data;
+		this.config = config;
+	}
+
+	/**
+	 *
+	 * @param {Number} page
+	 * @override
+	 */
+	createComponents(page) {
+		return super.createComponents();
+	}
+
+	/**
+	 *
+	 * @param {Interaction} interaction
+	 * @param {Number} maxClicks
+	 */
+	async onInteraction(interaction, maxClicks = 0) {
+		this._collector = super.onInteraction(interaction, maxClicks);
+
+		this._collector.on('collect', btnInt => {
+			// Defer Interaction
+			await btnInt.deferUpdate();
+
+			// Data Builder
+			const pageNum = JSON.parse(btnInt.component.customId).page;
+			const type = JSON.parse(btnInt.component.customId).type;
+
+			// End if Stopped
+			if (type === 'stop') {
+				await this._collector.stop();
+				return;
+			}
+
+			// Prep Data
+			const data = this._prepareData(pageNum);
+			// Create Embed
+			const e = new MessageEmbed()
+				.setTitle(`${this.customId}Board`)
+				.setDescription(data)
+				.setColor('AQUA');
+			// Update Components
+			this.components = this.createComponents(pageNum);
+			await btnInt.update({
+				components: this.components,
+				embeds: [e],
+			});
+		});
+
+		this.onStop(interaction);
+	}
+
+	/**
+	 *
+	 * @param {Number} page
+	 * @returns {String}
+	 */
+	_prepareData(page) {
+		const maxLines = 15;
+		const data = this.data;
+		const display = data.slice((page - 1) * maxLines, page * maxLines);
+
+		// Tabulate data for display
+		const tabulated = this.tabulate(display);
+		return tabulated;
+	}
+
+	/**
+	 *
+	 * @param {Array<>} data
+	 * @returns {String}
+	 */
+	tabulate(data) {
+		// Data Builder
+		const options = {
+			columnSplitter: ' | ',
+			config: this.config,
+			headingTransform: heading => `-${heading.toUpperCase()}-`,
+		};
+
+		const tabulated = columnify(data, options);
+		return `\`\`\`\n${tabulated}\n\`\`\``;
+	}
+}
 
 // ----------------------------------------------------------------
 //                             Imports
