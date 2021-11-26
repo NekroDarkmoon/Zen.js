@@ -3,7 +3,7 @@
 // ----------------------------------------------------------------
 import {
 	Interaction,
-	Message,
+	MessageButton,
 	MessageCollector,
 	MessageEmbed,
 } from 'discord.js';
@@ -19,7 +19,7 @@ export class Pages extends View {
 
 		this.max_pages = max_pages ? max_pages : 1;
 		this._currPage = 1;
-		this.components = this.createComponents(1);
+		this.components = this.createComponents(this._currPage);
 	}
 
 	/**
@@ -29,6 +29,7 @@ export class Pages extends View {
 	 */
 	createComponents(page) {
 		// Get buttons
+		console.log(page);
 		this.clearComponents();
 		const comps = [
 			this.firstPage(page),
@@ -50,7 +51,7 @@ export class Pages extends View {
 	 * @override
 	 */
 	async onInteraction(interaction, maxClicks = 0) {
-		return super.onInteraction(interaction, maxClicks);
+		return await super.onInteraction(interaction, maxClicks);
 	}
 
 	/**
@@ -135,7 +136,7 @@ export class Pages extends View {
 // ----------------------------------------------------------------
 //                      Tabulated Data Paginator
 // ----------------------------------------------------------------
-class TabulatedPages extends Pages {
+export class TabulatedPages extends Pages {
 	constructor(action, data, config = {}, max_pages = null, timeout = 180) {
 		max_pages = max_pages ? max_pages : Math.ceil(data.length / 15);
 		super(max_pages, timeout);
@@ -150,7 +151,7 @@ class TabulatedPages extends Pages {
 	 * @override
 	 */
 	createComponents(page) {
-		return super.createComponents();
+		return super.createComponents(page);
 	}
 
 	/**
@@ -159,14 +160,13 @@ class TabulatedPages extends Pages {
 	 * @param {Number} maxClicks
 	 */
 	async onInteraction(interaction, maxClicks = 0) {
-		this._collector = super.onInteraction(interaction, maxClicks);
+		this._collector = await super.onInteraction(interaction, maxClicks);
 
-		this._collector.on('collect', btnInt => {
-			// Defer Interaction
-			await btnInt.deferUpdate();
-
+		this._collector.on('collect', async btnInt => {
 			// Data Builder
 			const pageNum = JSON.parse(btnInt.component.customId).page;
+			console.log(JSON.parse(btnInt.component.customId));
+			console.log(pageNum);
 			const type = JSON.parse(btnInt.component.customId).type;
 
 			// End if Stopped
@@ -179,9 +179,9 @@ class TabulatedPages extends Pages {
 			const data = this._prepareData(pageNum);
 			// Create Embed
 			const e = new MessageEmbed()
-				.setTitle(`${this.customId}Board`)
+				.setTitle(`${this.customId} Board`)
 				.setDescription(data)
-				.setColor('AQUA');
+				.setColor('RANDOM');
 			// Update Components
 			this.components = this.createComponents(pageNum);
 			await btnInt.update({
