@@ -114,6 +114,7 @@ export class View {
 	/**
 	 *
 	 * @param {Interaction} interaction
+	 * @returns {MessageCollector}
 	 */
 	async onInteraction(interaction, maxClicks = 0) {
 		// Create Filter
@@ -121,8 +122,10 @@ export class View {
 			return interaction.user.id === btnInt.user.id;
 		};
 
+		const message = await interaction.fetchReply();
+
 		/**@type {MessageCollector} */
-		const collector = interaction.message.createMessageComponentCollector({
+		const collector = message.createMessageComponentCollector({
 			filter,
 			max: maxClicks,
 			time: 1000 * this.timeout,
@@ -130,6 +133,8 @@ export class View {
 
 		return collector;
 	}
+
+	async onStop() {}
 
 	onTimeout() {}
 
@@ -167,12 +172,12 @@ export class View {
 export class ConfirmDenyView extends View {
 	/**
 	 *
-	 * @param {String} customId
+	 * @param {String} action
 	 * @param {Number} timeout
 	 */
-	constructor(customId, timeout = 180) {
+	constructor(action, timeout = 180) {
 		super(timeout);
-		this.customId = customId;
+		this.customId = action;
 		this.components = this.createComponents();
 	}
 
@@ -192,11 +197,36 @@ export class ConfirmDenyView extends View {
 		return this.toComponents();
 	}
 
-	/** @override */
-	async onInteraction(interaction, maxClicks = 0) {
-		this._collector = super.onInteraction(interaction, maxClicks);
+	/**
+	 *
+	 * @param {Interaction} interaction
+	 * @param {Number} maxClicks
+	 * @override
+	 */
+	async onInteraction(interaction, f, maxClicks = 1) {
+		this._collector = await super.onInteraction(interaction, maxClicks);
 
-		this._collector.on('collect');
+		this._collector.on('collect', async btnInt => f(btnInt));
+		this.onStop(interaction);
+	}
+
+	async onStop(interaction, f = null) {
+		if (f) {
+			this._collector.on('end', a => f(a));
+			this.__stopped = true;
+			super.__stopped = true;
+			return;
+		}
+
+		this._collector.on('end', async collection => {
+			await interaction.editReply({
+				components: [],
+			});
+			this.__stopped = true;
+			super.__stopped = true;
+		});
+
+		return;
 	}
 }
 

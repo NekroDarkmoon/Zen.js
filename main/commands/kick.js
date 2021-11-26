@@ -54,8 +54,6 @@ export default class Kick {
 			components: view.components,
 		});
 
-		const collector = view.createCollector(channel, interaction);
-
 		const f = async btnInteraction => {
 			if (btnInteraction.component.customId === 'confirmKick') {
 				await interaction.guild.members.kick(user.id);
@@ -66,7 +64,6 @@ export default class Kick {
 			}
 		};
 
-		view.collect(interaction, f);
-		view.end(interaction);
+		await view.onInteraction(interaction, f);
 	};
 }
