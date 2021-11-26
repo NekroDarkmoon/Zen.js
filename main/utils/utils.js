@@ -1,7 +1,6 @@
 // ----------------------------------------------------------------
 //                             Imports
 // ----------------------------------------------------------------
-import { levels } from 'logform';
 import Zen from '../Zen.js';
 
 // ----------------------------------------------------------------
@@ -54,7 +53,7 @@ export const caches = {
  * @returns {Object} cache
  */
 async function cacheLogChns(bot) {
-	console.log('Building Logger Cache');
+	bot.logger.info('Building Logger Cache');
 	try {
 		const cache = {};
 		const sql = 'SELECT * FROM settings';
@@ -65,7 +64,7 @@ async function cacheLogChns(bot) {
 		});
 		return cache;
 	} catch (e) {
-		console.error('An error occured while building logging cache: ', e);
+		bot.logger.error('An error occured while building logging cache: ', e);
 	}
 }
 
@@ -78,7 +77,7 @@ async function cacheLogChns(bot) {
  * @returns {Object} cache
  */
 async function cachePlayChns(bot) {
-	console.log('Building PlayChannels Cache');
+	bot.logger.info('Building PlayChannels Cache');
 	try {
 		const cache = {};
 		const sql = 'SELECT * FROM settings';
@@ -89,7 +88,7 @@ async function cachePlayChns(bot) {
 		});
 		return cache;
 	} catch (e) {
-		console.error('An error occured while building logging cache: ', e);
+		bot.logger.error('An error occured while building logging cache: ', e);
 	}
 }
 
@@ -106,7 +105,7 @@ async function cachePlayChns(bot) {
  * }}} cache
  */
 async function cacheEnabled(bot) {
-	console.log('Building Features Cache');
+	bot.logger.info('Building Features Cache');
 	try {
 		const cache = {};
 		const sql = 'SELECT * FROM settings';
@@ -123,7 +122,7 @@ async function cacheEnabled(bot) {
 		});
 		return cache;
 	} catch (e) {
-		console.error('An error occured while building features cache');
+		bot.logger.error('An error occured while building features cache');
 	}
 }
 
