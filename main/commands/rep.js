@@ -2,9 +2,9 @@
 //                             Imports
 // ----------------------------------------------------------------
 import Zen from '../Zen.js';
-import Paginator from '../utils/ui/Paginator.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Interaction, MessageEmbed, Permissions } from 'discord.js';
+import { TabulatedPages } from '../utils/ui/Paginator.js';
 
 // ----------------------------------------------------------------
 //                             Command
@@ -60,6 +60,11 @@ export default class Rep {
 					.addIntegerOption(option =>
 						option.setName('page').setDescription('Selected page to view.')
 					)
+			)
+			.addSubcommand(sub =>
+				sub
+					.setName('rewards')
+					.setDescription('Display Rewards Associated with XP.')
 			);
 	}
 
@@ -73,12 +78,16 @@ export default class Rep {
 		const bot = interaction.client;
 		if (!this.bot) this.bot = bot;
 
+		// Defer Reply
+		await interaction.deferReply();
+
 		// Execute based on subcommand
 		const sub = interaction.options.getSubcommand();
 		if (sub === 'get') await this.getRep(interaction);
 		else if (sub === 'giverep') await this.giveRep(interaction);
 		else if (sub === 'repboard') await this.repBoard(interaction, args);
 		else if (sub === 'setrep') await this.setRep(interaction);
+		else if (sub === 'rewards') await this.rewards(interaction);
 
 		return;
 	};
@@ -102,7 +111,7 @@ export default class Rep {
 			const rep = result ? result.rep : 0;
 
 			const msg = `Member \`${user.username}\` has \`${rep}\` rep.`;
-			await interaction.reply(msg);
+			await interaction.editReply(msg);
 		} catch (err) {
 			this.bot.logger.error({ message: err });
 		}
@@ -122,7 +131,7 @@ export default class Rep {
 		// Validation - Bot check
 		if (user.bot) {
 			const msg = `Error: Bot. \`Unable to give rep to a bot.\``;
-			await interaction.reply({ content: msg, ephemeral: true });
+			await interaction.editReply({ content: msg, ephemeral: true });
 			return;
 		}
 
@@ -132,14 +141,14 @@ export default class Rep {
 			member.id === user.id
 		) {
 			const msg = `Error: Sabotage. \`Unable to give rep to yourself.\``;
-			await interaction.reply({ content: msg, ephemeral: true });
+			await interaction.editReply({ content: msg, ephemeral: true });
 			return;
 		}
 
 		// Validation - Amount check
 		if (!member.permissions.has(Permissions.FLAGS.ADMINISTRATOR) && rep !== 1) {
 			const msg = `Error: Permissions not met. \`Amount cannot be anything other than 1.\``;
-			await interaction.reply({ content: msg, ephemeral: true });
+			await interaction.editReply({ content: msg, ephemeral: true });
 			return;
 		}
 
@@ -167,7 +176,14 @@ export default class Rep {
 		}
 
 		const msg = `Gave \`${user.username}\` \`${rep}\` rep`;
-		await interaction.reply(msg);
+		await interaction.editReply(msg);
+
+		const rEvent = {
+			init: interaction,
+			userId: user.id,
+			guild: interaction.guild,
+		};
+		this.bot.emit('repGiven', rEvent);
 	}
 
 	/**
@@ -183,7 +199,7 @@ export default class Rep {
 		// Validation - Admin
 		if (!member.permissions.has(Permissions.FLAGS.ADMINISTRATOR)) {
 			const msg = `Error: Permissions not met. \`Unable to use command.\``;
-			await interaction.reply({ content: msg, ephemeral: true });
+			await interaction.editReply({ content: msg, ephemeral: true });
 			return;
 		}
 
@@ -200,7 +216,14 @@ export default class Rep {
 		}
 
 		const msg = `\`${user.username}\` now has \`${rep}\` rep`;
-		await interaction.reply(msg);
+		await interaction.editReply(msg);
+
+		const rEvent = {
+			init: interaction,
+			userId: user.id,
+			guild: interaction.guild,
+		};
+		this.bot.emit('repGiven', rEvent);
 	}
 
 	/**
@@ -221,7 +244,7 @@ export default class Rep {
 			let result = await this.bot.db.fetch(sql, values);
 			if (!result) {
 				const msg = `This server has no one with reputation points.`;
-				await interaction.reply(msg);
+				await interaction.editReply(msg);
 				return;
 			}
 
@@ -256,8 +279,7 @@ export default class Rep {
 		};
 
 		// Construct Paginator
-		const paginator = new Paginator(data, pageConf);
-		const components = paginator.getPaginationComponents(page);
+		const paginator = new TabulatedPages('Rep Board', data, pageConf);
 
 		// Construct Embed
 		const e = new MessageEmbed()
@@ -266,14 +288,84 @@ export default class Rep {
 			.setDescription(paginator._prepareData(page));
 
 		// Send reply
-		await interaction.reply({
+		await interaction.editReply({
 			embeds: [e],
-			components: components,
+			components: paginator.components,
 		});
 
 		// Start Collecting
 		try {
-			paginator.startCollector(interaction);
+			await paginator.onInteraction(interaction);
+		} catch (e) {
+			this.logger.error(e);
+			return;
+		}
+	}
+
+	/**
+	 *
+	 * @param {Interaction} interaction
+	 */
+	async rewards(interaction) {
+		// Data Builder
+		const page = 1;
+		let data = null;
+
+		// Fetch Rewards Data
+		try {
+			const sql = `SELECT * FROM rewards WHERE server_id=$1 AND type=$2
+                   ORDER BY val ASC;`;
+			const vals = [interaction.guild.id, this.name];
+			const res = await this.bot.db.fetch(sql, vals);
+			if (!res) {
+				const msg = `This server has no rewards set up for ${this.name}`;
+				await interaction.editReply(msg);
+				return;
+			}
+
+			// Modify resuts to datafy
+			data = [];
+			let count = 1;
+			res.forEach(async row => {
+				const role = interaction.guild.roles.cache.get(row.role_id);
+				const temp = {
+					role: role
+						? role.name
+						: await interaction.guild.roles.fetch(row.role_id),
+					level: row.val,
+				};
+
+				count += 1;
+				data.push(temp);
+			});
+		} catch (e) {
+			console.error(e);
+			return;
+		}
+
+		// Setup Formatter
+		const pageConf = {
+			role: { align: 'left', minWidth: 10 },
+			rep: { align: 'center', minWidth: 4 },
+		};
+
+		// Construct Paginator
+		const paginator = new TabulatedPages('Rewards - Rep', data, pageConf);
+
+		// Construct Embed
+		const e = new MessageEmbed()
+			.setColor(interaction.member.user.hexAccentColor)
+			.setTitle('Rewards - Rep')
+			.setDescription(paginator._prepareData(page));
+
+		await interaction.editReply({
+			embeds: [e],
+			components: paginator.components,
+		});
+
+		// Start Collecting
+		try {
+			await paginator.onInteraction(interaction);
 		} catch (e) {
 			this.logger.error(e);
 			return;

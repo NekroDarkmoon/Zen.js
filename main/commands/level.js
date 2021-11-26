@@ -2,7 +2,7 @@
 //                             Imports
 // ----------------------------------------------------------------
 import Zen from '../Zen.js';
-import Paginator from '../utils/ui/Paginator.js';
+import { TabulatedPages } from '../utils/ui/Paginator.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Interaction, Message, MessageEmbed, Permissions } from 'discord.js';
 
@@ -287,26 +287,25 @@ export default class Levels {
 		};
 
 		// Construct Paginator
-		const paginator = new Paginator(data, config);
-		const components = paginator.getPaginationComponents(page);
+		const paginator = new TabulatedPages('Xp Board', data, config);
 
 		// Construct Embed
 		const e = new MessageEmbed()
-			.setColor(interaction.member.user.hexAccentColor)
-			.setTitle('XP Board')
+			.setColor('RANDOM')
+			.setTitle('Xp Board')
 			.setDescription(paginator._prepareData(page));
 
 		// Send Reply
 		await interaction.editReply({
 			embeds: [e],
-			components: components,
+			components: paginator.components,
 		});
 
 		// Start Collecting
 		try {
-			paginator.startCollector(interaction);
+			await paginator.onInteraction(interaction);
 		} catch (e) {
-			this.logger.error(e);
+			this.bot.logger.error(e);
 			return;
 		}
 	}
@@ -359,8 +358,7 @@ export default class Levels {
 		};
 
 		// Construct Paginator
-		const paginator = new Paginator(data, pageConf);
-		const components = paginator.getPaginationComponents(page);
+		const paginator = new TabulatedPages('Rewards - XP', data, pageConf);
 
 		// Construct Embed
 		const e = new MessageEmbed()
@@ -370,12 +368,12 @@ export default class Levels {
 
 		await interaction.editReply({
 			embeds: [e],
-			components: components,
+			components: paginator.components,
 		});
 
 		// Start Collecting
 		try {
-			paginator.startCollector(interaction);
+			await paginator.onInteraction(interaction);
 		} catch (e) {
 			this.logger.error(e);
 			return;

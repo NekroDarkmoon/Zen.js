@@ -3,30 +3,23 @@
 // ----------------------------------------------------------------
 import {
 	Interaction,
-	MessageActionRow,
 	MessageButton,
+	MessageCollector,
 	MessageEmbed,
 } from 'discord.js';
-
-import { View } from './view.js';
+import { View } from './View.js';
 import columnify from 'columnify';
 
 // ----------------------------------------------------------------
-//                             Paginator
+//                             Imports
 // ----------------------------------------------------------------
-export default class Paginator {
-	/**
-	 * @param {Array} data
-	 * @param {Object} config
-	 * @param {Number} max_pages
-	 */
-	constructor(data, config = {}, max_pages = null) {
-		this.id = View.randomHex(16);
-		this.collector = null;
-		this.data = data;
-		this.config = config;
-		this.max_pages = max_pages ? max_pages : Math.ceil(data.length / 15);
-		this.view = new View();
+export class Pages extends View {
+	constructor(max_pages = null, timeout = 180) {
+		super(timeout);
+
+		this.max_pages = max_pages ? max_pages : 1;
+		this._currPage = 1;
+		this.components = this.createComponents(this._currPage);
 	}
 
 	/**
@@ -34,128 +27,177 @@ export default class Paginator {
 	 * @param {Number} page
 	 * @returns {Array<MessageActionRow>} components
 	 */
-	getPaginationComponents(page) {
-		// TODO: select menu
-		const firstPage = new MessageButton()
+	createComponents(page) {
+		// Get buttons
+		this.clearComponents();
+		const comps = [
+			this.firstPage(page),
+			this.prevPage(page),
+			this.nextPage(page),
+			this.lastPage(page),
+			this.stopPages(page),
+		];
+
+		this.addComponents(comps);
+		return this.toComponents();
+	}
+
+	/**
+	 *
+	 * @param {Interaction} interaction
+	 * @param {Number} maxClicks
+	 * @returns {MessageCollector}
+	 * @override
+	 */
+	async onInteraction(interaction, maxClicks = 0) {
+		return await super.onInteraction(interaction, maxClicks);
+	}
+
+	/**
+	 *
+	 * @param {Interaction} interaction
+	 * @override
+	 */
+	async onStop(interaction) {
+		if (!this._collector) throw 'No collector exists.';
+
+		this._collector.on('end', async collection => {
+			await interaction.editReply({
+				components: [],
+			});
+			this.__stopped = true;
+		});
+
+		return;
+	}
+
+	/**
+	 *
+	 * @param {Number} page
+	 */
+	_prepareData(page) {}
+
+	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	//                              Buttons
+	firstPage(page) {
+		return new MessageButton()
 			.setCustomId(JSON.stringify({ name: 'page', page: 1, type: 'first' }))
 			.setLabel('≪')
 			.setStyle('PRIMARY')
 			.setDisabled(page < 2);
+	}
 
-		const prevButton = new MessageButton()
+	prevPage(page) {
+		return new MessageButton()
 			.setCustomId(
 				JSON.stringify({ name: 'page', page: page - 1, type: 'prev' })
 			)
 			.setLabel('◀')
 			.setStyle('PRIMARY')
 			.setDisabled(page < 2);
+	}
 
-		// const current = new MessageButton()
-		// 	.setCustomId(View.randomHex(16))
-		// 	.setLabel('⟳')
-		// 	.setStyle('SECONDARY');
+	currentPage(page) {
+		return new MessageButton()
+			.setCustomId(View.randomHex(16))
+			.setLabel('⟳')
+			.setStyle('SECONDARY');
+	}
 
-		const nextButton = new MessageButton()
+	nextPage(page) {
+		return new MessageButton()
 			.setCustomId(
 				JSON.stringify({ name: 'page', page: page + 1, type: 'next' })
 			)
 			.setLabel('▶')
 			.setStyle('PRIMARY')
 			.setDisabled(page >= this.max_pages);
+	}
 
-		const lastButton = new MessageButton()
+	lastPage(page) {
+		return new MessageButton()
 			.setCustomId(
 				JSON.stringify({ name: 'page', page: this.max_pages, type: 'last' })
 			)
 			.setLabel('≫')
 			.setStyle('PRIMARY')
 			.setDisabled(page >= this.max_pages);
+	}
 
-		const stop = new MessageButton()
+	stopPages() {
+		return new MessageButton()
 			.setCustomId(JSON.stringify({ name: 'page', page: -1, type: 'stop' }))
 			.setLabel('Stop')
 			.setStyle('DANGER');
-
-		// Add Buttons to view
-		this.view.clearComponents();
-		this.view.addComponents([
-			firstPage,
-			prevButton,
-			// current,
-			nextButton,
-			lastButton,
-			stop,
-		]);
-
-		return this.view.toComponents();
 	}
+}
 
-	/**
-	 *
-	 * @param {Interaction} msgInteraction
-	 */
-	startCollector(interaction) {
-		// Get Collector
-		this.collector = this.view.createCollector(
-			interaction.channel,
-			interaction
-		);
-
-		this.collect(interaction);
-	}
-
-	/**
-	 *
-	 * @param {Interaction} interaction
-	 */
-	collect(interaction) {
-		if (!this.collector) throw 'No collector found';
-
-		// Settup Collector Function
-		const f = async btnInteraction => {
-			// Get page number
-			const pageNum = JSON.parse(btnInteraction.component.customId).page;
-			const type = JSON.parse(btnInteraction.component.customId).type;
-
-			// End if stop
-			if (type === 'stop') {
-				await this.collector.stop();
-				return;
-			}
-
-			// Prepate data for pageNumber
-			const data = this._prepareData(pageNum);
-
-			// Create embed
-			const e = new MessageEmbed()
-				.setTitle('RepBoard')
-				.setDescription(data)
-				.setColor('DARK_GOLD');
-
-			// Update components
-			const components = this.getPaginationComponents(pageNum);
-
-			await btnInteraction.update({
-				components: components,
-				embeds: [e],
-			});
-		};
-
-		// Setup view Collector and End
-		this.view.collect(interaction, f);
-		this.view.end(interaction);
+// ----------------------------------------------------------------
+//                      Tabulated Data Paginator
+// ----------------------------------------------------------------
+export class TabulatedPages extends Pages {
+	constructor(action, data, config = {}, max_pages = null, timeout = 180) {
+		max_pages = max_pages ? max_pages : Math.ceil(data.length / 15);
+		super(max_pages, timeout);
+		this.customId = action;
+		this.data = data;
+		this.config = config;
 	}
 
 	/**
 	 *
 	 * @param {Number} page
-	 * @returns
+	 * @override
+	 */
+	createComponents(page) {
+		return super.createComponents(page);
+	}
+
+	/**
+	 *
+	 * @param {Interaction} interaction
+	 * @param {Number} maxClicks
+	 */
+	async onInteraction(interaction, maxClicks = 0) {
+		this._collector = await super.onInteraction(interaction, maxClicks);
+
+		this._collector.on('collect', async btnInt => {
+			// Data Builder
+			const pageNum = JSON.parse(btnInt.component.customId).page;
+			const type = JSON.parse(btnInt.component.customId).type;
+
+			// End if Stopped
+			if (type === 'stop') {
+				await this._collector.stop();
+				return;
+			}
+
+			// Prep Data
+			const data = this._prepareData(pageNum);
+			// Create Embed
+			const e = new MessageEmbed()
+				.setTitle(this.customId)
+				.setDescription(data)
+				.setColor('RANDOM');
+			// Update Components
+			this.components = this.createComponents(pageNum);
+			await btnInt.update({
+				components: this.components,
+				embeds: [e],
+			});
+		});
+
+		this.onStop(interaction);
+	}
+
+	/**
+	 *
+	 * @param {Number} page
+	 * @returns {String}
 	 */
 	_prepareData(page) {
 		const maxLines = 15;
 		const data = this.data;
-		// Splice array for 15 values if exists
-		// TODO: Add check for no content
 		const display = data.slice((page - 1) * maxLines, page * maxLines);
 
 		// Tabulate data for display
@@ -165,20 +207,42 @@ export default class Paginator {
 
 	/**
 	 *
-	 * @param {Array<{}>} data
-	 * @returns
+	 * @param {Array<>} data
+	 * @returns {String}
 	 */
 	tabulate(data) {
-		// Data builder
+		// Data Builder
 		const options = {
 			columnSplitter: ' | ',
 			config: this.config,
-			headingTransform: function (heading) {
-				return `--${heading.toUpperCase()}--`;
-			},
+			headingTransform: heading => `-${heading.toUpperCase()}-`,
 		};
 
-		const columns = columnify(data, options);
-		return `\`\`\`\n${columns}\n\`\`\``;
+		const tabulated = columnify(data, options);
+		return `\`\`\`\n${tabulated}\n\`\`\``;
 	}
 }
+
+// ----------------------------------------------------------------
+//                             Imports
+// ----------------------------------------------------------------
+
+// ----------------------------------------------------------------
+//                             Imports
+// ----------------------------------------------------------------
+
+// ----------------------------------------------------------------
+//                             Imports
+// ----------------------------------------------------------------
+
+// ----------------------------------------------------------------
+//                             Imports
+// ----------------------------------------------------------------
+
+// ----------------------------------------------------------------
+//                             Imports
+// ----------------------------------------------------------------
+
+// ----------------------------------------------------------------
+//                             Imports
+// ----------------------------------------------------------------
