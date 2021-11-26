@@ -287,7 +287,7 @@ export default class Levels {
 		};
 
 		// Construct Paginator
-		const paginator = new TabulatedPages('Xp', data, config);
+		const paginator = new TabulatedPages('Xp Board', data, config);
 
 		// Construct Embed
 		const e = new MessageEmbed()
@@ -358,8 +358,7 @@ export default class Levels {
 		};
 
 		// Construct Paginator
-		const paginator = new Paginator(data, pageConf);
-		const components = paginator.getPaginationComponents(page);
+		const paginator = new TabulatedPages('Rewards - XP', data, pageConf);
 
 		// Construct Embed
 		const e = new MessageEmbed()
@@ -369,12 +368,12 @@ export default class Levels {
 
 		await interaction.editReply({
 			embeds: [e],
-			components: components,
+			components: paginator.components,
 		});
 
 		// Start Collecting
 		try {
-			paginator.startCollector(interaction);
+			await paginator.onInteraction(interaction);
 		} catch (e) {
 			this.logger.error(e);
 			return;

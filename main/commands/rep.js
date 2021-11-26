@@ -5,6 +5,7 @@ import Zen from '../Zen.js';
 import Paginator from '../utils/ui/PaginatorOld.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Interaction, MessageEmbed, Permissions } from 'discord.js';
+import { TabulatedPages } from '../utils/ui/Paginator.js';
 
 // ----------------------------------------------------------------
 //                             Command
@@ -256,8 +257,7 @@ export default class Rep {
 		};
 
 		// Construct Paginator
-		const paginator = new Paginator(data, pageConf);
-		const components = paginator.getPaginationComponents(page);
+		const paginator = new TabulatedPages('Rep Board', data, pageConf);
 
 		// Construct Embed
 		const e = new MessageEmbed()
@@ -268,12 +268,12 @@ export default class Rep {
 		// Send reply
 		await interaction.reply({
 			embeds: [e],
-			components: components,
+			components: paginator.components,
 		});
 
 		// Start Collecting
 		try {
-			paginator.startCollector(interaction);
+			await paginator.onInteraction(interaction);
 		} catch (e) {
 			this.logger.error(e);
 			return;

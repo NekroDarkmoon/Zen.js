@@ -29,7 +29,6 @@ export class Pages extends View {
 	 */
 	createComponents(page) {
 		// Get buttons
-		console.log(page);
 		this.clearComponents();
 		const comps = [
 			this.firstPage(page),
@@ -165,8 +164,6 @@ export class TabulatedPages extends Pages {
 		this._collector.on('collect', async btnInt => {
 			// Data Builder
 			const pageNum = JSON.parse(btnInt.component.customId).page;
-			console.log(JSON.parse(btnInt.component.customId));
-			console.log(pageNum);
 			const type = JSON.parse(btnInt.component.customId).type;
 
 			// End if Stopped
@@ -179,7 +176,7 @@ export class TabulatedPages extends Pages {
 			const data = this._prepareData(pageNum);
 			// Create Embed
 			const e = new MessageEmbed()
-				.setTitle(`${this.customId} Board`)
+				.setTitle(this.customId)
 				.setDescription(data)
 				.setColor('RANDOM');
 			// Update Components
