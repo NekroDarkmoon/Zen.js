@@ -2,7 +2,6 @@
 //                             Imports
 // ----------------------------------------------------------------
 import Zen from '../Zen.js';
-import Paginator from '../utils/ui/PaginatorOld.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Interaction, MessageEmbed, Permissions } from 'discord.js';
 import { TabulatedPages } from '../utils/ui/Paginator.js';
