@@ -112,7 +112,7 @@ export class View {
 	 * @param {Number} maxClicks
 	 * @returns
 	 */
-	createCollector(channel, interaction, maxClicks = 1) {
+	createCollector(channel, interaction, maxClicks = 0) {
 		const filter = btnInt => {
 			return interaction.user.id === btnInt.user.id;
 		};

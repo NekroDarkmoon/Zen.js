@@ -35,8 +35,6 @@ export default class Paginator {
 	 */
 	getPaginationComponents(page) {
 		// TODO: select menu
-		console.log(View.randomHex(16));
-
 		const firstPage = new MessageButton()
 			.setCustomId(JSON.stringify({ name: 'page', page: 1, type: 'first' }))
 			.setLabel('≪')
@@ -96,31 +94,25 @@ export default class Paginator {
 	 * @param {Interaction} msgInteraction
 	 * @param {number} time
 	 */
-	startCollector(msgInteraction, time = 1000 * 30) {
-		// Data builder
-		/** @type {Interaction.channel} */
-		const channel = msgInteraction.channel;
-		const filter = btnInteraction => {
-			return msgInteraction.user.id === btnInteraction.user.id;
-		};
+	startCollector(interaction) {
+		// Get Collector
+		this.collector = this.view.createCollector(
+			interaction.channel,
+			interaction
+		);
 
-		// Create collector
-		this.collector = channel.createMessageComponentCollector({
-			filter,
-			time: time,
-		});
-
-		this.collect(msgInteraction);
+		this.collect(interaction);
 	}
 
 	/**
 	 *
-	 * @param {*} msgInteraction
+	 * @param {Interaction} interaction
 	 */
-	collect(msgInteraction) {
+	collect(interaction) {
 		if (!this.collector) throw 'No collector found';
 
-		this.collector.on('collect', async btnInteraction => {
+		// Settup Collector Function
+		const f = async btnInteraction => {
 			// Get page number
 			const pageNum = JSON.parse(btnInteraction.component.customId).page;
 			const type = JSON.parse(btnInteraction.component.customId).type;
@@ -142,20 +134,16 @@ export default class Paginator {
 
 			// Update components
 			const components = this.getPaginationComponents(pageNum);
-			console.log('Imhere');
-			console.log(components);
 
 			await btnInteraction.update({
 				components: components,
 				embeds: [e],
 			});
-		});
+		};
 
-		this.collector.on('end', async collection => {
-			await msgInteraction.editReply({
-				components: [],
-			});
-		});
+		// Setup view Collector and End
+		this.view.collect(interaction, f);
+		this.view.end(interaction);
 	}
 
 	/**
