@@ -78,7 +78,7 @@ export default class MessageCreateEvent {
 
 		// Data builder
 		const users = [...message.mentions.users.values()]
-			.filter(u => u.id !== message.author.id)
+			// .filter(u => u.id !== message.author.id)
 			.filter(u => !u.bot);
 
 		// Validation - Length
@@ -97,6 +97,9 @@ export default class MessageCreateEvent {
 				const values = [message.guild.id, user.id, 1];
 				sqlArray.push(sql);
 				valArray.push(values);
+				// TODO: Possibly Fix this emitter
+				const rEvent = { init: message, userId: user.id, guild: message.guild };
+				this.bot.emit('repGiven', rEvent);
 			});
 
 			await this.bot.db.executeMany(sqlArray, valArray);

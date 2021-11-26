@@ -141,14 +141,14 @@ export default class Rep {
 			member.id === user.id
 		) {
 			const msg = `Error: Sabotage. \`Unable to give rep to yourself.\``;
-			await interaction.editreply({ content: msg, ephemeral: true });
+			await interaction.editReply({ content: msg, ephemeral: true });
 			return;
 		}
 
 		// Validation - Amount check
 		if (!member.permissions.has(Permissions.FLAGS.ADMINISTRATOR) && rep !== 1) {
 			const msg = `Error: Permissions not met. \`Amount cannot be anything other than 1.\``;
-			await interaction.editreply({ content: msg, ephemeral: true });
+			await interaction.editReply({ content: msg, ephemeral: true });
 			return;
 		}
 
@@ -176,7 +176,14 @@ export default class Rep {
 		}
 
 		const msg = `Gave \`${user.username}\` \`${rep}\` rep`;
-		await interaction.editreply(msg);
+		await interaction.editReply(msg);
+
+		const rEvent = {
+			init: interaction,
+			userId: user.id,
+			guild: interaction.guild,
+		};
+		this.bot.emit('repGiven', rEvent);
 	}
 
 	/**
@@ -192,7 +199,7 @@ export default class Rep {
 		// Validation - Admin
 		if (!member.permissions.has(Permissions.FLAGS.ADMINISTRATOR)) {
 			const msg = `Error: Permissions not met. \`Unable to use command.\``;
-			await interaction.editreply({ content: msg, ephemeral: true });
+			await interaction.editReply({ content: msg, ephemeral: true });
 			return;
 		}
 
@@ -209,7 +216,14 @@ export default class Rep {
 		}
 
 		const msg = `\`${user.username}\` now has \`${rep}\` rep`;
-		await interaction.editreply(msg);
+		await interaction.editReply(msg);
+
+		const rEvent = {
+			init: interaction,
+			userId: user.id,
+			guild: interaction.guild,
+		};
+		this.bot.emit('repGiven', rEvent);
 	}
 
 	/**
@@ -230,7 +244,7 @@ export default class Rep {
 			let result = await this.bot.db.fetch(sql, values);
 			if (!result) {
 				const msg = `This server has no one with reputation points.`;
-				await interaction.editreply(msg);
+				await interaction.editReply(msg);
 				return;
 			}
 
@@ -274,7 +288,7 @@ export default class Rep {
 			.setDescription(paginator._prepareData(page));
 
 		// Send reply
-		await interaction.editreply({
+		await interaction.editReply({
 			embeds: [e],
 			components: paginator.components,
 		});
