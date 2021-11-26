@@ -8,7 +8,7 @@ import {
 	MessageButton,
 	Permissions,
 } from 'discord.js';
-import { ConfirmDenyView } from '../utils/ui/ViewN.js';
+import { ConfirmDenyView } from '../utils/ui/View.js';
 
 // ----------------------------------------------------------------
 //                             Imports
@@ -44,8 +44,7 @@ export default class Kick {
 		// Data builder
 		const user = interaction.options.getUser('target');
 		const reason = interaction.options.getString('reason') || '';
-		const channel = interaction.channel;
-		const view = new ConfirmDenyView('kick');
+		const view = new ConfirmDenyView('Kick');
 
 		// Inital reply
 		interaction.reply({

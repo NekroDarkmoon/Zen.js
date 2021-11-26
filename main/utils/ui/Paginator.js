@@ -8,7 +8,7 @@ import {
 	MessageEmbed,
 } from 'discord.js';
 
-import { View } from './view.js';
+import { View } from './View.js';
 import columnify from 'columnify';
 
 // ----------------------------------------------------------------

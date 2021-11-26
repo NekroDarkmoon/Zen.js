@@ -8,7 +8,7 @@ import {
 	MessageButton,
 	Permissions,
 } from 'discord.js';
-import { confirmDenyView } from '../utils/ui/view.js';
+import { ConfirmDenyView } from '../utils/ui/View.js';
 
 // ----------------------------------------------------------------
 //                             Imports
@@ -44,17 +44,14 @@ export default class Ban {
 		// Data builder
 		const user = interaction.options.getUser('target');
 		const reason = interaction.options.getString('reason') || '';
-		const channel = interaction.channel;
-		const view = confirmDenyView('Ban');
+		const view = new ConfirmDenyView('Ban');
 
 		// Inital reply
 		interaction.reply({
 			content: `\`Are you sure you wish to ban ${user.username}\``,
 			// ephemeral: true,
-			components: view.toComponents(),
+			components: view.components,
 		});
-
-		const collector = view.createCollector(channel, interaction);
 
 		const f = async btnInteraction => {
 			if (btnInteraction.component.customId === 'confirmBan') {
@@ -66,7 +63,6 @@ export default class Ban {
 			}
 		};
 
-		view.collect(f);
-		view.end(interaction);
+		await view.onInteraction(interaction, f);
 	};
 }
