@@ -31,7 +31,7 @@ export default class Paginator {
 	/**
 	 *
 	 * @param {Number} page
-	 * @returns {MessageActionRow} actionRow
+	 * @returns {Array<MessageActionRow>} components
 	 */
 	getPaginationComponents(page) {
 		// TODO: select menu
