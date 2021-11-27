@@ -2,7 +2,7 @@
 //                             Imports
 // ----------------------------------------------------------------
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { Interaction } from 'discord.js';
+import { Interaction, MessageEmbed } from 'discord.js';
 
 /**
  * @class
@@ -20,9 +20,28 @@ export default class Ping {
 
 	/**
 	 *
-	 *
+	 * @param {Interaction} interaction
 	 */
 	execute = async interaction => {
-		await interaction.reply('Pong!');
+		// Empty Reply
+		const reply = await interaction.deferReply({ fetchReply: true });
+		const bts = '```diff\n';
+		const bt = '```';
+
+		const e = new MessageEmbed()
+			.setTitle('Pong!')
+			.setColor('RANDOM')
+			.addField(
+				'Websocket Heartbeat',
+				`${bts}- ${interaction.client.ws.ping}ms${bt}`
+			)
+			.addField(
+				'Roundtrip latency',
+				`${bts}- ${
+					reply.createdTimestamp - interaction.createdTimestamp
+				}ms${bt}`
+			);
+
+		await interaction.editReply({ embeds: [e] });
 	};
 }
