@@ -17,7 +17,7 @@ export default class ReadyEvent {
 	}
 
 	/**
-	 * @param {Client} bot
+	 * @param {Zen} bot
 	 * @returns {Promise<void>}
 	 */
 	execute = async bot => {
@@ -30,5 +30,8 @@ export default class ReadyEvent {
 		this.bot.logger.info(
 			`Logged in as ${tag}!. Currently in ${guildCount} Guilds.`
 		);
+
+		// Fetch Members from main guild
+		await bot.guilds.cache.get(bot.config.guild_id).members.fetch();
 	};
 }

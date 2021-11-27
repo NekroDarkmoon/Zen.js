@@ -1,8 +1,7 @@
 // ----------------------------------------------------------------
 //                             Imports
 // ----------------------------------------------------------------
-import discord from 'discord.js';
-const { Client, Message, Intents } = discord;
+import { Client, GuildMember, Intents, Message } from 'discord.js';
 
 import ZenDB from './utils/db/index.js';
 import CommandHandler from './structures/CommandHandler.js';
@@ -108,4 +107,12 @@ export default class Zen extends Client {
 		this.caches.playCats = await caches.cachePlayChns(this);
 		this.caches.features = await caches.cacheEnabled(this);
 	}
+
+	/**
+	 *
+	 * @param {Number} userId
+	 * @param {Number} guildId
+	 * @returns {GuildMember}
+	 */
+	async getOrFetchMembers(userId, guildId) {}
 }
