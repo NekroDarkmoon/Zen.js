@@ -28,10 +28,21 @@ async function main() {
 	// Set up bot instance
 	const zen = new Zen(config, db, logger);
 	logger.info('Bot Initiated');
-	// ["exit", "SIGINT", "SIGQUIT", "SIGTERM", "uncaughtException", "unhandledRejection"]
-	// 	.forEach(ec => process.on(ec, ZEN.handleExit.bind(ZEN)));
 
-	await zen.start();
+	[
+		'exit',
+		'SIGINT',
+		'SIGQUIT',
+		'SIGTERM',
+		'uncaughtException',
+		'unhandledRejection',
+	].forEach(ec => process.on(ec, zen.handleExit.bind(zen)));
+
+	try {
+		await zen.start();
+	} catch (e) {
+		logger.error(e);
+	}
 }
 
 main();
