@@ -29,6 +29,7 @@ async function main() {
 	const zen = new Zen(config, db, logger);
 	logger.info('Bot Initiated');
 
+	// Handle Exit and logging out
 	[
 		'exit',
 		'SIGINT',
@@ -36,8 +37,9 @@ async function main() {
 		'SIGTERM',
 		'uncaughtException',
 		'unhandledRejection',
-	].forEach(ec => process.on(ec, zen.handleExit.bind(zen)));
+	].forEach(ec => process.on(ec, zen.onClose.bind(zen)));
 
+	// Start Bot
 	try {
 		await zen.start();
 	} catch (e) {

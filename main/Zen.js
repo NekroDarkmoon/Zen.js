@@ -115,4 +115,8 @@ export default class Zen extends Client {
 	 * @returns {GuildMember}
 	 */
 	async getOrFetchMembers(userId, guildId) {}
+
+	onClose() {
+		this.destroy();
+	}
 }
