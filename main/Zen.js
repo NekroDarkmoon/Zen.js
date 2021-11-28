@@ -148,5 +148,6 @@ export default class Zen extends Client {
 
 		// Close logger
 		this.logger.close();
+		process.exit();
 	}
 }

@@ -31,7 +31,7 @@ async function main() {
 
 	// Handle Exit and logging out
 	[
-		'exit',
+		// 'exit',
 		'SIGINT',
 		'SIGQUIT',
 		'SIGTERM',
