@@ -16,6 +16,7 @@ async function main() {
 	console.info('Logger setup. Switching to logger.');
 
 	// Fetch data from config file
+	/** @type {import('./main/structures/typedefs.js').ZenConfig} */
 	const config = JSON.parse(
 		await readFile(new URL('./main/settings/config.json', import.meta.url))
 	);
