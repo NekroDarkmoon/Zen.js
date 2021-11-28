@@ -3,7 +3,7 @@
 // ----------------------------------------------------------------
 import Zen from '../Zen.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { Interaction } from 'discord.js';
+import { CommandInteraction } from 'discord.js';
 
 // ----------------------------------------------------------------
 //                             Command
@@ -19,7 +19,15 @@ export default class OwnerCommands {
 			.setDefaultPermission(false)
 			.addSubcommand(sub =>
 				sub
-					.setName('removeSlash')
+					.setName('addslash')
+					.setDescription('Adds all or a specified slash command')
+					.addStringOption(str =>
+						str.setName('target').setDescription('Slash Command to add')
+					)
+			)
+			.addSubcommand(sub =>
+				sub
+					.setName('removeslash')
 					.setDescription('Removes all or a specified slash command')
 					.addStringOption(str =>
 						str.setName('target').setDescription('Slash Command to remove')
@@ -28,7 +36,7 @@ export default class OwnerCommands {
 	}
 
 	/**
-	 * @param {Interaction} interaction
+	 * @param {CommandInteraction} interaction
 	 * @returns {Promise<void>}
 	 * */
 	execute = async interaction => {
@@ -42,7 +50,10 @@ export default class OwnerCommands {
 		// Execute based on subcommand
 		const sub = interaction.options.getSubcommand();
 		switch (sub) {
-			case 'removeSlash':
+			case 'addslash':
+				await this.addSlash(interaction);
+				break;
+			case 'removeslash':
 				await this.removeSlash(interaction);
 				break;
 		}
@@ -52,7 +63,52 @@ export default class OwnerCommands {
 
 	/**
 	 *
-	 * @param {Interaction} interaction
+	 * @param {CommandInteraction} interaction
+	 * @returns
 	 */
-	async removeSlash(interaction) {}
+	async addSlash(interaction) {
+		// Data Builder
+		const cmdName = interaction.options.getString('target');
+
+		try {
+			if (!cmdName) {
+				await this.bot.CommandHandler.registerCommands();
+			} else {
+			}
+		} catch (e) {
+			this.bot.logger.error(e);
+		}
+
+		// Send reply
+		const val = cmdName ? cmdName : 'all';
+		const msg = `Registered ${val} commands.`;
+		this.bot.logger.info(msg);
+		await interaction.editReply(msg);
+		return;
+	}
+
+	/**
+	 *
+	 * @param {CommandInteraction} interaction
+	 */
+	async removeSlash(interaction) {
+		// Data Builder
+		const cmdName = interaction.options.getString('target');
+
+		try {
+			if (!cmdName) {
+				await this.bot.CommandHandler.deleteCommands();
+			} else {
+			}
+		} catch (e) {
+			this.bot.logger.error(e);
+		}
+
+		// Send reply
+		const val = cmdName ? cmdName : 'all';
+		const msg = `Unregistered ${val} commands.`;
+		this.bot.logger.warn(msg);
+		await interaction.editReply(msg);
+		return;
+	}
 }
