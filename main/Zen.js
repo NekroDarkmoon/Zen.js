@@ -121,7 +121,20 @@ export default class Zen extends Client {
 	 * @param {Number} guildId
 	 * @returns {GuildMember}
 	 */
-	async getOrFetchMembers(userId, guildId) {}
+	async _getOrFetchMembers(userId, guildId) {
+		const guild = this.guilds.cache.get(guildId);
+		const member = guild.members.cache.get(userId);
+		if (member) return member;
+
+		// Fetch
+		try {
+			const member = await guild.members.fetch(userId);
+			return member;
+		} catch (e) {
+			this.logger.error(e);
+			return null;
+		}
+	}
 
 	onClose() {
 		if (this._exited) return;
