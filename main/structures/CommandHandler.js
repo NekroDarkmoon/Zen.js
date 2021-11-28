@@ -45,17 +45,22 @@ export default class CommandHandler {
 		const commands = await this.getGuildCommands();
 		if (commands.length <= 0) return;
 
-		const promises = commands.map(async cmd => {
-			this.rest.delete(
-				Routes.applicationGuildCommand(
-					this.config.client_id,
-					this.config.guild_id,
-					cmd.id
-				)
-			);
-		});
+		// Get Guilds
+		const guilds = this.config.guilds;
 
-		await Promise.all(promises);
+		guilds.forEach(async guild => {
+			const promises = commands.map(async cmd => {
+				this.rest.delete(
+					Routes.applicationGuildCommand(
+						this.config.client_id,
+						this.config.guild_id,
+						cmd.id
+					)
+				);
+			});
+
+			await Promise.all(promises);
+		});
 	}
 
 	/**
@@ -96,7 +101,7 @@ export default class CommandHandler {
 		return this.rest.get(
 			Routes.applicationGuildCommands(
 				this.config.client_id,
-				this.config.guild_id
+				this.config.guilds[0]
 			)
 			// {body: this.guildCommands.mapValues( cmd => cmd.data.toJSON())}
 		);
@@ -154,13 +159,19 @@ export default class CommandHandler {
 		if (size <= 0) return;
 
 		this.logger.info(`Registering ${size} Guild commands.`);
-		await this.rest.put(
-			Routes.applicationGuildCommands(
-				this.config.client_id,
-				this.config.guild_id
-			),
-			{ body: this.guildCommands.mapValues(cmd => cmd.data.toJSON()) }
-		);
+
+		// Get main guilds
+		const guilds = this.config.guilds;
+
+		guilds.forEach(async guildId => {
+			await this.rest.put(
+				Routes.applicationGuildCommands(
+					this.config.client_id,
+					this.config.guildId
+				),
+				{ body: this.guildCommands.mapValues(cmd => cmd.data.toJSON()) }
+			);
+		});
 	}
 
 	/**

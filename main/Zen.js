@@ -144,6 +144,7 @@ export default class Zen extends Client {
 
 		// Close db connection
 		this.db.close();
+		console.log("I' ran?");
 
 		// Close logger
 		this.logger.close();
