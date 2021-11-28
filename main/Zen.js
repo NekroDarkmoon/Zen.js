@@ -90,23 +90,6 @@ export default class Zen extends Client {
 		await this.buildCaches();
 	}
 
-	async _setSlashPerms() {
-		if (!this.application?.owner) await this.application.fetch();
-
-		// Const get guild commands
-		const guilds = this.config.guilds.map(id => this.guilds.cache.get(id));
-
-		guilds.forEach(async guild => {
-			// Construct Ids
-
-			console.log(await guild.commands.fetch());
-		});
-
-		// await this.application.commands.permissions.set({
-		// 	fullPermissions: '',
-		// });
-	}
-
 	/**
 	 *
 	 * @param {object} data

@@ -20,6 +20,17 @@
  */
 
 // ----------------------------------------------------------------
+//                            ZenSlashPerms
+// ----------------------------------------------------------------
+/**
+ * @typedef {Object} ZenSlashPerms
+ * @property {Array<string>} commandNames
+ * @property {Object} commandPerms
+ * @property {Object} commandPerms.cmdName
+ * @memberof typedefs
+ */
+
+// ----------------------------------------------------------------
 //                           Discord.js
 // ----------------------------------------------------------------
 /**

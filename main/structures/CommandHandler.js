@@ -6,7 +6,7 @@ import { Collection } from '@discordjs/collection';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
 import Zen from '../Zen.js';
-import fs from 'fs';
+import fs, { readFileSync } from 'fs';
 
 // ----------------------------------------------------------------
 //                          Command Handler
@@ -16,12 +16,16 @@ export default class CommandHandler {
 	 * @param {Zen} bot
 	 */
 	constructor(bot) {
-		this.config = bot.config;
+		this.bot = bot;
 		this.commands = new Collection();
 		this.globalComamnds = new Collection();
 		this.guildCommands = new Collection();
-		this.logger = bot.logger;
-		this.rest = new REST({ version: '9' }).setToken(this.config.token);
+		this.rest = new REST({ version: '9' }).setToken(this.bot.config.token);
+
+		/** @type {import('./typedefs.js').ZenSlashPerms} */
+		this._perms = JSON.parse(
+			readFileSync(new URL('../settings/perms.json', import.meta.url))
+		);
 	}
 
 	/**
@@ -32,7 +36,7 @@ export default class CommandHandler {
 			await this.deleteGlobalCommands();
 			await this.deleteGuildCommands();
 
-			this.logger.log('Successfully deleted all application (/) commands');
+			this.bot.logger.log('Successfully deleted all application (/) commands');
 		} catch (err) {
 			console.error(err);
 		}
@@ -46,12 +50,16 @@ export default class CommandHandler {
 		if (commands.length <= 0) return;
 
 		// Get Guilds
-		const guilds = this.config.guilds;
+		const guilds = this.bot.config.guilds;
 
 		guilds.forEach(async guildId => {
 			const promises = commands.map(async cmd => {
 				this.rest.delete(
-					Routes.applicationGuildCommand(this.config.client_id, guildId, cmd.id)
+					Routes.applicationGuildCommand(
+						this.bot.config.client_id,
+						guildId,
+						cmd.id
+					)
 				);
 			});
 
@@ -68,7 +76,7 @@ export default class CommandHandler {
 
 		const promises = commands.map(async cmd => {
 			this.rest.delete(
-				Routes.applicationCommand(this.config.client_id, cmd.id)
+				Routes.applicationCommand(this.bot.config.client_id, cmd.id)
 			);
 		});
 
@@ -85,7 +93,7 @@ export default class CommandHandler {
 				...(await this.getGuildCommands()),
 			];
 		} catch (err) {
-			this.logger.error(err);
+			this.bot.logger.error(err);
 			return [];
 		}
 	}
@@ -96,8 +104,8 @@ export default class CommandHandler {
 	async getGuildCommands() {
 		return this.rest.get(
 			Routes.applicationGuildCommands(
-				this.config.client_id,
-				this.config.guilds[0]
+				this.bot.config.client_id,
+				this.bot.config.guilds[0]
 			)
 			// {body: this.guildCommands.mapValues( cmd => cmd.data.toJSON())}
 		);
@@ -108,7 +116,7 @@ export default class CommandHandler {
 	 */
 	async getGlobalCommands() {
 		return this.rest.get(
-			Routes.applicationCommands(this.config.client_id)
+			Routes.applicationCommands(this.bot.config.client_id)
 			// {body: this.guildCommands.mapValues( cmd => cmd.data.toJSON())}
 		);
 	}
@@ -143,7 +151,7 @@ export default class CommandHandler {
 			await this.registerGlobalCommands();
 			await this.registerGuildCommands();
 		} catch (err) {
-			this.logger.error(err);
+			this.bot.logger.error(err);
 		}
 	}
 
@@ -154,14 +162,14 @@ export default class CommandHandler {
 		const { size } = this.guildCommands;
 		if (size <= 0) return;
 
-		this.logger.info(`Registering ${size} Guild commands.`);
+		this.bot.logger.info(`Registering ${size} Guild commands.`);
 
 		// Get main guilds
-		const guilds = this.config.guilds;
+		const guilds = this.bot.config.guilds;
 
 		guilds.forEach(async guildId => {
 			await this.rest.put(
-				Routes.applicationGuildCommands(this.config.client_id, guildId),
+				Routes.applicationGuildCommands(this.bot.config.client_id, guildId),
 				{ body: this.guildCommands.mapValues(cmd => cmd.data.toJSON()) }
 			);
 		});
@@ -175,8 +183,50 @@ export default class CommandHandler {
 		if (size <= 0) return;
 
 		console.info(`Registering ${size} Global commands.`);
-		await this.rest.put(Routes.applicationCommands(this.config.client_id), {
+		await this.rest.put(Routes.applicationCommands(this.bot.config.client_id), {
 			body: this.globalComamnds.mapValues(cmd => cmd.data.toJSON()),
 		});
+	}
+
+	async setSlashPerms() {
+		const bot = this.bot;
+		if (!bot.application?.owner) await bot.application.fetch();
+
+		// Const get guild commands
+		const guilds = bot.config.guilds.map(id => bot.guilds.cache.get(id));
+
+		guilds.forEach(async guild => {
+			// Construct Ids
+			const _commands = await guild.commands.fetch();
+			const commands = _commands.filter(cmd =>
+				this._perms.commandNames.includes(cmd.name)
+			);
+
+			const fullPermissions = this._permBuilder(commands);
+		});
+
+		// await this.application.commands.permissions.set({
+		// 	fullPermissions: '',
+		// });
+	}
+
+	/**
+	 *
+	 * @param {Collection<string, discord.ApplicationCommand<{}>>} commands
+	 */
+	_permBuilder(commands) {
+		// Construct perms
+		const fullPermissions = [];
+
+		for (const [cmdName, perms] of Object.entries(this._perms.commandPerms)) {
+			// Get perm type
+			const type = perms.type;
+			console.log(type);
+
+			if (type === 'USER') {
+			}
+		}
+
+		return fullPermissions;
 	}
 }

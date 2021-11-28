@@ -41,6 +41,6 @@ export default class ReadyEvent {
 		});
 
 		// Set Perms
-		await this.bot._setSlashPerms();
+		await this.bot.CommandHandler.setSlashPerms();
 	};
 }
