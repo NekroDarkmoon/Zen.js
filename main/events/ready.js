@@ -39,5 +39,8 @@ export default class ReadyEvent {
 			bot.logger.info(`Chunked ${members.size} members from ${guildId}`);
 			setTimeout(() => {}, 1000);
 		});
+
+		// Set Perms
+		await this.bot._setSlashPerms();
 	};
 }

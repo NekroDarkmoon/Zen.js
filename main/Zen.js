@@ -18,7 +18,7 @@ import winston from 'winston';
  */
 export default class Zen extends Client {
 	/**
-	 * @param {ZenConfig} config
+	 * @param {import('./structures/typedefs.js').ZenConfig} config
 	 * @param {ZenDB} db
 	 * @param {winston.Logger} logger
 	 */
@@ -35,7 +35,7 @@ export default class Zen extends Client {
 			partials: ['MESSAGE', 'CHANNEL', 'REACTION', 'GUILD_MEMBER'],
 		});
 
-		/** @type {ZenConfig} */
+		/** @type {import('./structures/typedefs.js').ZenConfig} */
 		this.config = config;
 
 		/** @type {ZenDB} */
@@ -82,14 +82,29 @@ export default class Zen extends Client {
 			console.log(e);
 		}
 
-		// TODO: Perform Permission Hnadling for slash commands
-
 		// Set token
 		this.login(this.config.token);
 		this.setMaxListeners(20);
 
 		// Cache Builder
 		await this.buildCaches();
+	}
+
+	async _setSlashPerms() {
+		if (!this.application?.owner) await this.application.fetch();
+
+		// Const get guild commands
+		const guilds = this.config.guilds.map(id => this.guilds.cache.get(id));
+
+		guilds.forEach(async guild => {
+			// Construct Ids
+
+			console.log(await guild.commands.fetch());
+		});
+
+		// await this.application.commands.permissions.set({
+		// 	fullPermissions: '',
+		// });
 	}
 
 	/**
