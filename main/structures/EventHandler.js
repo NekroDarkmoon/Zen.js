@@ -27,7 +27,7 @@ export default class EventHandler {
 			file.endsWith('.js')
 		);
 
-		console.info(`Registering ${eventFiles.length} Events.`);
+		this.bot.logger.info(`Registering ${eventFiles.length} Events.`);
 		eventFiles.forEach(async file => {
 			const eventClass = (await import(`../events/${file}`)).default;
 			const event = new eventClass(this.bot);
