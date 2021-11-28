@@ -76,7 +76,11 @@ export default class Zen extends Client {
 
 		// Setup commands & interactions
 		await this.CommandHandler.loadCommands();
-		await this.CommandHandler.registerCommands();
+		try {
+			await this.CommandHandler.registerCommands();
+		} catch (e) {
+			console.log(e);
+		}
 
 		// TODO: Perform Permission Hnadling for slash commands
 
@@ -144,7 +148,6 @@ export default class Zen extends Client {
 
 		// Close db connection
 		this.db.close();
-		console.log("I' ran?");
 
 		// Close logger
 		this.logger.close();

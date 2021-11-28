@@ -48,14 +48,10 @@ export default class CommandHandler {
 		// Get Guilds
 		const guilds = this.config.guilds;
 
-		guilds.forEach(async guild => {
+		guilds.forEach(async guildId => {
 			const promises = commands.map(async cmd => {
 				this.rest.delete(
-					Routes.applicationGuildCommand(
-						this.config.client_id,
-						this.config.guild_id,
-						cmd.id
-					)
+					Routes.applicationGuildCommand(this.config.client_id, guildId, cmd.id)
 				);
 			});
 
@@ -165,10 +161,7 @@ export default class CommandHandler {
 
 		guilds.forEach(async guildId => {
 			await this.rest.put(
-				Routes.applicationGuildCommands(
-					this.config.client_id,
-					this.config.guildId
-				),
+				Routes.applicationGuildCommands(this.config.client_id, guildId),
 				{ body: this.guildCommands.mapValues(cmd => cmd.data.toJSON()) }
 			);
 		});
