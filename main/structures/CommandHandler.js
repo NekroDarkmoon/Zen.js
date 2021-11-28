@@ -5,6 +5,7 @@ import discord from 'discord.js';
 import { Collection } from '@discordjs/collection';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
+import Zen from '../Zen.js';
 import fs from 'fs';
 
 // ----------------------------------------------------------------
@@ -12,14 +13,14 @@ import fs from 'fs';
 // ----------------------------------------------------------------
 export default class CommandHandler {
 	/**
-	 * @param {ZenConfig} config
+	 * @param {Zen} bot
 	 */
-	constructor(config) {
-		this.config = config;
+	constructor(bot) {
+		this.config = bot.config;
 		this.commands = new Collection();
 		this.globalComamnds = new Collection();
 		this.guildCommands = new Collection();
-		this.logger = null;
+		this.logger = bot.logger;
 		this.rest = new REST({ version: '9' }).setToken(this.config.token);
 	}
 
@@ -31,8 +32,7 @@ export default class CommandHandler {
 			await this.deleteGlobalCommands();
 			await this.deleteGuildCommands();
 
-			// TODO: Convert to logger
-			console.log('Successfully deleted all application (/) commands');
+			this.logger.log('Successfully deleted all application (/) commands');
 		} catch (err) {
 			console.error(err);
 		}
@@ -84,8 +84,7 @@ export default class CommandHandler {
 				...(await this.getGuildCommands()),
 			];
 		} catch (err) {
-			// TODO: Replace with logger
-			console.error(err);
+			this.logger.error(err);
 			return [];
 		}
 	}
@@ -143,8 +142,7 @@ export default class CommandHandler {
 			await this.registerGlobalCommands();
 			await this.registerGuildCommands();
 		} catch (err) {
-			// TODO: Switch to logger
-			console.error(err);
+			this.logger.error(err);
 		}
 	}
 
@@ -155,8 +153,7 @@ export default class CommandHandler {
 		const { size } = this.guildCommands;
 		if (size <= 0) return;
 
-		// TODO: Make to logger
-		console.info(`Registering ${size} Guild commands.`);
+		this.logger.info(`Registering ${size} Guild commands.`);
 		await this.rest.put(
 			Routes.applicationGuildCommands(
 				this.config.client_id,

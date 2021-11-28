@@ -38,17 +38,17 @@ export default class Zen extends Client {
 		/** @type {ZenConfig} */
 		this.config = config;
 
-		/** @type {CommandHandler} */
-		this.CommandHandler = new CommandHandler(this.config);
-
-		/** @type {EventHandler} */
-		this.EventHandler = new EventHandler(this);
-
 		/** @type {ZenDB} */
 		this.db = db;
 
 		/** @type {winston.Logger} */
 		this.logger = logger;
+
+		/** @type {CommandHandler} */
+		this.CommandHandler = new CommandHandler(this);
+
+		/** @type {EventHandler} */
+		this.EventHandler = new EventHandler(this);
 
 		// Miscellaneous
 		this.caches = {

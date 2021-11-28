@@ -21,25 +21,6 @@ export default class Threads {
 		//     .setName('get')
 		//     .setDescription('')
 		// )
-		// .addSubcommand( sub =>
-		//   sub
-		//     .setName('add')
-		//     .setDescription('')
-		// )
-		// .addSubcommand( sub =>
-		//   sub
-		//     .setName('remove')
-		//     .setDescription('')
-		// )
-		// .addSubcommand( sub =>
-		//   sub
-		//     .setName('list')
-		//     .setDescription('')
-		// )
-		// .addSubcommand( sub =>
-		//   sub
-		//     .setName('info')
-		//     .setDescription('')
 		// )
 	}
 
@@ -52,9 +33,9 @@ export default class Threads {
 		/** @type {Zen} */
 		const bot = interaction.client;
 		if (!this.bot) this.bot = bot;
-
 		// Defer Reply
 		await interaction.deferReply();
+
 		// Execute based on subcommand
 		const sub = interaction.options.getSubcommand();
 
