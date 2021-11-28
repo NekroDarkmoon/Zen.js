@@ -50,11 +50,14 @@ export default class Zen extends Client {
 		/** @type {winston.Logger} */
 		this.logger = logger;
 
+		// Miscellaneous
 		this.caches = {
 			loggingChns: {},
 			features: {},
 			playCats: {},
 		};
+		this._started = false;
+		this._exited = false;
 	}
 
 	/**
@@ -62,6 +65,10 @@ export default class Zen extends Client {
 	 * @memberof Zen
 	 */
 	async start() {
+		if (this._started) return;
+		this._started = true;
+
+		// Check Token
 		if (!this.config.token) throw new Error('No discord token provided');
 
 		// Setup event listeners
@@ -117,6 +124,15 @@ export default class Zen extends Client {
 	async getOrFetchMembers(userId, guildId) {}
 
 	onClose() {
+		if (this._exited) return;
+		this._exited = true;
+
 		this.destroy();
+
+		// Close db connection
+		this.db.close();
+
+		// Close logger
+		this.logger.close();
 	}
 }
