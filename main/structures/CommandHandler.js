@@ -36,7 +36,7 @@ export default class CommandHandler {
 			await this.deleteGlobalCommands();
 			await this.deleteGuildCommands();
 
-			this.bot.logger.log('Successfully deleted all application (/) commands');
+			this.bot.logger.info('Successfully deleted all application (/) commands');
 		} catch (err) {
 			console.error(err);
 		}

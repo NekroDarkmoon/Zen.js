@@ -15,6 +15,7 @@ export default class Setup {
 		this.data = new SlashCommandBuilder()
 			.setName(this.name)
 			.setDescription(this.description)
+			.setDefaultPermission(false)
 			.addSubcommand(sub =>
 				sub
 					.setName('loggingchannel')
