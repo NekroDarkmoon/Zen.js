@@ -15,6 +15,7 @@ export default class Setup {
 		this.data = new SlashCommandBuilder()
 			.setName(this.name)
 			.setDescription(this.description)
+			.setDefaultPermission(false)
 			.addSubcommand(sub =>
 				sub
 					.setName('loggingchannel')
@@ -233,8 +234,10 @@ export default class Setup {
 
 			// Update Cache
 			this.bot.caches.features[guild.id].levels = answer;
+
 			// Send Interaction Update
-			const msg = `Enabled leveling system.`;
+			const state = answer ? 'Enabled' : 'Disabled';
+			const msg = `${state} reputation system.`;
 			await interaction.editReply(msg);
 		} catch (e) {
 			console.error(e);
@@ -260,8 +263,10 @@ export default class Setup {
 			await this.bot.db.execute(sql, vals);
 			// Update Cache
 			this.bot.caches.features[guild.id].rep = answer;
+
 			// Send Interaction Update
-			const msg = `Enabled reputation system.`;
+			const state = answer ? 'Enabled' : 'Disabled';
+			const msg = `${state} leveling system.`;
 			await interaction.editReply(msg);
 		} catch (e) {
 			console.error(e);
@@ -349,6 +354,7 @@ export default class Setup {
 			// Update Cache
 			this.bot.caches.features[guild.id].playchns = answer;
 			this.bot.caches.playCats[guild.id] = channel?.id || null;
+
 			// Send Reply
 			const msg = `Playchannel settings updated.`;
 			await interaction.editReply(msg);

@@ -17,7 +17,7 @@ export default class ReadyEvent {
 	}
 
 	/**
-	 * @param {Client} bot
+	 * @param {Zen} bot
 	 * @returns {Promise<void>}
 	 */
 	execute = async bot => {
@@ -27,8 +27,20 @@ export default class ReadyEvent {
 		const tag = bot.user.tag;
 		const guildCount = bot.guilds.cache.size;
 
-		this.bot.logger.info(
-			`Logged in as ${tag}!. Currently in ${guildCount} Guilds.`
-		);
+		bot.logger.info(`Logged in as ${tag}!. Currently in ${guildCount} Guilds.`);
+
+		// Fetch Members from main guild
+		const guilds = bot.config.guilds;
+
+		bot.logger.info(`Chunking ${guilds.length} guilds.`);
+		guilds.forEach(async guildId => {
+			const guild = bot.guilds.cache.get(guildId);
+			const members = await guild.members.fetch();
+			bot.logger.info(`Chunked ${members.size} members from ${guildId}`);
+			setTimeout(() => {}, 1000);
+		});
+
+		// Set Perms
+		if (bot.config.deploySlash) await this.bot.CommandHandler.setSlashPerms();
 	};
 }

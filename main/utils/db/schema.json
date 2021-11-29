@@ -63,6 +63,12 @@
     "description": "TEXT NOT NULL"
   },
 
+  "threads": {
+    "server_id": "BIGINT PRIMARY KEY NOT NULL,",
+    "channels": "BIGINT ARRAY,",
+    "threads": "BIGINT ARRAY "
+  },
+
   "xp": {
     "server_id": "BIGINT NOT NULL,",
     "user_id": "BIGINT NOT NULL,",

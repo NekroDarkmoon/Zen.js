@@ -1,8 +1,7 @@
 // ----------------------------------------------------------------
 //                             Imports
 // ----------------------------------------------------------------
-import discord from 'discord.js';
-const { Client, Message, Intents } = discord;
+import { Client, GuildMember, Intents, Message } from 'discord.js';
 
 import ZenDB from './utils/db/index.js';
 import CommandHandler from './structures/CommandHandler.js';
@@ -19,7 +18,7 @@ import winston from 'winston';
  */
 export default class Zen extends Client {
 	/**
-	 * @param {ZenConfig} config
+	 * @param {import('./structures/typedefs.js').ZenConfig} config
 	 * @param {ZenDB} db
 	 * @param {winston.Logger} logger
 	 */
@@ -36,14 +35,8 @@ export default class Zen extends Client {
 			partials: ['MESSAGE', 'CHANNEL', 'REACTION', 'GUILD_MEMBER'],
 		});
 
-		/** @type {ZenConfig} */
+		/** @type {import('./structures/typedefs.js').ZenConfig} */
 		this.config = config;
-
-		/** @type {CommandHandler} */
-		this.CommandHandler = new CommandHandler(this.config);
-
-		/** @type {EventHandler} */
-		this.EventHandler = new EventHandler(this);
 
 		/** @type {ZenDB} */
 		this.db = db;
@@ -51,11 +44,20 @@ export default class Zen extends Client {
 		/** @type {winston.Logger} */
 		this.logger = logger;
 
+		/** @type {CommandHandler} */
+		this.CommandHandler = new CommandHandler(this);
+
+		/** @type {EventHandler} */
+		this.EventHandler = new EventHandler(this);
+
+		// Miscellaneous
 		this.caches = {
 			loggingChns: {},
 			features: {},
 			playCats: {},
 		};
+		this._started = false;
+		this._exited = false;
 	}
 
 	/**
@@ -63,6 +65,10 @@ export default class Zen extends Client {
 	 * @memberof Zen
 	 */
 	async start() {
+		if (this._started) return;
+		this._started = true;
+
+		// Check Token
 		if (!this.config.token) throw new Error('No discord token provided');
 
 		// Setup event listeners
@@ -70,9 +76,11 @@ export default class Zen extends Client {
 
 		// Setup commands & interactions
 		await this.CommandHandler.loadCommands();
-		await this.CommandHandler.registerCommands();
-
-		// TODO: Perform Permission Hnadling for slash commands
+		try {
+			if (this.config.deploySlash) await this.CommandHandler.registerCommands();
+		} catch (e) {
+			console.log(e);
+		}
 
 		// Set token
 		this.login(this.config.token);
@@ -107,5 +115,44 @@ export default class Zen extends Client {
 		this.caches.loggingChns = await caches.cacheLogChns(this);
 		this.caches.playCats = await caches.cachePlayChns(this);
 		this.caches.features = await caches.cacheEnabled(this);
+	}
+
+	/**
+	 *
+	 * @param {Number} userId
+	 * @param {Number} guildId
+	 * @returns {GuildMember}
+	 */
+	async _getOrFetchMembers(userId, guildId) {
+		const guild = this.guilds.cache.get(guildId);
+		const member = guild.members.cache.get(userId);
+		if (member) return member;
+
+		// Fetch
+		try {
+			const member = await guild.members.fetch(userId);
+			return member;
+		} catch (e) {
+			this.logger.error(e);
+			return null;
+		}
+	}
+
+	onClose() {
+		if (this._exited) return;
+		this._exited = true;
+		this.logger.warn('Shutting down.');
+
+		this.destroy();
+		this.logger.warn('Client Disconnected');
+
+		// Close db connection
+		this.db.close();
+
+		// Close logger
+		this.logger.warn('Logger streams closed');
+		this.logger.close();
+
+		process.exit();
 	}
 }

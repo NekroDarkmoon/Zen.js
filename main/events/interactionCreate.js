@@ -8,10 +8,12 @@ import Zen from '../Zen.js';
 //                            Ready Event
 // ----------------------------------------------------------------
 export default class InteractionCreateEvent {
-	constructor() {
+	constructor(bot) {
 		this.name = 'interactionCreate';
 		/** @type {boolean} */
 		this.once = false;
+		/** @type {Zen} */
+		this.bot = bot;
 	}
 
 	/**
@@ -30,8 +32,7 @@ export default class InteractionCreateEvent {
 		try {
 			await command.execute(interaction);
 		} catch (err) {
-			// TODO: Convert to logger
-			console.error(err);
+			this.bot.logger.error(err);
 
 			await interaction.reply({
 				content: 'There was an error while executing this command!',

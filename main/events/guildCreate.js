@@ -8,10 +8,12 @@ import Zen from '../Zen.js';
 //                            Ready Event
 // ----------------------------------------------------------------
 export default class GuildCreateEvent {
-	constructor() {
+	constructor(bot) {
 		this.name = 'guildCreate';
 		/** @type {boolean} */
 		this.once = false;
+		/** @type {Zen} */
+		this.bot = bot;
 	}
 
 	/**
@@ -20,9 +22,6 @@ export default class GuildCreateEvent {
 	 */
 	execute = async guild => {
 		// Data builder
-		/** @type {Zen} */
-		const bot = guild.client;
-		if (!this.bot) this.bot = bot;
 		const ownerId = guild.ownerId;
 		const prefix = bot.config.prefix;
 		const loggingChannel = null;
