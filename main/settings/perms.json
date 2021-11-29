@@ -10,6 +10,11 @@
       "perms": "ADMINISTRATOR",
       "type": "ROLE",
       "permission": true
+    },
+    "thread": {
+      "perms": "ADMINISTRATOR",
+      "type": "ROLE",
+      "permission": true
     }
   }
 }

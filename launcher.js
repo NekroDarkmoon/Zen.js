@@ -36,8 +36,8 @@ async function main() {
 		'SIGINT',
 		// 'SIGQUIT',
 		// 'SIGTERM',
-		// 'uncaughtException',
-		// 'unhandledRejection',
+		'uncaughtException',
+		'unhandledRejection',
 	].forEach(ec => process.on(ec, zen.onClose.bind(zen)));
 
 	// Start Bot
