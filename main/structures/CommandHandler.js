@@ -1,7 +1,7 @@
 // ----------------------------------------------------------------
 //                             Imports
 // ----------------------------------------------------------------
-import discord from 'discord.js';
+import discord, { Guild, Permissions } from 'discord.js';
 import { Collection } from '@discordjs/collection';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
@@ -200,7 +200,7 @@ export default class CommandHandler {
 			// Construct Ids
 			const _commands = await guild.commands.fetch();
 			// Construct perms
-			const fullPermissions = this._permBuilder(_commands);
+			const fullPermissions = await this._permBuilder(_commands, guild);
 
 			await guild.commands.permissions.set({ fullPermissions });
 			bot.logger.info(
@@ -210,7 +210,7 @@ export default class CommandHandler {
 
 		// Set Global Perms
 		// const _commands = await bot.application.commands.fetch();
-		// const fullPermissions = this._permBuilder(_commands);
+		// const fullPermissions = await this._permBuilder(_commands);
 		// await this.application.commands.permissions.set({
 		// 	fullPermissions: fullPermissions,
 		// });
@@ -219,9 +219,10 @@ export default class CommandHandler {
 	/**
 	 *
 	 * @param {Collection<string, discord.ApplicationCommand<{}>>} _commands
+	 * @param {Guild} guild
 	 * @returns {Array<import('discord.js').GuildApplicationCommandPermissionData>}
 	 */
-	_permBuilder(_commands) {
+	async _permBuilder(_commands, guild = null) {
 		const commands = _commands.filter(cmd =>
 			this._perms.commandNames.includes(cmd.name)
 		);
@@ -233,12 +234,32 @@ export default class CommandHandler {
 			const type = perms.type;
 
 			if (type === 'USER') {
-				const perm = {
-					id: `${cmd.id}`,
-					permissions: [perms],
-				};
+				const perm = { id: `${cmd.id}`, permissions: [perms] };
+
 				fullPermissions.push(perm);
 			} else if (type === 'ROLE') {
+				// TODO: Make guild input an array and then iterate it instead
+				// Check if is guild command
+				if (guild) {
+					const roles = await guild.roles.fetch();
+					const ids = roles
+						.filter(
+							r =>
+								r.permissions.has(Permissions.FLAGS[perms.perms]) &&
+								!r.tags?.botId &&
+								!r.tags?.integrationId
+						)
+						.map(r => r.id);
+
+					// Add Perms to full permissions for each role
+					const perm = { id: cmd.id, permissions: [] };
+					ids.forEach(id => {
+						const p = { id: id, type: 'ROLE', permission: true };
+						perm.permissions.push(p);
+					});
+
+					fullPermissions.push(perm);
+				}
 			}
 		}
 
