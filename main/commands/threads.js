@@ -3,7 +3,7 @@
 // ----------------------------------------------------------------
 import Zen from '../Zen.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction } from 'discord.js';
+import { CommandInteraction, ThreadChannel } from 'discord.js';
 import { ChannelType } from 'discord-api-types/v9';
 
 // ----------------------------------------------------------------
@@ -128,5 +128,45 @@ export default class Threads {
 		} catch (e) {
 			this.bot.logger.error(e);
 		}
+	}
+
+	/**
+	 *
+	 * @param {ThreadChannel} oldThread
+	 * @param {ThreadChannel} newThread
+	 * @returns {boolean} unarchived
+	 */
+}
+
+export async function handleKeepAliveEvent(bot, oldThread, newThread) {
+	// Data builder
+	const guild = oldThread.guild;
+	const channel = oldThread.parent;
+	const archived = oldThread.archived === false && newThread.archived === true;
+
+	// Return if not archived
+	if (!archived) return false;
+
+	try {
+		const sql = `SELECT * FROM threads WHERE server_id=$1`;
+		const vals = [guild.id];
+		const res = await bot.db.fetchOne(sql, vals);
+		if (!res) return false;
+
+		// Check if channel matches first
+		if (res.channels.includes(channel.id)) {
+			await newThread.setArchived(false);
+			return true;
+		}
+
+		// Check if thread is in threads
+		if (res.threads.includes(oldThread.id)) {
+			await newThread.setArchived(false);
+			return true;
+		}
+
+		return false;
+	} catch (e) {
+		bot.logger.error(e);
 	}
 }
