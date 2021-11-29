@@ -41,6 +41,7 @@ export default class ReadyEvent {
 		});
 
 		// Set Perms
+		// TODO: Move to deployer
 		await this.bot.CommandHandler.setSlashPerms();
 	};
 }

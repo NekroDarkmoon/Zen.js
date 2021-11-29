@@ -195,35 +195,50 @@ export default class CommandHandler {
 		// Const get guild commands
 		const guilds = bot.config.guilds.map(id => bot.guilds.cache.get(id));
 
+		// Set Guild Perms
 		guilds.forEach(async guild => {
 			// Construct Ids
 			const _commands = await guild.commands.fetch();
-			const commands = _commands.filter(cmd =>
-				this._perms.commandNames.includes(cmd.name)
-			);
+			// Construct perms
+			const fullPermissions = this._permBuilder(_commands);
 
-			const fullPermissions = this._permBuilder(commands);
+			await guild.commands.permissions.set({ fullPermissions });
+			bot.logger.info(
+				`Set perms for ${fullPermissions.length} commands in guild ${guild.id}`
+			);
 		});
 
+		// Set Global Perms
+		// const _commands = await bot.application.commands.fetch();
+		// const fullPermissions = this._permBuilder(_commands);
 		// await this.application.commands.permissions.set({
-		// 	fullPermissions: '',
+		// 	fullPermissions: fullPermissions,
 		// });
 	}
 
 	/**
 	 *
-	 * @param {Collection<string, discord.ApplicationCommand<{}>>} commands
+	 * @param {Collection<string, discord.ApplicationCommand<{}>>} _commands
+	 * @returns {Array<import('discord.js').GuildApplicationCommandPermissionData>}
 	 */
-	_permBuilder(commands) {
-		// Construct perms
+	_permBuilder(_commands) {
+		const commands = _commands.filter(cmd =>
+			this._perms.commandNames.includes(cmd.name)
+		);
+
 		const fullPermissions = [];
 
 		for (const [cmdName, perms] of Object.entries(this._perms.commandPerms)) {
-			// Get perm type
+			const cmd = commands.find(cmd => cmd.name === cmdName);
 			const type = perms.type;
-			console.log(type);
 
 			if (type === 'USER') {
+				const perm = {
+					id: `${cmd.id}`,
+					permissions: [perms],
+				};
+				fullPermissions.push(perm);
+			} else if (type === 'ROLE') {
 			}
 		}
 
