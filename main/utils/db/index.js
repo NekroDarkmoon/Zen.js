@@ -51,8 +51,8 @@ export default class ZenDB {
 	 * @returns {Promise<void>}
 	 */
 	async close() {
-		this.logger.info('Closing pool.');
 		await this.pool.end();
+		this.logger.warn('Closed DB pool.');
 	}
 
 	async fetch(sql, values = []) {
