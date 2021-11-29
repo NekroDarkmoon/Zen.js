@@ -4,6 +4,7 @@
     "owner_id": "BIGINT NOT NULL,",
     "prefix": "TEXT DEFAULT NULL,",
     "logging_chn": "BIGINT DEFAULT NULL,",
+    "hashtags": "BIGINT ARRAY DEFAULT NULL,",
     "levels": "BOOLEAN DEFAULT NULL," ,
     "rep": "BOOLEAN DEFAULT NULL,",
     "playchns": "BOOLEAN DEFAULT NULL,",
@@ -21,6 +22,14 @@
     "PRIMARY KEY": "(server_id, user_id)" 
   },
 
+  "playchns": {
+    "server_id": "BIGINT NOT NULL,",
+    "user_id": "BIGINT NOT NULL,",
+    "count": "INT NOT NULL,", 
+    "chns": "BIGINT ARRAY DEFAULT NULL,",   
+    "PRIMARY KEY": "(server_id, user_id)" 
+  },
+
   "quests": {
     "server_id": "BIGINT NOT NULL,",
     "user_id": "BIGINT NOT NULL,",
@@ -28,14 +37,6 @@
     "type": "TEXT,",
     "posted_on": "TIMESTAMP DEFAULT CURRENT_DATE,",
     "msg": "TEXT,",
-    "PRIMARY KEY": "(server_id, user_id)" 
-  },
-
-  "playchns": {
-    "server_id": "BIGINT NOT NULL,",
-    "user_id": "BIGINT NOT NULL,",
-    "count": "INT NOT NULL,", 
-    "chns": "BIGINT ARRAY DEFAULT NULL,",   
     "PRIMARY KEY": "(server_id, user_id)" 
   },
 
