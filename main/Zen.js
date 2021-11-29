@@ -77,7 +77,7 @@ export default class Zen extends Client {
 		// Setup commands & interactions
 		await this.CommandHandler.loadCommands();
 		try {
-			await this.CommandHandler.registerCommands();
+			if (this.config.deploySlash) await this.CommandHandler.registerCommands();
 		} catch (e) {
 			console.log(e);
 		}
@@ -141,14 +141,18 @@ export default class Zen extends Client {
 	onClose() {
 		if (this._exited) return;
 		this._exited = true;
+		this.logger.warn('Shutting down.');
 
 		this.destroy();
+		this.logger.warn('Client Disconnected');
 
 		// Close db connection
 		this.db.close();
 
 		// Close logger
+		this.logger.warn('Logger streams closed');
 		this.logger.close();
+
 		process.exit();
 	}
 }
