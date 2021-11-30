@@ -3,7 +3,7 @@
 // ----------------------------------------------------------------
 import Zen from '../Zen.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction, ThreadChannel } from 'discord.js';
+import { CommandInteraction, Message, ThreadChannel } from 'discord.js';
 import { ChannelType } from 'discord-api-types/v9';
 
 // ----------------------------------------------------------------
@@ -77,36 +77,41 @@ export default class HashTag {
 		const channel = interaction.options.getChannel('target');
 		const enable = interaction.options.getBoolean('set');
 
-		//TODO: THINK ABT SCHEMA A BIT MORE
-
 		// Add to db
 		try {
-			const sql = `INSERT INTO settings(server_id, hashtags)
-									 VALUES ($1, $2)
-									 ON CONFLICT (server_id)
-									 DO UPDATE SET hashtags=$2`;
-			const vals = [interaction.guild.id];
+			let sql = `SELECT * FROM settings WHERE server_id=$1`;
+			let vals = [interaction.guild.id];
+			const res = await this.bot.db.fetchOne(sql, vals);
+
+			if (!res) {
+				await interaction.editReply('Error: Setup server first using `setup`');
+				return;
+			}
+
+			const hashtags = [...res.hashtags];
+			if (enable) hashtags.push(channel.id);
+			else if (hashtags.includes(channel.id))
+				hashtags.splice(hashtags.findIndex(channel.id), 1);
+
+			// Update db
+			sql = `UPDATE settings SET hashtags=$1 WHERE server_id=$2;`;
+			vals = [hashtags, interaction.guild.id];
 			await this.bot.db.execute(sql, vals);
 
 			// Reply to Interaction
-			const type = thread.type === 'GUILD_TEXT' ? 'Threads in' : 'Thread';
-			const state = alive ? 'not' : 'now';
-			const msg = `${type} ${thread.name} will ${state} auto archive.`;
+			const state = enable ? 'now' : 'no longer';
+			const msg = `Channel ${state} requires \` [ tag ] \`. `;
 			await interaction.editReply(msg);
 		} catch (e) {
 			this.bot.logger.error(e);
 		}
 	}
-
-	/**
-	 *
-	 * @param {ThreadChannel} oldThread
-	 * @param {ThreadChannel} newThread
-	 * @returns {boolean} unarchived
-	 */
 }
 
-export async function handleKeepAliveEvent(bot, oldThread, newThread) {
+/**
+ * @param {Message} message
+ */
+export async function handleHashTag(message) {
 	// Data builder
 	const guild = oldThread.guild;
 	const channel = oldThread.parent;
