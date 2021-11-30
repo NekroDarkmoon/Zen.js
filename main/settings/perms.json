@@ -1,16 +1,25 @@
 {
-  "commandNames": ["bot", "mod",  "setup", "thread"],
+  "commandNames": ["bot", "hashtag" ,"mod", "setup", "thread"],
+  
   "commandPerms": {
     "bot": {
       "id": "157433182331863040",
       "type": "USER",
       "permission": true
     },
+
+    "hashtag": {
+      "perms": "ADMINISTRATOR",
+      "type": "ROLE",
+      "permission": true
+    },
+
     "setup": {
       "perms": "ADMINISTRATOR",
       "type": "ROLE",
       "permission": true
     },
+
     "thread": {
       "perms": "ADMINISTRATOR",
       "type": "ROLE",
