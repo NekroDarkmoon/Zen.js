@@ -319,7 +319,41 @@ export default class Info {
 		// await interaction.editReply({embeds:[e]});
 	}
 
-	async roleInfo(interaction) {
-		await interaction.reply('Implementation missing');
+	/**
+	 *
+	 * @param {Interaction} interaction
+	 */
+	 async roleInfo(interaction) {
+		// Defer Reply
+		const hidden = interaction.options.getBoolean('hidden');
+		//await interaction.deferReply();
+		await interaction.deferReply({ ephemeral: hidden });
+		// Data builder
+		/** @type {Role} */
+		const role = interaction.options.getRole('target');
+		const e = new MessageEmbed();
+
+		// Set up embed
+		const name = role.name
+		e.setTitle(`Role: @{name}`);
+
+		const guild = role.guild.name;
+		e.addField('Server', guild, false);
+
+		const color = role.hexColor;
+		e.setColor(color);
+
+		const members = role.members;
+		const nmembers = members.size ? members.size: 0;
+
+		if (nmembers > 0) {
+			const memberNames = members.map(member => member.displayName);
+			const data = nmembers < 10 ? `${nmembers} members: `.concat(memberNames.join(', ')) : `${nmembers} members`;
+			e.addField('Members', data, false);
+		} else {
+			e.addField('Members', 'No members', false);
+		} 
+		
+		await interaction.editReply({ embeds: [e], ephemeral: hidden });
 	}
 }
