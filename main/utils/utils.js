@@ -42,6 +42,7 @@ export const caches = {
 	cacheLogChns: cacheLogChns,
 	cacheEnabled: cacheEnabled,
 	cachePlayChns: cachePlayChns,
+	cacheHashtags: cacheHashtags,
 };
 
 // ----------------------------------------------------------------
@@ -89,6 +90,30 @@ async function cachePlayChns(bot) {
 		return cache;
 	} catch (e) {
 		bot.logger.error('An error occured while building logging cache: ', e);
+		return {};
+	}
+}
+
+// ----------------------------------------------------------------
+//                     			Cache - HashTags
+// ----------------------------------------------------------------
+/**
+ * @param {Zen} bot
+ */
+async function cacheHashtags(bot) {
+	bot.logger.info('Building Hashtag Cache');
+	try {
+		const cache = {};
+		const sql = 'SELECT * FROM settings';
+		const res = (await bot.db.fetch(sql)) || [];
+		// Add to object
+		res.forEach(entry => {
+			cache[entry.server_id] = entry.hashtags;
+		});
+		return cache;
+	} catch (e) {
+		bot.logger.error(e);
+		return {};
 	}
 }
 

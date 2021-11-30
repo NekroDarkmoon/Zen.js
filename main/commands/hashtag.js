@@ -3,7 +3,12 @@
 // ----------------------------------------------------------------
 import Zen from '../Zen.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction, Message, ThreadChannel } from 'discord.js';
+import {
+	CommandInteraction,
+	Message,
+	MessageEmbed,
+	ThreadChannel,
+} from 'discord.js';
 import { ChannelType } from 'discord-api-types/v9';
 
 // ----------------------------------------------------------------
@@ -113,33 +118,32 @@ export default class HashTag {
  */
 export async function handleHashTag(message) {
 	// Data builder
-	const guild = oldThread.guild;
-	const channel = oldThread.parent;
-	const archived = oldThread.archived === false && newThread.archived === true;
+	const guild = message.guild;
+	const channel = message.channel;
+	const content = message.content;
+	const hashtags = this.bot.caches.hashtags[guild.id];
 
-	// Return if not archived
-	if (!archived) return false;
+	// TODO: Check for exception
 
-	try {
-		const sql = `SELECT * FROM threads WHERE server_id=$1`;
-		const vals = [guild.id];
-		const res = await bot.db.fetchOne(sql, vals);
-		if (!res) return false;
+	// Check if hashtags exist
+	if (hashtags?.length === 0) return false;
+	// Return if not included
+	if (!hashtags.includes(channel.id)) return false;
 
-		// Check if channel matches first
-		if (res.channels.includes(channel.id)) {
-			await newThread.setArchived(false);
-			return true;
-		}
+	if (content.includes('[') && content.includes(']')) {
+	} else {
+		setTimeout(message => {
+			message.delete();
+		}, 5000);
 
-		// Check if thread is in threads
-		if (res.threads.includes(oldThread.id)) {
-			await newThread.setArchived(false);
-			return true;
-		}
-
-		return false;
-	} catch (e) {
-		bot.logger.error(e);
+		const msg = new MessageEmbed()
+			.setTitle('Error')
+			.setDescription('Please add relevant tags to your post.')
+			.setColor('RANDOM');
+		await message.channel.send(msg).then(msg => {
+			msg.delete();
+		});
 	}
+
+	return true;
 }

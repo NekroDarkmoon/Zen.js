@@ -51,6 +51,7 @@ export default class Zen extends Client {
 		this.EventHandler = new EventHandler(this);
 
 		// Miscellaneous
+		// TODO: Fetch type from typedef
 		this.caches = {
 			loggingChns: {},
 			features: {},
@@ -115,6 +116,7 @@ export default class Zen extends Client {
 		this.caches.loggingChns = await caches.cacheLogChns(this);
 		this.caches.playCats = await caches.cachePlayChns(this);
 		this.caches.features = await caches.cacheEnabled(this);
+		this.caches.hashtags = await caches.cacheHashtags(this);
 	}
 
 	/**
