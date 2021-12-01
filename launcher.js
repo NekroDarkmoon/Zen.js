@@ -11,7 +11,6 @@ import setupLogger from './main/utils/logger.js';
 // ----------------------------------------------------------------
 async function main() {
 	// Setup Logger
-	// const logger = setupLogger('info');
 	const logger = setupLogger('info');
 	console.info('Logger setup. Switching to logger.');
 
