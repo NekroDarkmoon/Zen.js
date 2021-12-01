@@ -4,6 +4,7 @@
 import { Message } from 'discord.js';
 import Zen from '../Zen.js';
 import { handleXpMsg } from '../commands/level.js';
+import { handleHashTag } from '../commands/hashtag.js';
 
 // ----------------------------------------------------------------
 //                            Ready Event
@@ -32,10 +33,11 @@ export default class MessageCreateEvent {
 		// Validation - Command
 
 		// Fire sub events
-		if (bot.caches.features[message.guild.id]?.levels)
-			await this.xpHandler(message);
-		if (bot.caches.features[message.guild.id]?.rep)
-			await this.repHandler(message);
+		const events = [];
+		if (bot.caches.features[message.guild.id]?.levels) this.xpHandler(message);
+		if (bot.caches.features[message.guild.id]?.rep) this.repHandler(message);
+
+		handleHashTag.bind(this)(message);
 	};
 
 	/**
