@@ -56,6 +56,8 @@ export default class MessageDeleteEvent {
 		if (!chnId) return;
 
 		// Databuilder
+		const bts = '```diff\n';
+		const bt = '```';
 		const author = message.author;
 		const origChannel = message.channel;
 		const content = message.content;
@@ -70,14 +72,24 @@ export default class MessageDeleteEvent {
 			// Sanatize and chunk
 			const contentArray = chunkify(msgSanatize(content), limit);
 			// Create Embed
-			const e = new MessageEmbed().setTitle('Deleted Message Log');
-			e.addField('Author', `${author.username}#${author.discriminator}`, true);
-			e.addField('AuthorID', author.id, true);
-			e.addField('Channel', origChannel.name, false);
-			if (attachs.length) e.addField('Attachments', attachs.join(',\n'), false);
+			const e = new MessageEmbed()
+				.setTitle('Deleted Message Log')
+				.setColor('RED');
+
+			e.addField(
+				'Author',
+				`${bts}${author.username}#${author.discriminator}${bt}`,
+				true
+			);
+
+			e.addField('AuthorID', `${bts}${author.id}${bt}`, true);
+
+			e.addField('Channel', `${bts}${origChannel.name}${bt}`);
+
+			if (attachs.length) e.addField('Attachments', attachs.join(',\n'));
 
 			contentArray.forEach(chunk => {
-				e.addField('Content', chunk.toString(), false);
+				e.addField('Content', `${bts}${chunk.toString()}${bt}`);
 			});
 
 			await logChn.send({ embeds: [e] });
