@@ -61,7 +61,7 @@ async function cacheLogChns(bot) {
 		const res = (await bot.db.fetch(sql)) || [];
 		// Add to object
 		res.forEach(entry => {
-			if (entry.logging_chn) cache[entry.server_id] = entry.logging_chn;
+			cache[entry.server_id] = entry.logging_chn;
 		});
 		return cache;
 	} catch (e) {
@@ -85,7 +85,7 @@ async function cachePlayChns(bot) {
 		const res = (await bot.db.fetch(sql)) || [];
 		// Add to object
 		res.forEach(entry => {
-			if (entry.playcat) cache[entry.server_id] = entry.playcat;
+			cache[entry.server_id] = entry.playcat;
 		});
 		return cache;
 	} catch (e) {

@@ -34,12 +34,10 @@ export default class MessageCreateEvent {
 
 		// Fire sub events
 		const events = [];
-		if (bot.caches.features[message.guild.id]?.levels)
-			await this.xpHandler(message);
-		if (bot.caches.features[message.guild.id]?.rep)
-			await this.repHandler(message);
+		if (bot.caches.features[message.guild.id]?.levels) this.xpHandler(message);
+		if (bot.caches.features[message.guild.id]?.rep) this.repHandler(message);
 
-		await handleHashTag.bind(this)(message);
+		handleHashTag.bind(this)(message);
 	};
 
 	/**

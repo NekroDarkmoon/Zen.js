@@ -81,11 +81,14 @@ export default class HashTag {
 		// Data Builder
 		const channel = interaction.options.getChannel('target');
 		const enable = interaction.options.getBoolean('set');
+		const guild = interaction.guild;
+		const cache = this.bot.caches.hashtags[guild.id];
+		let hashtags = [];
 
 		// Add to db
 		try {
 			let sql = `SELECT * FROM settings WHERE server_id=$1`;
-			let vals = [interaction.guild.id];
+			let vals = [guild.id];
 			const res = await this.bot.db.fetchOne(sql, vals);
 
 			if (!res) {
@@ -93,14 +96,21 @@ export default class HashTag {
 				return;
 			}
 
-			const hashtags = [...res.hashtags];
-			if (enable) hashtags.push(channel.id);
-			else if (hashtags.includes(channel.id))
-				hashtags.splice(hashtags.findIndex(channel.id), 1);
+			if (res.hashtags) hashtags = [...res.hashtags];
+
+			if (enable) {
+				hashtags.push(channel.id);
+				cache.push(channel.id);
+			} else {
+				if (hashtags.includes(channel.id))
+					hashtags.splice(hashtags.indexOf(channel.id), 1);
+				if (cache.includes(channel.id))
+					cache.splice(cache.indexOf(channel.id, 1));
+			}
 
 			// Update db
 			sql = `UPDATE settings SET hashtags=$1 WHERE server_id=$2;`;
-			vals = [hashtags, interaction.guild.id];
+			vals = [hashtags, guild.id];
 			await this.bot.db.execute(sql, vals);
 
 			// Reply to Interaction
@@ -132,16 +142,17 @@ export async function handleHashTag(message) {
 
 	if (content.includes('[') && content.includes(']')) {
 	} else {
-		setTimeout(message => {
+		setTimeout(() => {
 			message.delete();
 		}, 5000);
 
-		const msg = new MessageEmbed()
+		const e = new MessageEmbed()
 			.setTitle('Error')
 			.setDescription('Please add relevant tags to your post.')
 			.setColor('RANDOM');
-		await message.channel.send(msg).then(msg => {
-			msg.delete();
+
+		await message.channel.send({ embeds: [e] }).then(msg => {
+			setTimeout(() => msg.delete(), 10000);
 		});
 	}
 

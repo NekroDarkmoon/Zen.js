@@ -5,7 +5,7 @@
     "prefix": "TEXT DEFAULT NULL,",
     "logging_chn": "BIGINT DEFAULT NULL,",
     "exception": "BIGINT DEFAULT NULL,",
-    "hashtags": "BIGINT ARRAY DEFAULT NULL,",
+    "hashtags": "BIGINT ARRAY ,",
     "levels": "BOOLEAN DEFAULT NULL," ,
     "rep": "BOOLEAN DEFAULT NULL,",
     "playchns": "BOOLEAN DEFAULT NULL,",
