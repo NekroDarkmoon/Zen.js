@@ -152,8 +152,22 @@ async function cacheEnabled(bot) {
 }
 
 // ----------------------------------------------------------------
-//                             XP Calc
+//                          Cache - Exceptions
 // ----------------------------------------------------------------
+async function cacheExceptions(bot) {
+	bot.logger.info('Building Exceptions Cache');
+	try {
+		const cache = {};
+		const sql = `SELECT * FROM settings`;
+		const res = (await bot.db.fetch(sql)) || [];
+		// Add to Cache
+		res.forEach(server => {
+			cache[server.id] = server.exceptions;
+		});
+	} catch (e) {
+		bot.logger.error(`An error occured while building exceptions cache ${e}`);
+	}
+}
 
 // ----------------------------------------------------------------
 //                             Imports

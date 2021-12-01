@@ -45,13 +45,8 @@ export default class Zen extends Client {
 		this.EventHandler = new EventHandler(this);
 
 		// Miscellaneous
-		// TODO: Fetch type from typedef
-		this.caches = {
-			loggingChns: {},
-			features: {},
-			playCats: {},
-			hashtags: {},
-		};
+		/**@type {import('./structures/typedefs.js').ZenCache} */
+		this.caches = {};
 		this._started = false;
 		this._exited = false;
 	}

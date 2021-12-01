@@ -43,8 +43,17 @@
  */
 
 // ----------------------------------------------------------------
-//                             Typedefs
+//                            Custom Cache
 // ----------------------------------------------------------------
+/**
+ * @typedef {Object} ZenCache
+ * @property {Object} loggingChns
+ * @property {Object} features
+ * @property {Object} playCats
+ * @property {Object} hashtags
+ * @property {Object} expections
+ * @memberof typedefs
+ */
 
 // ----------------------------------------------------------------
 //                             Typedefs
