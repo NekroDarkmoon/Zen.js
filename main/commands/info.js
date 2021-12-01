@@ -35,9 +35,17 @@ export default class Info {
 				sub
 					.setName('server')
 					.setDescription("Displays the server's information.")
+					.addBooleanOption(opt =>
+						opt.setName('hidden').setDescription('Set Ephemeral')
+					)
 			)
 			.addSubcommand(sub =>
-				sub.setName('self').setDescription('Displays information on the bot.')
+				sub
+					.setName('self')
+					.setDescription('Displays information on the bot.')
+					.addBooleanOption(opt =>
+						opt.setName('hidden').setDescription('Set Ephemeral')
+					)
 			)
 			.addSubcommand(sub =>
 				sub
@@ -48,6 +56,9 @@ export default class Info {
 							.setName('target')
 							.setDescription('Selected Role.')
 							.setRequired(true)
+					)
+					.addBooleanOption(opt =>
+						opt.setName('hidden').setDescription('Set Ephemeral')
 					)
 			);
 	}
@@ -94,31 +105,33 @@ export default class Info {
 		/** @type {User || GuildMember} */
 		const user = interaction.options.getUser('target');
 		const member = await interaction.guild.members.fetch(user.id);
+		const bts = '```diff\n';
+		const bt = '```';
 		const e = new MessageEmbed();
 
 		// Basic information
 		e.setAuthor(user.username);
-		e.addField('ID', user.id, true);
+		e.addField('ID', `${bts} ${user.id} ${bt}`, true);
 		// Get shared servers
 		const shared = 'In Progress';
-		e.addField('Servers', shared, true);
+		e.addField('Servers', `${bts} ${shared} ${bt}`, true);
 		// Joined
 		const joined = member.joinedAt.toDateString();
-		e.addField('Joined', joined, false);
+		e.addField('Joined', `${bts} ${joined} ${bt}`, false);
 		// Created
 		const created = user.createdAt.toDateString();
-		e.addField('Created', created, true);
+		e.addField('Created', `${bts} ${created} ${bt}`, true);
 		// Get roles
 		const roles = member.roles.cache;
 		if (roles) {
 			const roleNames = roles.map(role => role.name.replace('@', '@\u200b'));
 			const data =
 				roles.size > 10 ? `${roles.size} roles` : roleNames.join(', ');
-			e.addField('Roles', data, false);
+			e.addField('Roles', `${bts} ${data} ${bt}`, false);
 		}
 
 		// Add color
-		const color = user.hexAccentColor || '0xf2f6f7';
+		const color = user.hexAccentColor || 'RANDOM';
 		e.setColor(color);
 		// Add Avatar
 		const avatar = user.avatarURL();
@@ -142,7 +155,7 @@ export default class Info {
 		// Defer Reply
 		await interaction.deferReply();
 		// Data Builder
-		const e = new MessageEmbed();
+		const e = new MessageEmbed().setColor('RANDOM');
 		const guildId = interaction.guild.id;
 		const guild = await this.bot.guilds.fetch(guildId);
 		const owner = await guild.fetchOwner();
