@@ -78,18 +78,18 @@ export default class MessageDeleteEvent {
 
 			e.addField(
 				'Author',
-				`${bts}${author.username}#${author.discriminator}${bt}`,
+				`${bts} ${author.username}#${author.discriminator} ${bt}`,
 				true
 			);
 
-			e.addField('AuthorID', `${bts}${author.id}${bt}`, true);
+			e.addField('AuthorID', `${bts} ${author.id} ${bt}`, true);
 
-			e.addField('Channel', `${bts}${origChannel.name}${bt}`);
+			e.addField('Channel', `${bts} ${origChannel.name} ${bt}`);
 
 			if (attachs.length) e.addField('Attachments', attachs.join(',\n'));
 
 			contentArray.forEach(chunk => {
-				e.addField('Content', `${bts}${chunk.toString()}${bt}`);
+				e.addField('Content', `${bts} ${chunk.toString()} ${bt}`);
 			});
 
 			await logChn.send({ embeds: [e] });

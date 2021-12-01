@@ -48,6 +48,8 @@ export default class GuildMemberUpdateEvent {
 		if (!chnId) return;
 
 		// DataBuilder
+		const bts = '```diff\n';
+		const bt = '```';
 		const member = before.user.username;
 		const id = before.id;
 		const oNick = before.nickname ? before.nickname : member;
@@ -60,11 +62,11 @@ export default class GuildMemberUpdateEvent {
 		try {
 			const logChn = await before.guild.channels.fetch(chnId);
 			// Create Embed
-			const e = new MessageEmbed().setTitle(member);
-			e.addField('UserID', id, false);
-			e.addField('Old Nickname', oNick, false);
-			e.addField('New Nickname', nNick, false);
-			e.setThumbnail(before.avatarURL());
+			const e = new MessageEmbed().setTitle(member).setColor('ORANGE');
+			e.addField('UserID', `${bts} ${id} ${bt}`, false);
+			e.addField('Old Nickname', `${bts} ${oNick} ${bt}`, true);
+			e.addField('New Nickname', `${bts} ${nNick} ${bt}`, true);
+			e.setThumbnail(before.user.avatarURL());
 
 			await logChn.send({ embeds: [e] });
 		} catch (e) {
