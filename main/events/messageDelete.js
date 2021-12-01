@@ -46,7 +46,8 @@ export default class MessageDeleteEvent {
 		// Validation - Partial
 		if (message.partial) return;
 		// Validation - regex
-		const regex = '^[^"\'.w]';
+		const regex = /^[A-Za-z0-9]/;
+		if (!regex.test(message)) return;
 		// Validation - length
 		if (message.content.length < 3) return;
 
