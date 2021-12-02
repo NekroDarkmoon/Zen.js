@@ -210,7 +210,7 @@ export default class Setup {
 			await this.bot.db.execute(sql, values);
 
 			// Update Cache
-			this.bot.caches.loggingChns[guild.id] = channel.id;
+			this.bot.caches[guild.id].channels.logChn = channel.id;
 			// Send Interaction Update
 			const msg = `Logging channel set to \`${channel.name}\``;
 			await interaction.editReply(msg);
@@ -238,7 +238,7 @@ export default class Setup {
 			await this.bot.db.execute(sql, vals);
 
 			// Update Cache
-			this.bot.caches.features[guild.id].levels = answer;
+			this.bot.caches[guild.id].enabled.levels = answer;
 
 			// Send Interaction Update
 			const state = answer ? 'Enabled' : 'Disabled';
@@ -267,7 +267,7 @@ export default class Setup {
 			const vals = [guild.id, answer];
 			await this.bot.db.execute(sql, vals);
 			// Update Cache
-			this.bot.caches.features[guild.id].rep = answer;
+			this.bot.caches[guild.id].enabled.rep = answer;
 
 			// Send Interaction Update
 			const state = answer ? 'Enabled' : 'Disabled';
