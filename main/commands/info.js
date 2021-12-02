@@ -354,8 +354,6 @@ export default class Info {
 	 async roleInfo(interaction) {
 		// Defer Reply
 		const hidden = interaction.options.getBoolean('hidden');
-//		let page = interaction.options.getInteger('page');
-//		page = !page ? 1 : page;
 		const page = 1;
 
 		//await interaction.deferReply();
@@ -368,42 +366,24 @@ export default class Info {
 		console.log('Setting up the embed');
 		// Set up embed
 		const name = role.name
-//		console.log(name);
 		e.setTitle(`Role: ${name}`);
 
 		const guild = role.guild.name;
-//		console.log(guild);
 		e.addField('Server', guild, false);
 
 		const color = role.hexColor;
 		e.setColor(color);
 
 		const members = role.members;
-//		console.log(members);
 		e.addField('Number of members', `${members.size}`, false);
 
 		console.log(e);
 
-//		if (nmembers > 0) {
-//			const memberNames = members.map(member => member.displayName);
-//			const data = nmembers < 10 ? `${nmembers} members: `.concat(memberNames.join(', ')) : `${nmembers} members`;
-//			e.addField('Members', data, false);
-//		} else {
-//			e.addField('Members', 'No members', false);
-//		} 
-		
-//		await interaction.editReply({ embeds: [e], ephemeral: hidden });
-
-
 
 		// Modify results to needs
 		let modifiedResult = [];
-		members.forEach(async member => {
-			const temp = {};
-			temp.members = member.displayName;
-			modifiedResult.push(temp);
-		});
-
+		members.forEach(member => modifiedResult.push({'members' : member.displayName}));
+		 
 		// Setup Formatter
 		const pageConf = {
 			members: { align: 'left' }
