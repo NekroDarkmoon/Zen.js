@@ -23,6 +23,9 @@ export default class ThreadUpdateEvent {
 	 * @returns {Promise<void>}
 	 */
 	execute = async (oldThread, newThread) => {
+		// Validation - Ready
+		if (!this.bot.isReady()) return;
+
 		// Handle Keep Alive
 		const state = handleKeepAliveEvent(this.bot, oldThread, newThread);
 	};

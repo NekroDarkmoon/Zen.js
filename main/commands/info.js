@@ -113,23 +113,26 @@ export default class Info {
 
 		// Basic information
 		e.setAuthor(user.username);
-		e.addField('ID', `${bts} ${user.id} ${bt}`, true);
+		e.addField('ID', `${bts}${user.id} ${bt}`, true);
 		// Get shared servers
-		const shared = 'In Progress';
-		e.addField('Servers', `${bts} ${shared} ${bt}`, true);
+		const shared = this.bot.guilds.cache
+			.map(g => g.members.cache.get(member.id))
+			.filter(m => m);
+
+		e.addField('Servers', `${bts}${shared.length} ${bt}`, true);
 		// Joined
 		const joined = member.joinedAt.toDateString();
-		e.addField('Joined', `${bts} ${joined} ${bt}`, false);
+		e.addField('Joined', `${bts}${joined} ${bt}`, false);
 		// Created
 		const created = user.createdAt.toDateString();
-		e.addField('Created', `${bts} ${created} ${bt}`, true);
+		e.addField('Created', `${bts}${created} ${bt}`, true);
 		// Get roles
 		const roles = member.roles.cache;
 		if (roles) {
 			const roleNames = roles.map(role => role.name.replace('@', '@\u200b'));
 			const data =
 				roles.size > 10 ? `${roles.size} roles` : roleNames.join(', ');
-			e.addField('Roles', `${bts} ${data} ${bt}`, false);
+			e.addField('Roles', `${bts}${data} ${bt}`, false);
 		}
 
 		// Add color
@@ -139,7 +142,16 @@ export default class Info {
 		const avatar = user.avatarURL();
 		if (avatar) e.setThumbnail(avatar);
 
-		// TODO: Add last message
+		try {
+			const sql = `SELECT * FROM logger WHERE server_id=$1 AND user_id=$2`;
+			const vals = [interaction.guildId, user.id];
+			const res = await this.bot.db.fetchOne(sql, vals);
+
+			const msgTime = res ? res?.last_msg?.toString() : 'No last message';
+			e.addField('Last Message', `${bts}${msgTime} ${bt}`);
+		} catch (e) {
+			this.bot.logger.error(e);
+		}
 
 		// Set Footer
 		const footer = Date();

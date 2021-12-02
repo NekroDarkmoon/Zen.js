@@ -26,6 +26,8 @@ export default class GuildCreateEvent {
 		const prefix = this.bot.config.prefix;
 		const loggingChannel = null;
 
+		// Validation - Ready
+		if (!this.bot.isReady()) return;
 		// Validation - Guild Count
 		if (this.bot.guilds.cache.size > 73) {
 			await guild.leave();

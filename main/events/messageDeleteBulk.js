@@ -23,6 +23,9 @@ export default class MessageDeleteBulkEvent {
 	 * @returns {Promise<void>}
 	 */
 	execute = async mCollection => {
+		// Validation - Ready
+		if (!this.bot.isReady()) return;
+
 		try {
 			await this.logEvent(mCollection);
 		} catch (e) {

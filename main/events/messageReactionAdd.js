@@ -22,6 +22,9 @@ export default class MessageReactionAddEvent {
 	 * @param {User} user
 	 */
 	execute = async (reaction, user) => {
+		// Validation - Ready
+		if (!this.bot.isReady()) return;
+
 		try {
 			await this.handleRep(reaction, user);
 		} catch (e) {

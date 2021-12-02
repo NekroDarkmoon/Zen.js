@@ -28,6 +28,8 @@ export default class MessageCreateEvent {
 		const bot = message.client;
 		if (!this.bot) this.bot = bot;
 
+		// Validation - Ready
+		if (!this.bot.isReady()) return;
 		// Validation - Bot
 		if (message.author.bot) return;
 		// Validation - Command
@@ -112,7 +114,7 @@ export default class MessageCreateEvent {
 
 		// Data builder
 		const users = [...message.mentions.users.values()]
-			// .filter(u => u.id !== message.author.id)
+			.filter(u => u.id !== message.author.id)
 			.filter(u => !u.bot);
 
 		// Validation - Length

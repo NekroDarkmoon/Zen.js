@@ -2,7 +2,7 @@
 //                             Imports
 // ----------------------------------------------------------------
 import Zen from '../Zen.js';
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder, time } from '@discordjs/builders';
 import { Interaction, MessageEmbed, Permissions } from 'discord.js';
 import { TabulatedPages } from '../utils/ui/Paginator.js';
 
@@ -152,16 +152,6 @@ export default class Rep {
 			return;
 		}
 
-		// // TODO: Complete time validation query
-		// // Validation - Time check
-		// try {
-		//   const sql = `SELECT * FROM logger WHERE server_id=$1 and user_id=$2`;
-		//   const values = [interaction.guild.id, member.id];
-		//   const res = await this.bot.db.fetchOne(sql, values);
-		//   // console.log(res);
-
-		// } catch ( err ) { this.bot.logger.error(err) }
-
 		// Execute Db transaction
 		// TODO: Convert to executeMany
 		try {
@@ -285,7 +275,7 @@ export default class Rep {
 
 		// Construct Embed
 		const e = new MessageEmbed()
-			.setColor('DARK_GOLD')
+			.setColor('RANDOM')
 			.setTitle('Rep Board')
 			.setDescription(paginator._prepareData(page));
 
@@ -299,7 +289,7 @@ export default class Rep {
 		try {
 			await paginator.onInteraction(interaction);
 		} catch (e) {
-			this.logger.error(e);
+			this.bot.logger.error(e);
 			return;
 		}
 	}
@@ -369,7 +359,7 @@ export default class Rep {
 		try {
 			await paginator.onInteraction(interaction);
 		} catch (e) {
-			this.logger.error(e);
+			this.bot.logger.error(e);
 			return;
 		}
 	}
