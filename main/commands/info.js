@@ -287,6 +287,7 @@ export default class Info {
 		await interaction.editReply({ embeds: [e] });
 	}
 
+
 	/**
 	 *
 	 * @param {Interaction} interaction
@@ -326,6 +327,9 @@ export default class Info {
 	 async roleInfo(interaction) {
 		// Defer Reply
 		const hidden = interaction.options.getBoolean('hidden');
+//		let page = interaction.options.getInteger('page');
+//		page = !page ? 1 : page;
+
 		//await interaction.deferReply();
 		await interaction.deferReply({ ephemeral: hidden });
 		// Data builder
@@ -344,16 +348,55 @@ export default class Info {
 		e.setColor(color);
 
 		const members = role.members;
-		const nmembers = members.size ? members.size: 0;
+		e.addField('Number of members', members.size, false);
 
-		if (nmembers > 0) {
-			const memberNames = members.map(member => member.displayName);
-			const data = nmembers < 10 ? `${nmembers} members: `.concat(memberNames.join(', ')) : `${nmembers} members`;
-			e.addField('Members', data, false);
-		} else {
-			e.addField('Members', 'No members', false);
-		} 
+//		if (nmembers > 0) {
+//			const memberNames = members.map(member => member.displayName);
+//			const data = nmembers < 10 ? `${nmembers} members: `.concat(memberNames.join(', ')) : `${nmembers} members`;
+//			e.addField('Members', data, false);
+//		} else {
+//			e.addField('Members', 'No members', false);
+//		} 
 		
-		await interaction.editReply({ embeds: [e], ephemeral: hidden });
+//		await interaction.editReply({ embeds: [e], ephemeral: hidden });
+
+
+
+		// Modify results to needs
+		let modifiedResult = [];
+		members.forEach(async member => {
+			const temp = {};
+			temp.member = member;
+			modifiedResult.push(temp);
+		});
+
+		// Setup Formatter
+		const pageConf = {
+			member: { align: 'left' }
+		};
+
+		// Construct Paginator
+		const paginator = new TabulatedPages('Members in role', data, pageConf);
+
+		// Construct Embed
+		const f = new MessageEmbed()
+			.setColor('DARK_GOLD')
+			.setTitle('Members in role')
+			.setDescription(paginator._prepareData(page));
+
+		// Send reply
+		await interaction.editReply({
+			embeds: [e, f],
+			components: paginator.components,
+		});
+
+		// Start Collecting
+		try {
+			await paginator.onInteraction(interaction);
+		} catch (e) {
+			this.logger.error(e);
+			return;
+		}
 	}
+
 }
