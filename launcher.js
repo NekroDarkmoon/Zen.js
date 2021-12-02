@@ -13,7 +13,7 @@ import migrate from './main/utils/migrations/v0300.js';
 async function main() {
 	// Setup Logger
 	const logger = setupLogger('info');
-	console.info('Logger setup. Switching to logger.');
+	logger.info('Logger setup. Switching to logger.');
 
 	// Fetch data from config file
 	/** @type {import('./main/structures/typedefs.js').ZenConfig} */
