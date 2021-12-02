@@ -22,6 +22,9 @@ export default class MessageUpdateEvent {
 	 * @returns {Promise<void>}
 	 */
 	execute = async (oldMessage, newMessage) => {
+		// Validation - Ready
+		if (!this.bot.isReady()) return;
+
 		// Data builder
 		/** @type {Zen} */
 		const bot = oldMessage.client;

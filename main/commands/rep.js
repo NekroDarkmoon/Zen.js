@@ -2,7 +2,7 @@
 //                             Imports
 // ----------------------------------------------------------------
 import Zen from '../Zen.js';
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder, time } from '@discordjs/builders';
 import { Interaction, MessageEmbed, Permissions } from 'discord.js';
 import { TabulatedPages } from '../utils/ui/Paginator.js';
 
@@ -152,15 +152,28 @@ export default class Rep {
 			return;
 		}
 
-		// // TODO: Complete time validation query
-		// // Validation - Time check
-		// try {
-		//   const sql = `SELECT * FROM logger WHERE server_id=$1 and user_id=$2`;
-		//   const values = [interaction.guild.id, member.id];
-		//   const res = await this.bot.db.fetchOne(sql, values);
-		//   // console.log(res);
+		let totalRep = rep;
+		// Validation - Time check
+		try {
+			const sql = `SELECT * FROM rep WHERE server_id=$1 and user_id=$2`;
+			const values = [interaction.guild.id, member.id];
+			const res = await this.bot.db.fetchOne(sql, values);
 
-		// } catch ( err ) { this.bot.logger.error(err) }
+			if (res) {
+				totalRep += res.rep;
+				const eTime = res.last_given;
+				if (
+					(new Date().getTime() - eTime.getTime()) / 1000 < 60 &&
+					!member.permissions.has(Permissions.FLAGS.ADMINISTRATOR)
+				) {
+					const msg = `Error: \`Time - Please wait 1 minute before giving rep.\``;
+					await interaction.deferReply(msg);
+					return;
+				}
+			}
+		} catch (err) {
+			this.bot.logger.error(err);
+		}
 
 		// Execute Db transaction
 		// TODO: Convert to executeMany

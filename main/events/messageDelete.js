@@ -27,6 +27,9 @@ export default class MessageDeleteEvent {
 		const bot = message.client;
 		if (!this.bot) this.bot = bot;
 
+		// Validation - Ready
+		if (!this.bot.isReady()) return;
+
 		try {
 			await this.logEvent(message);
 		} catch (e) {

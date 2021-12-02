@@ -22,6 +22,9 @@ export default class MessageReactionRemoveEvent {
 	 * @param {User} user
 	 */
 	execute = async (reaction, user) => {
+		// Validation - Ready
+		if (!this.bot.isReady()) return;
+
 		try {
 			await this.handleRep(reaction, user);
 		} catch (e) {

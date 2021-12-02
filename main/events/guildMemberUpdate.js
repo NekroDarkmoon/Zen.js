@@ -44,7 +44,7 @@ export default class GuildMemberUpdateEvent {
 			after = await after.fetch();
 		}
 
-		const chnId = this.bot.caches[before.guild.id].channels.logChn;
+		const chnId = this.bot.caches[before.guild.id]?.channels.logChn;
 		if (!chnId) return;
 
 		// DataBuilder

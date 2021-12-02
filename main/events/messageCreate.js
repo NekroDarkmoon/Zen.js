@@ -28,6 +28,8 @@ export default class MessageCreateEvent {
 		const bot = message.client;
 		if (!this.bot) this.bot = bot;
 
+		// Validation - Ready
+		if (!this.bot.isReady()) return;
 		// Validation - Bot
 		if (message.author.bot) return;
 		// Validation - Command
