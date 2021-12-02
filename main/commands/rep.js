@@ -156,18 +156,22 @@ export default class Rep {
 		// Validation - Time check
 		try {
 			const sql = `SELECT * FROM rep WHERE server_id=$1 and user_id=$2`;
-			const values = [interaction.guild.id, member.id];
+			const values = [interaction.guild.id, user.id];
 			const res = await this.bot.db.fetchOne(sql, values);
 
 			if (res) {
 				totalRep += res.rep;
 				const eTime = res.last_given;
+
+				console.log(!member.permissions.has(Permissions.FLAGS.ADMINISTRATOR));
+				console.log((new Date().getTime() - eTime.getTime()) / 1000 < 60);
+
 				if (
-					(new Date().getTime() - eTime.getTime()) / 1000 < 60 &&
-					!member.permissions.has(Permissions.FLAGS.ADMINISTRATOR)
+					!member.permissions.has(Permissions.FLAGS.ADMINISTRATOR) &&
+					(new Date().getTime() - eTime.getTime()) / 1000 < 60
 				) {
 					const msg = `Error: \`Time - Please wait 1 minute before giving rep.\``;
-					await interaction.deferReply(msg);
+					await interaction.editReply(msg);
 					return;
 				}
 			}
@@ -298,7 +302,7 @@ export default class Rep {
 
 		// Construct Embed
 		const e = new MessageEmbed()
-			.setColor('DARK_GOLD')
+			.setColor('RANDOM')
 			.setTitle('Rep Board')
 			.setDescription(paginator._prepareData(page));
 
@@ -312,7 +316,7 @@ export default class Rep {
 		try {
 			await paginator.onInteraction(interaction);
 		} catch (e) {
-			this.logger.error(e);
+			this.bot.logger.error(e);
 			return;
 		}
 	}
@@ -382,7 +386,7 @@ export default class Rep {
 		try {
 			await paginator.onInteraction(interaction);
 		} catch (e) {
-			this.logger.error(e);
+			this.bot.logger.error(e);
 			return;
 		}
 	}
