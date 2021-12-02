@@ -18,7 +18,6 @@
     "user_id": "BIGINT NOT NULL,",
     "channel_id": "BIGINT NOT NULL,",
     "last_msg": "TIMESTAMP DEFAULT CURRENT_DATE,",
-    "last_rep_given": "TIMESTAMP,",
     "msg_count": "BIGINT NOT NULL,",
     "PRIMARY KEY": "(server_id, user_id)" 
   },
