@@ -5,6 +5,8 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { Interaction, MessageEmbed, Permissions, User } from 'discord.js';
 import Zen from '../Zen.js';
 import os from 'os';
+import { TabulatedPages } from '../utils/ui/Paginator.js';
+
 
 // ----------------------------------------------------------------
 //                             Imports
@@ -312,6 +314,7 @@ export default class Info {
 		await interaction.editReply({ embeds: [e] });
 	}
 
+
 	/**
 	 *
 	 * @param {Interaction} interaction
@@ -344,7 +347,67 @@ export default class Info {
 		// await interaction.editReply({embeds:[e]});
 	}
 
-	async roleInfo(interaction) {
-		await interaction.reply('Implementation missing');
+	/**
+	 *
+	 * @param {Interaction} interaction
+	 */
+	 async roleInfo(interaction) {
+		// Defer Reply
+		const hidden = interaction.options.getBoolean('hidden');
+		const page = 1;
+
+		//await interaction.deferReply();
+		await interaction.deferReply({ ephemeral: hidden });
+		// Data builder
+		/** @type {Role} */
+		const role = interaction.options.getRole('target');
+		const e = new MessageEmbed();
+
+		console.log('Setting up the embed');
+		// Set up embed
+		const name = role.name
+		e.setTitle(`Role: ${name}`);
+
+		const guild = role.guild.name;
+		e.addField('Server', guild, false);
+
+		const color = role.hexColor;
+		e.setColor(color);
+
+		const members = role.members;
+		e.addField('Number of members', `${members.size}`, false);
+
+		console.log(e);
+
+
+		// Modify results to needs
+		let modifiedResult = [];
+		members.forEach(member => modifiedResult.push({'members' : member.displayName}));
+		 
+		// Setup Formatter
+		const pageConf = {
+			members: { align: 'left' }
+		};
+
+		// Construct Paginator
+		const paginator = new TabulatedPages('Members in role', modifiedResult, pageConf);
+
+		// Construct Embed
+		e.setDescription(paginator._prepareData(page));
+
+		// Send reply
+		await interaction.editReply({
+			embeds: [e],
+			components: paginator.components,
+		});
+
+		// Start Collecting
+		try {
+			await paginator.onInteraction(interaction);
+		} catch (e) {
+			this.logger.error(e);
+			return;
+		}
 	}
+
 }
