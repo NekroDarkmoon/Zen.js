@@ -167,7 +167,7 @@ export default class Rep {
 		try {
 			const sql = `INSERT INTO rep (server_id, user_id, rep)
                    VALUES ($1, $2, $3)
-                   ON CONFLICT ON CONSTRAINT server_user 
+                   ON CONFLICT (server_id, user_id) 
                    DO UPDATE SET rep = rep.rep + $3;`;
 			const values = [interaction.guild.id, user.id, rep];
 			await this.bot.db.execute(sql, values);
@@ -207,7 +207,7 @@ export default class Rep {
 		try {
 			const sql = `INSERT INTO rep (server_id, user_id, rep)
                    VALUES ($1, $2, $3)
-                   ON CONFLICT ON CONSTRAINT server_user
+                   ON CONFLICT (server_id, user_id)
                    DO UPDATE SET rep = $3;`;
 			const values = [interaction.guild.id, user.id, rep];
 			await this.bot.db.execute(sql, values);

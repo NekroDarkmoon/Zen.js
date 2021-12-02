@@ -25,7 +25,7 @@ export default class MessageReactionRemoveEvent {
 		try {
 			await this.handleRep(reaction, user);
 		} catch (e) {
-			console.log(e);
+			this.bot.logger.error(e);
 			return;
 		}
 	};
@@ -61,7 +61,7 @@ export default class MessageReactionRemoveEvent {
 		try {
 			const sql = `INSERT INTO rep (server_id, user_id, rep)
                    VALUES ($1, $2, $3)
-                   ON CONFLICT ON CONSTRAINT server_user 
+                   ON CONFLICT (server_id, user_id) 
                    DO UPDATE SET rep = rep.rep - $3;`;
 			const values = [guild.id, member.id, rep];
 			await this.bot.db.execute(sql, values);

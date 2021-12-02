@@ -67,8 +67,6 @@ export default class MessageCreateEvent {
 																 msg_count=logger.msg_count + $5`;
 			const vals = [guild, user, channel, new Date(), 1];
 			this.bot.db.execute(sql, vals);
-
-			console.log('Added');
 		} catch (e) {
 			this.bot.logger.error(e);
 		}
@@ -128,7 +126,7 @@ export default class MessageCreateEvent {
 			users.forEach(user => {
 				const sql = `INSERT INTO rep (server_id, user_id, rep, last_given)
                      VALUES ($1, $2, $3, $4)
-                     ON CONFLICT ON CONSTRAINT server_user 
+                     ON CONFLICT (server_id, user_id) 
                      DO UPDATE SET rep = rep.rep + $3,
 										 							 last_given=$4;`;
 				const values = [message.guild.id, user.id, 1, new Date()];
@@ -141,7 +139,7 @@ export default class MessageCreateEvent {
 
 			await this.bot.db.executeMany(sqlArray, valArray);
 		} catch (err) {
-			console.log(err);
+			this.bot.logger.error(err);
 		}
 
 		// Send notif

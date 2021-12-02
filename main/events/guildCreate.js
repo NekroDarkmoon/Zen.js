@@ -32,7 +32,7 @@ export default class GuildCreateEvent {
 			this.bot.logger.warn(`73 Guilds Limit reached - Left ${guild.name}.`);
 		}
 
-		console.log(`Joined a new guild - ${guild.name}`);
+		this.bot.logger.debug(`Joined a new guild - ${guild.name}`);
 
 		// Make a db connection to add to db
 		try {
