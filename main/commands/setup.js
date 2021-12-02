@@ -2,7 +2,9 @@
 //                             Imports
 // ----------------------------------------------------------------
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { Channel, Interaction, Permissions } from 'discord.js';
+import { ChannelType } from 'discord-api-types/v9';
+import { Interaction, Permissions } from 'discord.js';
+import Zen from '../Zen.js';
 
 // ----------------------------------------------------------------
 //                             Setup
@@ -20,12 +22,14 @@ export default class Setup {
 				sub
 					.setName('loggingchannel')
 					.setDescription('Select a channel for the bot to log to.')
-					.addChannelOption(chn =>
+					.addChannelOption(chn => {
 						chn
 							.setName('channel')
 							.setDescription('Selected Channel')
-							.setRequired(true)
-					)
+							.setRequired(true);
+						chn.channelTypes = [ChannelType.GuildText];
+						return chn;
+					})
 			)
 			.addSubcommand(sub =>
 				sub
@@ -50,12 +54,13 @@ export default class Setup {
 					.addBooleanOption(b =>
 						b.setName('choice').setDescription('True/False').setRequired(true)
 					)
-					.addChannelOption(c =>
-						c
-							.setName('channel')
+					.addChannelOption(c => {
+						c.setName('channel')
 							.setDescription('Selected Category for Personal Channels')
-							.setRequired(true)
-					)
+							.setRequired(true);
+						c.channelTypes = [ChannelType.GuildCategory];
+						return c;
+					})
 			)
 			.addSubcommandGroup(group =>
 				group
@@ -352,8 +357,8 @@ export default class Setup {
 			const vals = [answer, channel?.id, guild.id];
 			await this.bot.db.execute(sql, vals);
 			// Update Cache
-			this.bot.caches.features[guild.id].playchns = answer;
-			this.bot.caches.playCats[guild.id] = channel?.id || null;
+			this.bot.caches[guild.id].enabled.playChns = answer;
+			this.bot.caches[guild.id].channels.playCat = channel?.id || null;
 
 			// Send Reply
 			const msg = `Playchannel settings updated.`;

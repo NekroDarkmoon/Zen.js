@@ -134,7 +134,7 @@ export default class PlayChannels {
 		// Defer Reply
 		await interaction.deferReply();
 		// Validation - Enabled
-		if (!this.bot.caches.features[interaction.guild.id]?.playchns) {
+		if (!this.bot.caches[interaction.guild.id].enabled.playChns) {
 			await interaction.editReply('Error: System not setup.');
 			return;
 		}
@@ -173,7 +173,7 @@ export default class PlayChannels {
 		const guild = interaction.guild;
 
 		// Fetch data from cache
-		const channelId = this.bot.caches.playCats[guild.id] || null;
+		const channelId = this.bot.caches[guild.id].channels.playCat || null;
 		if (!channelId) {
 			await interaction.editReply('Error: System not active.');
 			return;
@@ -287,7 +287,9 @@ export default class PlayChannels {
 		/**@type {Channel} */
 		const vChannel = interaction.options.getChannel('voicechannel');
 		/**@type {CategoryChannel} */
-		const cat = await guild.channels.fetch(this.bot.caches.playCats[guild.id]);
+		const cat = await guild.channels.fetch(
+			this.bot.caches[guild.id].channels.playCat
+		);
 
 		// Validation - Play Channel
 		if (tChannel.parentId !== cat.id || vChannel.parentId !== cat.id) {
@@ -367,7 +369,9 @@ export default class PlayChannels {
 		/**@type {Channel} */
 		const vChannel = interaction.options.getChannel('voicechannel');
 		/**@type {CategoryChannel} */
-		const cat = await guild.channels.fetch(this.bot.caches.playCats[guild.id]);
+		const cat = await guild.channels.fetch(
+			this.bot.caches[guild.id].channels.playCat
+		);
 		let users = [];
 		let count = 1;
 		while (count <= 10) {
@@ -443,7 +447,9 @@ export default class PlayChannels {
 		/**@type {Channel} */
 		const vChannel = interaction.options.getChannel('voicechannel');
 		/**@type {CategoryChannel} */
-		const cat = await guild.channels.fetch(this.bot.caches.playCats[guild.id]);
+		const cat = await guild.channels.fetch(
+			this.bot.caches[guild.id].channels.playCat
+		);
 		let users = [];
 		let count = 1;
 		while (count <= 10) {
@@ -513,7 +519,6 @@ export default class PlayChannels {
 		const guild = interaction.guild;
 		const author = interaction.member;
 		const channel = interaction.channel;
-		const cat = await guild.channels.fetch(this.bot.caches.playCats[guild.id]);
 		let ownedChns = null;
 
 		// DB data

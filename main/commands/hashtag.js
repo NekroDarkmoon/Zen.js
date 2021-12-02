@@ -131,7 +131,7 @@ export async function handleHashTag(message) {
 	const guild = message.guild;
 	const channel = message.channel;
 	const content = message.content;
-	const hashtags = this.bot.caches.hashtags[guild.id];
+	const hashtags = this.bot.caches[guild.id].channels.hashtags;
 
 	// TODO: Check for exception
 
