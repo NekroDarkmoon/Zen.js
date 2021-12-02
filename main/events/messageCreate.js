@@ -114,7 +114,7 @@ export default class MessageCreateEvent {
 
 		// Data builder
 		const users = [...message.mentions.users.values()]
-			// .filter(u => u.id !== message.author.id)
+			.filter(u => u.id !== message.author.id)
 			.filter(u => !u.bot);
 
 		// Validation - Length

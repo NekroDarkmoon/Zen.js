@@ -152,33 +152,6 @@ export default class Rep {
 			return;
 		}
 
-		let totalRep = rep;
-		// Validation - Time check
-		try {
-			const sql = `SELECT * FROM rep WHERE server_id=$1 and user_id=$2`;
-			const values = [interaction.guild.id, user.id];
-			const res = await this.bot.db.fetchOne(sql, values);
-
-			if (res) {
-				totalRep += res.rep;
-				const eTime = res.last_given;
-
-				console.log(!member.permissions.has(Permissions.FLAGS.ADMINISTRATOR));
-				console.log((new Date().getTime() - eTime.getTime()) / 1000 < 60);
-
-				if (
-					!member.permissions.has(Permissions.FLAGS.ADMINISTRATOR) &&
-					(new Date().getTime() - eTime.getTime()) / 1000 < 60
-				) {
-					const msg = `Error: \`Time - Please wait 1 minute before giving rep.\``;
-					await interaction.editReply(msg);
-					return;
-				}
-			}
-		} catch (err) {
-			this.bot.logger.error(err);
-		}
-
 		// Execute Db transaction
 		// TODO: Convert to executeMany
 		try {
