@@ -47,11 +47,21 @@
 // ----------------------------------------------------------------
 /**
  * @typedef {Object} ZenCache
- * @property {Object} loggingChns
- * @property {Object} features
- * @property {Object} playCats
- * @property {Object} hashtags
- * @property {Object} expections
+ * @property {Object} server_id
+ * @property {Object} server_id.enabled
+ * @property {boolean} server_id.enabled.levels
+ * @property {boolean} server_id.enabled.playChns
+ * @property {boolean} server_id.enabled.rep
+ *
+ * @property {Object} server_id.channels
+ * @property {Array<String>} server_id.channels.hashtags
+ * @property {String} server_id.channels.logChn
+ * @property {Number} server_id.channels.playCat
+ *
+ * @property {Object} server_id.roles
+ * @property {Array<String>} server_id.roles.exceptions
+ *
+ * @property {Object} server_id.settings
  * @memberof typedefs
  */
 
