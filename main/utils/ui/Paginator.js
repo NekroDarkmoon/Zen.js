@@ -145,7 +145,7 @@ export class TabulatedPages extends Pages {
 		timeout = 180
 	) {
 		maxPages = maxPages ? maxPages : Math.ceil(data.length / maxLines);
-		super(maxPpages, timeout);
+		super(maxPages, timeout);
 		this.customId = action;
 		this.data = data;
 		this.config = config;
