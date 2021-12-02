@@ -129,15 +129,14 @@ export default class Threads {
 			this.bot.logger.error(e);
 		}
 	}
-
-	/**
-	 *
-	 * @param {ThreadChannel} oldThread
-	 * @param {ThreadChannel} newThread
-	 * @returns {boolean} unarchived
-	 */
 }
 
+/**
+ *
+ * @param {ThreadChannel} oldThread
+ * @param {ThreadChannel} newThread
+ * @returns {boolean} unarchived
+ */
 export async function handleKeepAliveEvent(bot, oldThread, newThread) {
 	// Data builder
 	const guild = oldThread.guild;

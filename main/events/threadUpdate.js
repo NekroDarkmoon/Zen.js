@@ -24,8 +24,6 @@ export default class ThreadUpdateEvent {
 	 */
 	execute = async (oldThread, newThread) => {
 		// Handle Keep Alive
-		const state = await handleKeepAliveEvent(this.bot, oldThread, newThread);
-
-		console.log(state);
+		const state = handleKeepAliveEvent(this.bot, oldThread, newThread);
 	};
 }

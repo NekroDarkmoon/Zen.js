@@ -4,9 +4,11 @@
     "owner_id": "BIGINT NOT NULL,",
     "prefix": "TEXT DEFAULT NULL,",
     "logging_chn": "BIGINT DEFAULT NULL,",
-    "levels": "BOOLEAN DEFAULT NULL," ,
-    "rep": "BOOLEAN DEFAULT NULL,",
-    "playchns": "BOOLEAN DEFAULT NULL,",
+    "exception": "BIGINT DEFAULT NULL,",
+    "hashtags": "BIGINT ARRAY ,",
+    "levels": "BOOLEAN DEFAULT FALSE," ,
+    "rep": "BOOLEAN DEFAULT FALSE,",
+    "playchns": "BOOLEAN DEFAULT FALSE,",
     "playcat": "BIGINT DEFAULT NULL,",
     "setup": "BOOLEAN NOT NULL DEFAULT FALSE"
   },
@@ -16,8 +18,15 @@
     "user_id": "BIGINT NOT NULL,",
     "channel_id": "BIGINT NOT NULL,",
     "last_msg": "TIMESTAMP DEFAULT CURRENT_DATE,",
-    "last_rep_given": "TIMESTAMP,",
     "msg_count": "BIGINT NOT NULL,",
+    "PRIMARY KEY": "(server_id, user_id)" 
+  },
+
+  "playchns": {
+    "server_id": "BIGINT NOT NULL,",
+    "user_id": "BIGINT NOT NULL,",
+    "count": "INT NOT NULL,", 
+    "chns": "BIGINT ARRAY DEFAULT NULL,",   
     "PRIMARY KEY": "(server_id, user_id)" 
   },
 
@@ -31,20 +40,12 @@
     "PRIMARY KEY": "(server_id, user_id)" 
   },
 
-  "playchns": {
-    "server_id": "BIGINT NOT NULL,",
-    "user_id": "BIGINT NOT NULL,",
-    "count": "INT NOT NULL,", 
-    "chns": "BIGINT ARRAY DEFAULT NULL,",   
-    "PRIMARY KEY": "(server_id, user_id)" 
-  },
-
   "rep": {
     "server_id": "BIGINT NOT NULL,",
     "user_id": "BIGINT NOT NULL,",
     "rep": "INT NOT NULL,",
     "last_given": "TIMESTAMP DEFAULT CURRENT_DATE,",
-    "CONSTRAINT": "server_user UNIQUE (server_id, user_id)"
+    "PRIMARY KEY": "(server_id, user_id)"
   },
 
   "rewards": {

@@ -138,7 +138,6 @@ export default class CommandHandler {
 
 		await Promise.all(promises);
 
-		// console.log(this.commands);
 		this.globalCommands = this.commands.filter(cmd => cmd.global);
 		this.guildCommands = this.commands.filter(cmd => !cmd.global);
 	}
