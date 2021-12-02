@@ -103,11 +103,10 @@ export default class Zen extends Client {
 	}
 
 	async buildCaches() {
-		this.caches = await caches.settingsCacheBuilder(this);
-		this.caches.loggingChns = await caches.cacheLogChns(this);
-		this.caches.playCats = await caches.cachePlayChns(this);
-		this.caches.features = await caches.cacheEnabled(this);
-		this.caches.hashtags = await caches.cacheHashtags(this);
+		setTimeout(async () => {
+			this.caches = await caches.settingsCacheBuilder(this);
+			console.log(this.caches);
+		}, 5000);
 	}
 
 	/**

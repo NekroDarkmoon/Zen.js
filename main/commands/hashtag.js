@@ -132,8 +132,10 @@ export async function handleHashTag(message) {
 	const channel = message.channel;
 	const content = message.content;
 	const hashtags = this.bot.caches[guild.id].channels.hashtags;
+	const exceptions = this.bot.caches[guild.id].roles.exceptions;
 
-	// TODO: Check for exception
+	// Validation: Check for exception
+	if (message.member.roles.cache.has(exceptions)) return;
 
 	// Check if hashtags exist
 	if (hashtags?.length === 0) return false;

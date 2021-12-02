@@ -34,8 +34,8 @@ export default class MessageCreateEvent {
 
 		// Fire sub events
 		const events = [];
-		if (bot.caches[message.guild.id].enabled.levels) this.xpHandler(message);
-		if (bot.caches[message.guild.id].enabled.rep) this.repHandler(message);
+		if (bot.caches[message.guild.id]?.enabled.levels) this.xpHandler(message);
+		if (bot.caches[message.guild.id]?.enabled.rep) this.repHandler(message);
 
 		handleHashTag.bind(this)(message);
 	};

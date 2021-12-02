@@ -242,7 +242,7 @@ export default class Setup {
 
 			// Send Interaction Update
 			const state = answer ? 'Enabled' : 'Disabled';
-			const msg = `${state} reputation system.`;
+			const msg = `${state} xp system.`;
 			await interaction.editReply(msg);
 		} catch (e) {
 			console.error(e);
@@ -271,7 +271,7 @@ export default class Setup {
 
 			// Send Interaction Update
 			const state = answer ? 'Enabled' : 'Disabled';
-			const msg = `${state} leveling system.`;
+			const msg = `${state} reputation system.`;
 			await interaction.editReply(msg);
 		} catch (e) {
 			console.error(e);

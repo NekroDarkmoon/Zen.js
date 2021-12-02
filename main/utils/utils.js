@@ -213,7 +213,7 @@ export async function settingsCacheBuilder(bot) {
 			};
 
 			const roles = {
-				exceptions: s.exceptions || [],
+				exceptions: s.exception || [],
 			};
 
 			const settings = {};
@@ -231,7 +231,6 @@ export async function settingsCacheBuilder(bot) {
 		bot.logger.error(`An errror occured while building settings cache ${e}.`);
 	}
 
-	console.log(cache);
 	return cache;
 }
 

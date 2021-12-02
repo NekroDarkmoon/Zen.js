@@ -52,7 +52,7 @@ export default class MessageDeleteEvent {
 		if (message.content.length < 3) return;
 
 		// Get logging channel
-		const chnId = this.bot.caches.loggingChns[message.guild.id] || null;
+		const chnId = this.bot.caches[message.guild.id].channels.logChn;
 		if (!chnId) return;
 
 		// Databuilder
