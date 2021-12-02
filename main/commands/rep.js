@@ -209,7 +209,7 @@ export default class Rep {
 			const sql = `INSERT INTO rep (server_id, user_id, rep, last_given)
                      VALUES ($1, $2, $3, $4)
                      ON CONFLICT (server_id, user_id) 
-                     DO UPDATE SET rep = rep.rep + $3,
+                     DO UPDATE SET rep=$3,
 										 							 last_given=$4;`;
 			const values = [interaction.guild.id, user.id, rep, new Date()];
 			await this.bot.db.execute(sql, values);
