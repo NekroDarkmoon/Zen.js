@@ -136,12 +136,13 @@ export class Pages extends View {
 //                      Tabulated Data Paginator
 // ----------------------------------------------------------------
 export class TabulatedPages extends Pages {
-	constructor(action, data, config = {}, max_pages = null, timeout = 180) {
-		max_pages = max_pages ? max_pages : Math.ceil(data.length / 15);
+	constructor(action, data, config = {}, max_pages = null, maxLines = 15, timeout = 180) {
+		max_pages = max_pages ? max_pages : Math.ceil(data.length / maxLines);
 		super(max_pages, timeout);
 		this.customId = action;
 		this.data = data;
 		this.config = config;
+		this.maxLines = maxLines;
 	}
 
 	/**
@@ -196,7 +197,7 @@ export class TabulatedPages extends Pages {
 	 * @returns {String}
 	 */
 	_prepareData(page) {
-		const maxLines = 15;
+		const maxLines = this.maxLines;
 		const data = this.data;
 		const display = data.slice((page - 1) * maxLines, page * maxLines);
 

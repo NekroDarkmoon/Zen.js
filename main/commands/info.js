@@ -5,6 +5,8 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { Interaction, MessageEmbed, Permissions, User } from 'discord.js';
 import Zen from '../Zen.js';
 import os from 'os';
+import { TabulatedPages } from '../utils/ui/Paginator.js';
+
 
 // ----------------------------------------------------------------
 //                             Imports
@@ -342,6 +344,7 @@ export default class Info {
 		const hidden = interaction.options.getBoolean('hidden');
 //		let page = interaction.options.getInteger('page');
 //		page = !page ? 1 : page;
+		const page = 1;
 
 		//await interaction.deferReply();
 		await interaction.deferReply({ ephemeral: hidden });
@@ -350,18 +353,24 @@ export default class Info {
 		const role = interaction.options.getRole('target');
 		const e = new MessageEmbed();
 
+		console.log('Setting up the embed');
 		// Set up embed
 		const name = role.name
-		e.setTitle(`Role: @{name}`);
+//		console.log(name);
+		e.setTitle(`Role: ${name}`);
 
 		const guild = role.guild.name;
+//		console.log(guild);
 		e.addField('Server', guild, false);
 
 		const color = role.hexColor;
 		e.setColor(color);
 
 		const members = role.members;
-		e.addField('Number of members', members.size, false);
+//		console.log(members);
+		e.addField('Number of members', `${members.size}`, false);
+
+		console.log(e);
 
 //		if (nmembers > 0) {
 //			const memberNames = members.map(member => member.displayName);
@@ -379,27 +388,24 @@ export default class Info {
 		let modifiedResult = [];
 		members.forEach(async member => {
 			const temp = {};
-			temp.member = member;
+			temp.members = member.displayName;
 			modifiedResult.push(temp);
 		});
 
 		// Setup Formatter
 		const pageConf = {
-			member: { align: 'left' }
+			members: { align: 'left' }
 		};
 
 		// Construct Paginator
-		const paginator = new TabulatedPages('Members in role', data, pageConf);
+		const paginator = new TabulatedPages('Members in role', modifiedResult, pageConf);
 
 		// Construct Embed
-		const f = new MessageEmbed()
-			.setColor('DARK_GOLD')
-			.setTitle('Members in role')
-			.setDescription(paginator._prepareData(page));
+		e.setDescription(paginator._prepareData(page));
 
 		// Send reply
 		await interaction.editReply({
-			embeds: [e, f],
+			embeds: [e],
 			components: paginator.components,
 		});
 
