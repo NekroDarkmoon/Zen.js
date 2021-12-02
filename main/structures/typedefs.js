@@ -46,8 +46,13 @@
 //                            Custom Cache
 // ----------------------------------------------------------------
 /**
- * @typedef {Object} ZenCache
- * @property {Object} server_id
+ * @typedef {Object<string, server_id>} ZenCache
+ * @memberof typedefs
+ *
+ */
+
+/**
+ * @typedef {Object} server_id
  * @property {Object} server_id.enabled
  * @property {boolean} server_id.enabled.levels
  * @property {boolean} server_id.enabled.playChns
@@ -62,7 +67,6 @@
  * @property {Array<String>} server_id.roles.exceptions
  *
  * @property {Object} server_id.settings
- * @memberof typedefs
  */
 
 // ----------------------------------------------------------------

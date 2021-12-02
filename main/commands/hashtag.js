@@ -82,7 +82,7 @@ export default class HashTag {
 		const channel = interaction.options.getChannel('target');
 		const enable = interaction.options.getBoolean('set');
 		const guild = interaction.guild;
-		const cache = this.bot.caches.hashtags[guild.id];
+		const cache = this.bot.caches[guild.id].channels.hashtags;
 		let hashtags = [];
 
 		// Add to db

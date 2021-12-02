@@ -185,7 +185,7 @@ async function cacheExceptions(bot) {
 /**
  *
  * @param {Zen} bot
- * @returns {import('../structures/typedefs.js').ZenCache}
+ * @returns {import('../structures/typedefs.js').ZenCache} ZenCache
  *
  */
 export async function settingsCacheBuilder(bot) {
