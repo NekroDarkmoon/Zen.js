@@ -114,7 +114,7 @@ export default class Levels {
 			const level = res ? res.level : 0;
 			const nXp = Levels.calcXp(level);
 			const missXp = nXp - xp;
-			const msgCount = res2 ? res2.mes_count : 0;
+			const msgCount = res2 ? res2.msg_count : 0;
 			// Message
 			let msg = `You are level ${level}, with ${xp} xp.\n`;
 			msg += `Level ${

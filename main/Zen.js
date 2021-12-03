@@ -106,7 +106,7 @@ export default class Zen extends Client {
 		setTimeout(async () => {
 			this.caches = await caches.settingsCacheBuilder(this);
 			console.log(this.caches);
-		}, 5000);
+		}, 1500);
 	}
 
 	/**

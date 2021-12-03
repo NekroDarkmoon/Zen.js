@@ -2,11 +2,14 @@
 //                             Imports
 // ----------------------------------------------------------------
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { Interaction, MessageEmbed, Permissions, User } from 'discord.js';
+import {
+	CommandInteraction,
+	MessageEmbed,
+	Permissions,
+	User,
+} from 'discord.js';
 import Zen from '../Zen.js';
-import os from 'os';
 import { TabulatedPages } from '../utils/ui/Paginator.js';
-
 
 // ----------------------------------------------------------------
 //                             Imports
@@ -66,7 +69,7 @@ export default class Info {
 	}
 
 	/**
-	 * @param {Interaction} interaction
+	 * @param {CommandInteraction} interaction
 	 * @returns {Promise<void>}
 	 * */
 	execute = async interaction => {
@@ -76,6 +79,9 @@ export default class Info {
 		/**@type {Zen} */
 		const bot = interaction.client;
 		if (!this.bot) this.bot = bot;
+		// Defer Update
+		const hidden = interaction.options.getBoolean('hidden');
+		await interaction.deferReply({ ephemeral: hidden });
 		const sub = interaction.options.getSubcommand();
 
 		// Handler
@@ -97,12 +103,9 @@ export default class Info {
 
 	/**
 	 *
-	 * @param {Interaction} interaction
+	 * @param {CommandInteraction} interaction
 	 */
 	async userInfo(interaction) {
-		// Defer reply
-		const hidden = interaction.options.getBoolean('hidden');
-		await interaction.deferReply({ ephemeral: hidden });
 		// Data builder
 		/** @type {User || GuildMember} */
 		const user = interaction.options.getUser('target');
@@ -163,11 +166,9 @@ export default class Info {
 
 	/**
 	 *
-	 * @param {Interaction} interaction
+	 * @param {CommandInteraction} interaction
 	 */
 	async serverInfo(interaction) {
-		// Defer Reply
-		await interaction.deferReply();
 		// Data Builder
 		const e = new MessageEmbed().setColor('RANDOM');
 		const guildId = interaction.guild.id;
@@ -314,14 +315,11 @@ export default class Info {
 		await interaction.editReply({ embeds: [e] });
 	}
 
-
 	/**
 	 *
-	 * @param {Interaction} interaction
+	 * @param {CommandInteraction} interaction
 	 */
 	async selfInfo(interaction) {
-		// Defer Reply
-		await interaction.deferReply();
 		// // Data Builder
 		// const bot = this.bot;
 		// const e = new MessageEmbed();
@@ -345,27 +343,22 @@ export default class Info {
 		// // Add Created at
 		// e.setFooter(`Created At: ${bot.application.createdAt.toDateString()}`);
 		// await interaction.editReply({embeds:[e]});
+		interaction.editReply('Implementation missing');
 	}
 
 	/**
 	 *
-	 * @param {Interaction} interaction
+	 * @param {CommandInteraction} interaction
 	 */
-	 async roleInfo(interaction) {
-		// Defer Reply
-		const hidden = interaction.options.getBoolean('hidden');
+	async roleInfo(interaction) {
 		const page = 1;
 
-		//await interaction.deferReply();
-		await interaction.deferReply({ ephemeral: hidden });
 		// Data builder
-		/** @type {Role} */
 		const role = interaction.options.getRole('target');
 		const e = new MessageEmbed();
 
-		console.log('Setting up the embed');
 		// Set up embed
-		const name = role.name
+		const name = role.name;
 		e.setTitle(`Role: ${name}`);
 
 		const guild = role.guild.name;
@@ -377,20 +370,23 @@ export default class Info {
 		const members = role.members;
 		e.addField('Number of members', `${members.size}`, false);
 
-		console.log(e);
-
-
 		// Modify results to needs
 		let modifiedResult = [];
-		members.forEach(member => modifiedResult.push({'members' : member.displayName}));
-		 
+		members.forEach(member =>
+			modifiedResult.push({ members: member.displayName })
+		);
+
 		// Setup Formatter
 		const pageConf = {
-			members: { align: 'left' }
+			members: { align: 'left' },
 		};
 
 		// Construct Paginator
-		const paginator = new TabulatedPages('Members in role', modifiedResult, pageConf);
+		const paginator = new TabulatedPages(
+			'Members in role',
+			modifiedResult,
+			pageConf
+		);
 
 		// Construct Embed
 		e.setDescription(paginator._prepareData(page));
@@ -405,9 +401,8 @@ export default class Info {
 		try {
 			await paginator.onInteraction(interaction);
 		} catch (e) {
-			this.logger.error(e);
+			this.bot.logger.error(e);
 			return;
 		}
 	}
-
 }
