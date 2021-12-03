@@ -1,17 +1,51 @@
 // ----------------------------------------------------------------
 //                             Imports
+
+import winston from 'winston';
+import ZenDB from '../db/index.js';
+
 // ----------------------------------------------------------------
-const VERSION = 3;
+const VERSION = '0300';
 
 // ----------------------------------------------------------------
 //                               Main
 // ----------------------------------------------------------------
+/**
+ *
+ * @param {String} ver
+ * @param {Array<ZenDB>} db
+ * @param {winston.Logger} logger
+ * @returns
+ */
 export default async function migrate(ver, db, logger) {
-	if (VERSION <= ver) return false;
-	// Major Version Change --> Load db file
+	if (VERSION !== ver) return false;
+
+	// Databuilder
+	const oldDB = db[0];
+	const newDB = db[1];
+
+	// Get Data from old db
+	const migrateData = await getOldData(oldDB);
+}
+
+// ----------------------------------------------------------------
+//                             Old Data
+// ----------------------------------------------------------------
+/**
+ *
+ * @param {ZenDB} oldDB
+ */
+async function getOldData(oldDB) {
+	// Data builder
+	const tables = [''];
 }
 
 // ----------------------------------------------------------------
 //                             Imports
 // ----------------------------------------------------------------
-migrate();
+// ----------------------------------------------------------------
+//                             Imports
+// ----------------------------------------------------------------
+// ----------------------------------------------------------------
+//                             Imports
+// ----------------------------------------------------------------

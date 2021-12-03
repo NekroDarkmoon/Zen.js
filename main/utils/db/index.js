@@ -24,24 +24,26 @@ export default class ZenDB {
 	/**
 	 *
 	 */
-	async init() {
+	async init(migrate = false) {
 		// Fetch schemas and create them in the db.
 		const tableSchema = JSON.parse(
 			await readFile(new URL('./schema.json', import.meta.url))
 		);
 
-		// Create Tables for the schema if they don't exist
-		const ct = 'CREATE TABLE IF NOT EXISTS';
-		for (const [table, data] of Object.entries(tableSchema)) {
-			let query = '';
+		if (!migrate) {
+			// Create Tables for the schema if they don't exist
+			const ct = 'CREATE TABLE IF NOT EXISTS';
+			for (const [table, data] of Object.entries(tableSchema)) {
+				let query = '';
 
-			for (const [key, value] of Object.entries(data)) {
-				query += `${key} ${value} \n`;
+				for (const [key, value] of Object.entries(data)) {
+					query += `${key} ${value} \n`;
+				}
+
+				// Execute sql
+				const sql = `${ct} ${table}(${query})`;
+				await this.execute(sql);
 			}
-
-			// Execute sql
-			const sql = `${ct} ${table}(${query})`;
-			await this.execute(sql);
 		}
 
 		this.logger.info('DB setup Complete');

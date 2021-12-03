@@ -5,7 +5,8 @@
   "main": "./launcher.js",
   "type": "module",
   "scripts": {
-    "zen": "node launcher.js"
+    "zen": "node launcher.js",
+    "migrate": "node migrate.js"
   },
   "repository": {
     "type": "git",

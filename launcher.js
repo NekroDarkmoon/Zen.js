@@ -5,7 +5,6 @@ import Zen from './main/Zen.js';
 import ZenDB from './main/utils/db/index.js';
 import { readFile } from 'fs/promises';
 import setupLogger from './main/utils/logger.js';
-import migrate from './main/utils/migrations/v0300.js';
 
 // ----------------------------------------------------------------
 //                              Main
@@ -22,13 +21,9 @@ async function main() {
 	);
 
 	// Setup DB
-	const db = new ZenDB(config.postgresql, logger);
+	const db = new ZenDB(config.uri, logger);
 	await db.init();
 	logger.info('DB initiated');
-
-	// Check Migration and Migrate
-	// const m = await migrate(2, db, logger);
-	// console.log(m);
 
 	// Set up bot instance
 	const zen = new Zen(config, db, logger);

@@ -13,11 +13,13 @@
  * @property {String} token
  * @property {string} client_id
  * @property {string} client_secret
+ * @property {string} uri
  * @property {string} prefix
  * @property {Array<string>} guilds
  * @property {string} activity
  * @property {boolean} deploySlash
  * @property {string} inviteLink
+ * @property {string} version
  * @memberof typedefs
  */
 
