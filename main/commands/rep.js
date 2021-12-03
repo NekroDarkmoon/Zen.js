@@ -269,7 +269,7 @@ export default class Rep {
 		};
 
 		// Construct Paginator
-		const paginator = new TabulatedPages('Rep Board', data, pageConf);
+		const paginator = new TabulatedPages('Rep Board', data, pageConf, 5);
 
 		// Construct Embed
 		const e = new MessageEmbed()

@@ -264,7 +264,7 @@ export default class Levels {
 					user: user
 						? user.username
 						: (await this.bot.users.fetch(row.user_id)).username,
-					xp: row.xp,
+					// xp: row.xp,
 					level: row.level,
 				};
 
@@ -282,12 +282,12 @@ export default class Levels {
 		const config = {
 			rank: { align: 'center' },
 			user: { align: 'left', midWidth: 20, maxWidth: 25 },
-			xp: { align: 'center', minWidth: 8 },
+			// xp: { align: 'center', minWidth: 8 },
 			level: { align: 'center', minWidth: 4 },
 		};
 
 		// Construct Paginator
-		const paginator = new TabulatedPages('Xp Board', data, config);
+		const paginator = new TabulatedPages('Xp Board', data, config, 8);
 
 		// Construct Embed
 		const e = new MessageEmbed()

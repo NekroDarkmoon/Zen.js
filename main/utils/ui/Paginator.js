@@ -136,6 +136,15 @@ export class Pages extends View {
 //                      Tabulated Data Paginator
 // ----------------------------------------------------------------
 export class TabulatedPages extends Pages {
+	/**
+	 *
+	 * @param {string} action
+	 * @param {Array<Object>} data
+	 * @param {Object} config
+	 * @param {Numer} maxPages
+	 * @param {Number} maxLines
+	 * @param {Numebr} timeout
+	 */
 	constructor(
 		action,
 		data,
@@ -223,9 +232,9 @@ export class TabulatedPages extends Pages {
 	tabulate(data) {
 		// Data Builder
 		const options = {
-			columnSplitter: ' | ',
+			columnSplitter: '  ',
 			config: this.config,
-			headingTransform: heading => `-${heading.toUpperCase()}-`,
+			headingTransform: heading => `${heading}\n${`-`.repeat(heading.length)}`,
 		};
 
 		const tabulated = columnify(data, options);
