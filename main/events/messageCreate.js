@@ -126,14 +126,14 @@ export default class MessageCreateEvent {
 			const sqlArray = [];
 			const valArray = [];
 			users.forEach(user => {
-				const sql = `INSERT INTO rep (server_id, user_id, rep, last_given)
-                     VALUES ($1, $2, $3, $4)
+				const sql = `INSERT INTO rep (server_id, user_id, rep)
+                     VALUES ($1, $2, $3)
                      ON CONFLICT (server_id, user_id) 
-                     DO UPDATE SET rep = rep.rep + $3,
-										 							 last_given=$4;`;
-				const values = [message.guild.id, user.id, 1, new Date()];
+                     DO UPDATE SET rep = rep.rep + $3;`;
+				const values = [message.guild.id, user.id, 1];
 				sqlArray.push(sql);
 				valArray.push(values);
+
 				// TODO: Possibly Fix this emitter
 				const rEvent = { init: message, userId: user.id, guild: message.guild };
 				this.bot.emit('repGiven', rEvent);

@@ -347,7 +347,7 @@ export default class Info {
 		// e.addField('CPU Usage', `${bts}${cpu} ${bt}`, true);
 
 		// Add links
-		e.addField('Invite Link', bot.config.inviteLink);
+		e.setURL(bot.config.inviteLink);
 		e.addField('Repo Link', 'https://github.com/NekroDarkmoon/Zen');
 		// Add Bot Image
 		e.setThumbnail(bot.user.displayAvatarURL());
@@ -383,13 +383,14 @@ export default class Info {
 
 		// Modify results to needs
 		let modifiedResult = [];
+
 		members.forEach(member =>
-			modifiedResult.push({ members: member.displayName })
+			modifiedResult.push({ members: `- ${member.displayName}` })
 		);
 
 		// Setup Formatter
 		const pageConf = {
-			members: { align: 'left' },
+			members: { align: 'left', minWidth: 40 },
 		};
 
 		// Construct Paginator

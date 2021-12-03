@@ -44,7 +44,6 @@
     "server_id": "BIGINT NOT NULL,",
     "user_id": "BIGINT NOT NULL,",
     "rep": "INT NOT NULL,",
-    "last_given": "TIMESTAMP DEFAULT CURRENT_DATE,",
     "PRIMARY KEY": "(server_id, user_id)"
   },
 

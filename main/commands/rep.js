@@ -155,12 +155,11 @@ export default class Rep {
 		// Execute Db transaction
 		// TODO: Convert to executeMany
 		try {
-			const sql = `INSERT INTO rep (server_id, user_id, rep, last_given)
-                     VALUES ($1, $2, $3, $4)
+			const sql = `INSERT INTO rep (server_id, user_id, rep)
+                     VALUES ($1, $2, $3)
                      ON CONFLICT (server_id, user_id) 
-                     DO UPDATE SET rep = rep.rep + $3,
-										 							 last_given=$4;`;
-			const values = [interaction.guild.id, user.id, rep, new Date()];
+                     DO UPDATE SET rep = rep.rep + $3;`;
+			const values = [interaction.guild.id, user.id, rep];
 			await this.bot.db.execute(sql, values);
 		} catch (err) {
 			this.bot.logger.error(err);
@@ -196,12 +195,11 @@ export default class Rep {
 
 		// Set new rep
 		try {
-			const sql = `INSERT INTO rep (server_id, user_id, rep, last_given)
-                     VALUES ($1, $2, $3, $4)
+			const sql = `INSERT INTO rep (server_id, user_id, rep)
+                     VALUES ($1, $2, $3)
                      ON CONFLICT (server_id, user_id) 
-                     DO UPDATE SET rep=$3,
-										 							 last_given=$4;`;
-			const values = [interaction.guild.id, user.id, rep, new Date()];
+                     DO UPDATE SET rep=$3`;
+			const values = [interaction.guild.id, user.id, rep];
 			await this.bot.db.execute(sql, values);
 		} catch (err) {
 			this.bot.logger.error(err);
