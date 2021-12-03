@@ -4,6 +4,9 @@
 import pg from 'pg';
 const { Pool } = pg;
 import { readFile } from 'fs/promises';
+import Cursor from 'pg-cursor';
+import { promisify } from 'util';
+Cursor.prototype.readAsync = promisify(Cursor.prototype.read);
 
 // ----------------------------------------------------------------
 //                            Main Class
@@ -133,5 +136,21 @@ export default class ZenDB {
 		} finally {
 			conn.release();
 		}
+	}
+
+	/**
+	 *
+	 * @param {string} sql
+	 * @param {Array<string>} val
+	 * @returns {Cursor} cursor
+	 */
+	async getCursor(sql, val = []) {
+		// Validation - Fetch
+		if (sql.indexOf('SELECT') === -1) throw 'Not a fetch query';
+
+		const conn = await this.pool.connect();
+		const cursor = await conn.query(new Cursor(sql, val));
+
+		return cursor;
 	}
 }
