@@ -321,29 +321,40 @@ export default class Info {
 	 */
 	async selfInfo(interaction) {
 		// // Data Builder
-		// const bot = this.bot;
-		// const e = new MessageEmbed();
+		const bot = this.bot;
+		const e = new MessageEmbed();
+		const bts = '```diff\n';
+		const bt = '```';
 
 		// // Add Title & Description
-		// e.setTitle(bot.application.name || "Not Set");
-		// e.setDescription(bot.application.description || "Not Set");
+		e.setTitle(bot.application.name || 'Not Set');
+		e.setDescription(bot.application.description || 'Not Set');
 
 		// // Add ID, Shards, GuildCount, MemberCount & Commands count
-		// e.addField("ID", bot.application.id, true);
-		// e.addField("Guilds", (bot.guilds.cache).length, true);
-		// e.addField("Members", bot.users.cache.length, true);
-		// e.addField("Commands", bot.application.commands.cache.length, true);
+		e.addField('Bot ID', `${bts}${bot.application.id} ${bt}`, true);
+		e.addField('Guilds', `${bts}${bot.guilds.cache.size} ${bt}`, true);
+		e.addField('Members', `${bts}${bot.users.cache.size} ${bt}`, false);
+		e.addField(
+			'Global Slash Commands',
+			`${bts}${bot.application.commands.cache.size} ${bt}`,
+			false
+		);
 
 		// // Add Uptime
-		// // e.addField("Usage", usage, true);
+		const uptime = (bot.uptime / 1000 / 60 / 60 / 24).toFixed(3);
+		e.addField('Uptime', `${bts}${uptime} days ${bt}`, true);
 		// // Add CPU & MEM usage
+		// e.addField('CPU Usage', `${bts}${cpu} ${bt}`, true);
 
-		// // Add links
-		// const links = `\`\``;
-		// // Add Created at
-		// e.setFooter(`Created At: ${bot.application.createdAt.toDateString()}`);
-		// await interaction.editReply({embeds:[e]});
-		interaction.editReply('Implementation missing');
+		// Add links
+		e.addField('Invite Link', bot.config.inviteLink);
+		e.addField('Repo Link', 'https://github.com/NekroDarkmoon/Zen');
+		// Add Bot Image
+		e.setThumbnail(bot.user.displayAvatarURL());
+		// Add Created at
+		e.setFooter(`Created At: ${bot.application.createdAt.toString()}`);
+		interaction.editReply({ embeds: [e] });
+		// interaction.editReply('Implementation missing');
 	}
 
 	/**
@@ -405,4 +416,6 @@ export default class Info {
 			return;
 		}
 	}
+
+	// ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 }

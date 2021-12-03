@@ -17,6 +17,7 @@
  * @property {Array<string>} guilds
  * @property {string} activity
  * @property {boolean} deploySlash
+ * @property {string} inviteLink
  * @memberof typedefs
  */
 
