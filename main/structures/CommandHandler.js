@@ -137,7 +137,7 @@ export default class CommandHandler {
 
 		await Promise.all(promises);
 
-		this.globalCommands = this.commands.filter(cmd => cmd.global);
+		this.globalCommands = this.commands.filter(cmd => !cmd.global);
 		this.guildCommands = this.commands.filter(cmd => !cmd.global);
 	}
 
@@ -180,7 +180,7 @@ export default class CommandHandler {
 		const { size } = this.globalCommands;
 		if (size <= 0) return;
 
-		console.info(`Registering ${size} Global commands.`);
+		this.bot.logger.info(`Registering ${size} Global commands.`);
 		await this.rest.put(Routes.applicationCommands(this.bot.config.client_id), {
 			body: this.globalComamnds.mapValues(cmd => cmd.data.toJSON()),
 		});
@@ -191,7 +191,8 @@ export default class CommandHandler {
 		if (!bot.application?.owner) await bot.application.fetch();
 
 		// Const get guild commands
-		const guilds = bot.config.guilds.map(id => bot.guilds.cache.get(id));
+		// const guilds = bot.config.guilds.map(id => bot.guilds.cache.get(id));
+		const guilds = this.bot.guilds.cache;
 
 		// Set Guild Perms
 		guilds.forEach(async guild => {
@@ -199,19 +200,12 @@ export default class CommandHandler {
 			const _commands = await guild.commands.fetch();
 			// Construct perms
 			const fullPermissions = await this._permBuilder(_commands, guild);
-
 			await guild.commands.permissions.set({ fullPermissions });
+
 			bot.logger.info(
-				`Set perms for ${fullPermissions.length} commands in guild ${guild.id}`
+				`Set perms for ${fullPermissions.length} commands in guild ${guild.id} - ${guild.name}`
 			);
 		});
-
-		// Set Global Perms
-		// const _commands = await bot.application.commands.fetch();
-		// const fullPermissions = await this._permBuilder(_commands);
-		// await this.application.commands.permissions.set({
-		// 	fullPermissions: fullPermissions,
-		// });
 	}
 
 	/**
@@ -230,6 +224,12 @@ export default class CommandHandler {
 		for (const [cmdName, perms] of Object.entries(this._perms.commandPerms)) {
 			const cmd = commands.find(cmd => cmd.name === cmdName);
 			const type = perms.type;
+			if (!cmd) {
+				this.bot.logger.error(
+					`${cmdName} perms not registered for ${guild.id} - ${guild.name}`
+				);
+				continue;
+			}
 
 			if (type === 'USER') {
 				const perm = { id: `${cmd.id}`, permissions: [perms] };
