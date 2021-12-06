@@ -56,9 +56,8 @@ async function main() {
 		logger.error(e);
 	}
 
-	// if (!success) throw `An error occured.`;
-
-	// await _exit(logger, oldDB, newDB);
+	if (!success) throw `An error occured.`;
+	await _exit(logger, oldDB, newDB);
 }
 // ----------------------------------------------------------------
 //

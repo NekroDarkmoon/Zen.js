@@ -18,6 +18,7 @@
     "user_id": "BIGINT NOT NULL,",
     "channel_id": "BIGINT NOT NULL,",
     "last_msg": "TIMESTAMP DEFAULT CURRENT_DATE,",
+    "last_rep": "TIMESTAMP DEFAULT CURRENT_DATE,",
     "msg_count": "BIGINT NOT NULL,",
     "PRIMARY KEY": "(server_id, user_id)" 
   },
@@ -27,16 +28,6 @@
     "user_id": "BIGINT NOT NULL,",
     "count": "INT NOT NULL,", 
     "chns": "BIGINT ARRAY DEFAULT NULL,",   
-    "PRIMARY KEY": "(server_id, user_id)" 
-  },
-
-  "quests": {
-    "server_id": "BIGINT NOT NULL,",
-    "user_id": "BIGINT NOT NULL,",
-    "quest_id": "INT NOT NULL,",
-    "type": "TEXT,",
-    "posted_on": "TIMESTAMP DEFAULT CURRENT_DATE,",
-    "msg": "TEXT,",
     "PRIMARY KEY": "(server_id, user_id)" 
   },
 

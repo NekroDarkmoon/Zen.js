@@ -1,10 +1,9 @@
 // ----------------------------------------------------------------
 //                             Imports
-
+// ----------------------------------------------------------------
 import Cursor from 'pg-cursor';
 import winston from 'winston';
 import ZenDB from '../db/index.js';
-import { promisify } from 'util';
 
 // ----------------------------------------------------------------
 const VERSION = '0300';
@@ -32,6 +31,8 @@ export default async function migrate(ver, db, logger) {
 	const oldCursors = await getOldData(oldDB);
 
 	await addToNewDB(newDB, oldCursors);
+
+	return true;
 }
 
 // ----------------------------------------------------------------
@@ -96,8 +97,14 @@ async function addToNewDB(newDb, cursors) {
 					r.last_exp,
 				];
 
+				const sql2 = `INSERT INTO logger (server_id, user_id, channel_id, last_msg, msg_count)
+											VALUES ($1, $2, $3, $4, $5);`;
+				const values2 = [r.server_id, r.user_id, -1, r.last_exp, r.msg_amt];
+
 				sqls.push(sql);
 				vals.push(values);
+				sqls.push(sql2);
+				vals.push(values2);
 			});
 
 			await newDb.executeMany(sqls, vals);

@@ -234,7 +234,8 @@ export class TabulatedPages extends Pages {
 		const options = {
 			columnSplitter: '  ',
 			config: this.config,
-			headingTransform: heading => `${heading}\n${`-`.repeat(heading.length)}`,
+			headingTransform: heading =>
+				`${heading.toUpperCase()}\n${`-`.repeat(heading.length)}`,
 		};
 
 		const tabulated = columnify(data, options);
