@@ -2,7 +2,7 @@
 //                             Imports
 // ----------------------------------------------------------------
 import Zen from '../Zen.js';
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder, time } from '@discordjs/builders';
 import { Interaction, MessageEmbed, Permissions } from 'discord.js';
 import { TabulatedPages } from '../utils/ui/Paginator.js';
 
@@ -152,23 +152,13 @@ export default class Rep {
 			return;
 		}
 
-		// // TODO: Complete time validation query
-		// // Validation - Time check
-		// try {
-		//   const sql = `SELECT * FROM logger WHERE server_id=$1 and user_id=$2`;
-		//   const values = [interaction.guild.id, member.id];
-		//   const res = await this.bot.db.fetchOne(sql, values);
-		//   // console.log(res);
-
-		// } catch ( err ) { this.bot.logger.error(err) }
-
 		// Execute Db transaction
 		// TODO: Convert to executeMany
 		try {
 			const sql = `INSERT INTO rep (server_id, user_id, rep)
-                   VALUES ($1, $2, $3)
-                   ON CONFLICT ON CONSTRAINT server_user 
-                   DO UPDATE SET rep = rep.rep + $3;`;
+                     VALUES ($1, $2, $3)
+                     ON CONFLICT (server_id, user_id) 
+                     DO UPDATE SET rep = rep.rep + $3;`;
 			const values = [interaction.guild.id, user.id, rep];
 			await this.bot.db.execute(sql, values);
 		} catch (err) {
@@ -206,9 +196,9 @@ export default class Rep {
 		// Set new rep
 		try {
 			const sql = `INSERT INTO rep (server_id, user_id, rep)
-                   VALUES ($1, $2, $3)
-                   ON CONFLICT ON CONSTRAINT server_user
-                   DO UPDATE SET rep = $3;`;
+                     VALUES ($1, $2, $3)
+                     ON CONFLICT (server_id, user_id) 
+                     DO UPDATE SET rep=$3`;
 			const values = [interaction.guild.id, user.id, rep];
 			await this.bot.db.execute(sql, values);
 		} catch (err) {
@@ -279,11 +269,11 @@ export default class Rep {
 		};
 
 		// Construct Paginator
-		const paginator = new TabulatedPages('Rep Board', data, pageConf);
+		const paginator = new TabulatedPages('Rep Board', data, pageConf, 5);
 
 		// Construct Embed
 		const e = new MessageEmbed()
-			.setColor('DARK_GOLD')
+			.setColor('RANDOM')
 			.setTitle('Rep Board')
 			.setDescription(paginator._prepareData(page));
 
@@ -297,7 +287,7 @@ export default class Rep {
 		try {
 			await paginator.onInteraction(interaction);
 		} catch (e) {
-			this.logger.error(e);
+			this.bot.logger.error(e);
 			return;
 		}
 	}
@@ -367,7 +357,7 @@ export default class Rep {
 		try {
 			await paginator.onInteraction(interaction);
 		} catch (e) {
-			this.logger.error(e);
+			this.bot.logger.error(e);
 			return;
 		}
 	}

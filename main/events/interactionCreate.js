@@ -21,6 +21,9 @@ export default class InteractionCreateEvent {
 	 * @returns {Promise<void>}
 	 */
 	execute = async interaction => {
+		// Validation - Ready
+		if (!this.bot.isReady()) return;
+
 		if (!interaction.isCommand()) return;
 
 		/** @type {Zen} */

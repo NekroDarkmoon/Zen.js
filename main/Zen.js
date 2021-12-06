@@ -1,7 +1,7 @@
 // ----------------------------------------------------------------
 //                             Imports
 // ----------------------------------------------------------------
-import { Client, GuildMember, Intents, Message } from 'discord.js';
+import { Client, GuildMember, Intents } from 'discord.js';
 
 import ZenDB from './utils/db/index.js';
 import CommandHandler from './structures/CommandHandler.js';
@@ -25,13 +25,7 @@ export default class Zen extends Client {
 	constructor(config, db, logger) {
 		// Init Client with intents and partials
 		super({
-			intents: [
-				Intents.FLAGS.GUILDS,
-				Intents.FLAGS.GUILD_BANS,
-				Intents.FLAGS.GUILD_MEMBERS,
-				Intents.FLAGS.GUILD_MESSAGES,
-				Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-			],
+			intents: 1927,
 			partials: ['MESSAGE', 'CHANNEL', 'REACTION', 'GUILD_MEMBER'],
 		});
 
@@ -51,12 +45,8 @@ export default class Zen extends Client {
 		this.EventHandler = new EventHandler(this);
 
 		// Miscellaneous
-		// TODO: Fetch type from typedef
-		this.caches = {
-			loggingChns: {},
-			features: {},
-			playCats: {},
-		};
+		/**@type {import('./structures/typedefs.js').ZenCache} */
+		this.caches = {};
 		this._started = false;
 		this._exited = false;
 	}
@@ -80,7 +70,7 @@ export default class Zen extends Client {
 		try {
 			if (this.config.deploySlash) await this.CommandHandler.registerCommands();
 		} catch (e) {
-			console.log(e);
+			this.logger.error(e);
 		}
 
 		// Set token
@@ -113,10 +103,10 @@ export default class Zen extends Client {
 	}
 
 	async buildCaches() {
-		this.caches.loggingChns = await caches.cacheLogChns(this);
-		this.caches.playCats = await caches.cachePlayChns(this);
-		this.caches.features = await caches.cacheEnabled(this);
-		this.caches.hashtags = await caches.cacheHashtags(this);
+		setTimeout(async () => {
+			this.caches = await caches.settingsCacheBuilder(this);
+			console.log(this.caches);
+		}, 1500);
 	}
 
 	/**

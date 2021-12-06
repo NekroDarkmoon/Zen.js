@@ -28,17 +28,51 @@ export default class MessageCreateEvent {
 		const bot = message.client;
 		if (!this.bot) this.bot = bot;
 
+		// Validation - Ready
+		if (!this.bot.isReady()) return;
 		// Validation - Bot
 		if (message.author.bot) return;
 		// Validation - Command
 
 		// Fire sub events
 		const events = [];
-		if (bot.caches.features[message.guild.id]?.levels) this.xpHandler(message);
-		if (bot.caches.features[message.guild.id]?.rep) this.repHandler(message);
+		this.handleLog(message);
+		if (bot.caches[message.guild.id]?.enabled.levels) this.xpHandler(message);
+		if (bot.caches[message.guild.id]?.enabled.rep) this.repHandler(message);
 
 		handleHashTag.bind(this)(message);
 	};
+
+	/**
+	 *
+	 * @param {Message} message
+	 *
+	 */
+	async handleLog(message) {
+		// Validation - Bot
+		if (message.author.bot) return;
+		// Validation - Join message
+		if (message.type !== 'DEFAULT') return;
+
+		// Data builder
+		const guild = message.guildId;
+		const user = message.author.id;
+		const channel = message.channelId;
+
+		try {
+			const sql = `INSERT INTO logger (server_id, user_id, channel_id,
+																			 last_msg, msg_count)
+									 VALUES ($1, $2, $3, $4, $5)
+									 ON CONFLICT (server_id, user_id)
+									 DO UPDATE SET channel_id=$3,
+									 							 last_msg=$4,
+																 msg_count=logger.msg_count + $5`;
+			const vals = [guild, user, channel, new Date(), 1];
+			this.bot.db.execute(sql, vals);
+		} catch (e) {
+			this.bot.logger.error(e);
+		}
+	}
 
 	/**
 	 *
@@ -80,7 +114,7 @@ export default class MessageCreateEvent {
 
 		// Data builder
 		const users = [...message.mentions.users.values()]
-			// .filter(u => u.id !== message.author.id)
+			.filter(u => u.id !== message.author.id)
 			.filter(u => !u.bot);
 
 		// Validation - Length
@@ -94,11 +128,12 @@ export default class MessageCreateEvent {
 			users.forEach(user => {
 				const sql = `INSERT INTO rep (server_id, user_id, rep)
                      VALUES ($1, $2, $3)
-                     ON CONFLICT ON CONSTRAINT server_user 
+                     ON CONFLICT (server_id, user_id) 
                      DO UPDATE SET rep = rep.rep + $3;`;
 				const values = [message.guild.id, user.id, 1];
 				sqlArray.push(sql);
 				valArray.push(values);
+
 				// TODO: Possibly Fix this emitter
 				const rEvent = { init: message, userId: user.id, guild: message.guild };
 				this.bot.emit('repGiven', rEvent);
@@ -106,7 +141,7 @@ export default class MessageCreateEvent {
 
 			await this.bot.db.executeMany(sqlArray, valArray);
 		} catch (err) {
-			console.log(err);
+			this.bot.logger.error(err);
 		}
 
 		// Send notif

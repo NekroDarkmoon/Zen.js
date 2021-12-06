@@ -22,10 +22,13 @@ export default class MessageReactionRemoveEvent {
 	 * @param {User} user
 	 */
 	execute = async (reaction, user) => {
+		// Validation - Ready
+		if (!this.bot.isReady()) return;
+
 		try {
 			await this.handleRep(reaction, user);
 		} catch (e) {
-			console.log(e);
+			this.bot.logger.error(e);
 			return;
 		}
 	};
@@ -59,11 +62,12 @@ export default class MessageReactionRemoveEvent {
 
 		// Give rep to member
 		try {
-			const sql = `INSERT INTO rep (server_id, user_id, rep)
-                   VALUES ($1, $2, $3)
-                   ON CONFLICT ON CONSTRAINT server_user 
-                   DO UPDATE SET rep = rep.rep - $3;`;
-			const values = [guild.id, member.id, rep];
+			const sql = `INSERT INTO rep (server_id, user_id, rep, last_given)
+                     VALUES ($1, $2, $3, $4)
+                     ON CONFLICT (server_id, user_id) 
+                     DO UPDATE SET rep = rep.rep + $3,
+										 							 last_given=$4;`;
+			const values = [message.guild.id, user.id, 1, new Date()];
 			await this.bot.db.execute(sql, values);
 		} catch (e) {
 			this.bot.logger.error(e);

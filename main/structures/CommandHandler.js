@@ -46,13 +46,12 @@ export default class CommandHandler {
 	 * @returns {Promise<void>}
 	 */
 	async deleteGuildCommands() {
-		const commands = await this.getGuildCommands();
-		if (commands.length <= 0) return;
-
 		// Get Guilds
 		const guilds = this.bot.config.guilds;
 
 		guilds.forEach(async guildId => {
+			const commands = await this.getGuildCommands(guildId);
+			if (commands.length <= 0) return;
 			const promises = commands.map(async cmd => {
 				this.rest.delete(
 					Routes.applicationGuildCommand(
@@ -101,11 +100,11 @@ export default class CommandHandler {
 	/**
 	 * @returns {Promise<{id:string}[]>}
 	 */
-	async getGuildCommands() {
+	async getGuildCommands(guildId = this.bot.config.guilds[0]) {
 		return this.rest.get(
 			Routes.applicationGuildCommands(
 				this.bot.config.client_id,
-				this.bot.config.guilds[0]
+				this.bot.config.guilds[this.bot.config.guilds.indexOf(guildId)]
 			)
 			// {body: this.guildCommands.mapValues( cmd => cmd.data.toJSON())}
 		);
@@ -138,7 +137,6 @@ export default class CommandHandler {
 
 		await Promise.all(promises);
 
-		// console.log(this.commands);
 		this.globalCommands = this.commands.filter(cmd => cmd.global);
 		this.guildCommands = this.commands.filter(cmd => !cmd.global);
 	}

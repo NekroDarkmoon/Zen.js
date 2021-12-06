@@ -39,6 +39,7 @@ export function msgSanatize(str) {
 //                         Export Cachers
 // ----------------------------------------------------------------
 export const caches = {
+	settingsCacheBuilder,
 	cacheLogChns: cacheLogChns,
 	cacheEnabled: cacheEnabled,
 	cachePlayChns: cachePlayChns,
@@ -52,6 +53,7 @@ export const caches = {
  *
  * @param {Zen} bot
  * @returns {Object} cache
+ * @deprecated
  */
 async function cacheLogChns(bot) {
 	bot.logger.info('Building Logger Cache');
@@ -76,6 +78,7 @@ async function cacheLogChns(bot) {
  *
  * @param {Zen} bot
  * @returns {Object} cache
+ * @deprecated
  */
 async function cachePlayChns(bot) {
 	bot.logger.info('Building PlayChannels Cache');
@@ -99,6 +102,7 @@ async function cachePlayChns(bot) {
 // ----------------------------------------------------------------
 /**
  * @param {Zen} bot
+ * @deprecated
  */
 async function cacheHashtags(bot) {
 	bot.logger.info('Building Hashtag Cache');
@@ -128,6 +132,7 @@ async function cacheHashtags(bot) {
  *    levels: Boolean,
  *    rep: Boolean,
  * }}} cache
+ * @deprecated
  */
 async function cacheEnabled(bot) {
 	bot.logger.info('Building Features Cache');
@@ -152,12 +157,83 @@ async function cacheEnabled(bot) {
 }
 
 // ----------------------------------------------------------------
-//                             XP Calc
+//                          Cache - Exceptions
 // ----------------------------------------------------------------
+/**
+ *
+ * @param {*} bot
+ * @deprecated
+ */
+async function cacheExceptions(bot) {
+	bot.logger.info('Building Exceptions Cache');
+	try {
+		const cache = {};
+		const sql = `SELECT * FROM settings`;
+		const res = (await bot.db.fetch(sql)) || [];
+		// Add to Cache
+		res.forEach(server => {
+			cache[server.id] = server.exceptions;
+		});
+	} catch (e) {
+		bot.logger.error(`An error occured while building exceptions cache ${e}`);
+	}
+}
 
 // ----------------------------------------------------------------
-//                             Imports
+//                       Cache - Server Objects
 // ----------------------------------------------------------------
+/**
+ *
+ * @param {Zen} bot
+ * @returns {import('../structures/typedefs.js').ZenCache} ZenCache
+ *
+ */
+export async function settingsCacheBuilder(bot) {
+	bot.logger.info('Building Server Settings Cache');
+	const cache = {};
+
+	try {
+		const sql = `SELECT * FROM settings`;
+		const res = (await bot.db.fetch(sql)) || [];
+
+		// Build Cache
+		res.forEach(s => {
+			// Add Enabled features
+			const enabled = {
+				levels: s.levels || false,
+				playChns: s.playchns || false,
+				rep: s.rep || false,
+			};
+
+			// Add Channel cache
+			const channels = {
+				hashtags: s.hashtags || [],
+				logChn: s.logging_chn,
+				playCat: s.playcat,
+			};
+
+			const roles = {
+				exceptions: s.exception || [],
+			};
+
+			const settings = {};
+
+			const data = {
+				enabled,
+				channels,
+				roles,
+				settings,
+			};
+
+			cache[s.server_id] = data;
+		});
+	} catch (e) {
+		bot.logger.error(`An errror occured while building settings cache ${e}.`);
+	}
+
+	return cache;
+}
+
 // ----------------------------------------------------------------
 //                             Imports
 // ----------------------------------------------------------------

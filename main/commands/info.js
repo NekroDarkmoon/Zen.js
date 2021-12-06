@@ -2,9 +2,14 @@
 //                             Imports
 // ----------------------------------------------------------------
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { Interaction, MessageEmbed, Permissions, User } from 'discord.js';
+import {
+	CommandInteraction,
+	MessageEmbed,
+	Permissions,
+	User,
+} from 'discord.js';
 import Zen from '../Zen.js';
-import os from 'os';
+import { TabulatedPages } from '../utils/ui/Paginator.js';
 
 // ----------------------------------------------------------------
 //                             Imports
@@ -35,9 +40,17 @@ export default class Info {
 				sub
 					.setName('server')
 					.setDescription("Displays the server's information.")
+					.addBooleanOption(opt =>
+						opt.setName('hidden').setDescription('Set Ephemeral')
+					)
 			)
 			.addSubcommand(sub =>
-				sub.setName('self').setDescription('Displays information on the bot.')
+				sub
+					.setName('self')
+					.setDescription('Displays information on the bot.')
+					.addBooleanOption(opt =>
+						opt.setName('hidden').setDescription('Set Ephemeral')
+					)
 			)
 			.addSubcommand(sub =>
 				sub
@@ -49,11 +62,14 @@ export default class Info {
 							.setDescription('Selected Role.')
 							.setRequired(true)
 					)
+					.addBooleanOption(opt =>
+						opt.setName('hidden').setDescription('Set Ephemeral')
+					)
 			);
 	}
 
 	/**
-	 * @param {Interaction} interaction
+	 * @param {CommandInteraction} interaction
 	 * @returns {Promise<void>}
 	 * */
 	execute = async interaction => {
@@ -63,6 +79,9 @@ export default class Info {
 		/**@type {Zen} */
 		const bot = interaction.client;
 		if (!this.bot) this.bot = bot;
+		// Defer Update
+		const hidden = interaction.options.getBoolean('hidden');
+		await interaction.deferReply({ ephemeral: hidden });
 		const sub = interaction.options.getSubcommand();
 
 		// Handler
@@ -84,47 +103,58 @@ export default class Info {
 
 	/**
 	 *
-	 * @param {Interaction} interaction
+	 * @param {CommandInteraction} interaction
 	 */
 	async userInfo(interaction) {
-		// Defer reply
-		const hidden = interaction.options.getBoolean('hidden');
-		await interaction.deferReply({ ephemeral: hidden });
 		// Data builder
 		/** @type {User || GuildMember} */
 		const user = interaction.options.getUser('target');
 		const member = await interaction.guild.members.fetch(user.id);
+		const bts = '```diff\n';
+		const bt = '```';
 		const e = new MessageEmbed();
 
 		// Basic information
 		e.setAuthor(user.username);
-		e.addField('ID', user.id, true);
+		e.addField('ID', `${bts}${user.id} ${bt}`, true);
 		// Get shared servers
-		const shared = 'In Progress';
-		e.addField('Servers', shared, true);
+		const shared = this.bot.guilds.cache
+			.map(g => g.members.cache.get(member.id))
+			.filter(m => m);
+
+		e.addField('Servers', `${bts}${shared.length} ${bt}`, true);
 		// Joined
 		const joined = member.joinedAt.toDateString();
-		e.addField('Joined', joined, false);
+		e.addField('Joined', `${bts}${joined} ${bt}`, false);
 		// Created
 		const created = user.createdAt.toDateString();
-		e.addField('Created', created, true);
+		e.addField('Created', `${bts}${created} ${bt}`, true);
 		// Get roles
 		const roles = member.roles.cache;
 		if (roles) {
 			const roleNames = roles.map(role => role.name.replace('@', '@\u200b'));
 			const data =
 				roles.size > 10 ? `${roles.size} roles` : roleNames.join(', ');
-			e.addField('Roles', data, false);
+			e.addField('Roles', `${bts}${data} ${bt}`, false);
 		}
 
 		// Add color
-		const color = user.hexAccentColor || '0xf2f6f7';
+		const color = user.hexAccentColor || 'RANDOM';
 		e.setColor(color);
 		// Add Avatar
 		const avatar = user.avatarURL();
 		if (avatar) e.setThumbnail(avatar);
 
-		// TODO: Add last message
+		try {
+			const sql = `SELECT * FROM logger WHERE server_id=$1 AND user_id=$2`;
+			const vals = [interaction.guildId, user.id];
+			const res = await this.bot.db.fetchOne(sql, vals);
+
+			const msgTime = res ? res?.last_msg?.toString() : 'No last message';
+			e.addField('Last Message', `${bts}${msgTime} ${bt}`);
+		} catch (e) {
+			this.bot.logger.error(e);
+		}
 
 		// Set Footer
 		const footer = Date();
@@ -136,13 +166,11 @@ export default class Info {
 
 	/**
 	 *
-	 * @param {Interaction} interaction
+	 * @param {CommandInteraction} interaction
 	 */
 	async serverInfo(interaction) {
-		// Defer Reply
-		await interaction.deferReply();
 		// Data Builder
-		const e = new MessageEmbed();
+		const e = new MessageEmbed().setColor('RANDOM');
 		const guildId = interaction.guild.id;
 		const guild = await this.bot.guilds.fetch(guildId);
 		const owner = await guild.fetchOwner();
@@ -289,37 +317,106 @@ export default class Info {
 
 	/**
 	 *
-	 * @param {Interaction} interaction
+	 * @param {CommandInteraction} interaction
 	 */
 	async selfInfo(interaction) {
-		// Defer Reply
-		await interaction.deferReply();
 		// // Data Builder
-		// const bot = this.bot;
-		// const e = new MessageEmbed();
+		const bot = this.bot;
+		const e = new MessageEmbed();
+		const bts = '```diff\n';
+		const bt = '```';
 
 		// // Add Title & Description
-		// e.setTitle(bot.application.name || "Not Set");
-		// e.setDescription(bot.application.description || "Not Set");
+		e.setTitle(bot.application.name || 'Not Set');
+		e.setDescription(bot.application.description || 'Not Set');
 
 		// // Add ID, Shards, GuildCount, MemberCount & Commands count
-		// e.addField("ID", bot.application.id, true);
-		// e.addField("Guilds", (bot.guilds.cache).length, true);
-		// e.addField("Members", bot.users.cache.length, true);
-		// e.addField("Commands", bot.application.commands.cache.length, true);
+		e.addField('Bot ID', `${bts}${bot.application.id} ${bt}`, true);
+		e.addField('Guilds', `${bts}${bot.guilds.cache.size} ${bt}`, true);
+		e.addField('Members', `${bts}${bot.users.cache.size} ${bt}`, false);
+		e.addField(
+			'Global Slash Commands',
+			`${bts}${bot.application.commands.cache.size} ${bt}`,
+			false
+		);
 
 		// // Add Uptime
-		// // e.addField("Usage", usage, true);
+		const uptime = (bot.uptime / 1000 / 60 / 60 / 24).toFixed(3);
+		e.addField('Uptime', `${bts}${uptime} days ${bt}`, true);
 		// // Add CPU & MEM usage
+		// e.addField('CPU Usage', `${bts}${cpu} ${bt}`, true);
 
-		// // Add links
-		// const links = `\`\``;
-		// // Add Created at
-		// e.setFooter(`Created At: ${bot.application.createdAt.toDateString()}`);
-		// await interaction.editReply({embeds:[e]});
+		// Add links
+		e.setURL(bot.config.inviteLink);
+		e.addField('Repo Link', 'https://github.com/NekroDarkmoon/Zen');
+		// Add Bot Image
+		e.setThumbnail(bot.user.displayAvatarURL());
+		// Add Created at
+		e.setFooter(`Created At: ${bot.application.createdAt.toString()}`);
+		interaction.editReply({ embeds: [e] });
+		// interaction.editReply('Implementation missing');
 	}
 
+	/**
+	 *
+	 * @param {CommandInteraction} interaction
+	 */
 	async roleInfo(interaction) {
-		await interaction.reply('Implementation missing');
+		const page = 1;
+
+		// Data builder
+		const role = interaction.options.getRole('target');
+		const e = new MessageEmbed();
+
+		// Set up embed
+		const name = role.name;
+		e.setTitle(`Role: ${name}`);
+
+		const guild = role.guild.name;
+		e.addField('Server', guild, false);
+
+		const color = role.hexColor;
+		e.setColor(color);
+
+		const members = role.members;
+		e.addField('Number of members', `${members.size}`, false);
+
+		// Modify results to needs
+		let modifiedResult = [];
+
+		members.forEach(member =>
+			modifiedResult.push({ members: `- ${member.displayName}` })
+		);
+
+		// Setup Formatter
+		const pageConf = {
+			members: { align: 'left', minWidth: 40 },
+		};
+
+		// Construct Paginator
+		const paginator = new TabulatedPages(
+			'Members in role',
+			modifiedResult,
+			pageConf
+		);
+
+		// Construct Embed
+		e.setDescription(paginator._prepareData(page));
+
+		// Send reply
+		await interaction.editReply({
+			embeds: [e],
+			components: paginator.components,
+		});
+
+		// Start Collecting
+		try {
+			await paginator.onInteraction(interaction);
+		} catch (e) {
+			this.bot.logger.error(e);
+			return;
+		}
 	}
+
+	// ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 }

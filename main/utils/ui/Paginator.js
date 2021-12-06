@@ -14,10 +14,10 @@ import columnify from 'columnify';
 //                             Imports
 // ----------------------------------------------------------------
 export class Pages extends View {
-	constructor(max_pages = null, timeout = 180) {
+	constructor(maxPages = null, timeout = 180) {
 		super(timeout);
 
-		this.max_pages = max_pages ? max_pages : 1;
+		this.maxPages = maxPages ? maxPages : 1;
 		this._currPage = 1;
 		this.components = this.createComponents(this._currPage);
 	}
@@ -111,17 +111,17 @@ export class Pages extends View {
 			)
 			.setLabel('▶')
 			.setStyle('PRIMARY')
-			.setDisabled(page >= this.max_pages);
+			.setDisabled(page >= this.maxPages);
 	}
 
 	lastPage(page) {
 		return new MessageButton()
 			.setCustomId(
-				JSON.stringify({ name: 'page', page: this.max_pages, type: 'last' })
+				JSON.stringify({ name: 'page', page: this.maxPages, type: 'last' })
 			)
 			.setLabel('≫')
 			.setStyle('PRIMARY')
-			.setDisabled(page >= this.max_pages);
+			.setDisabled(page >= this.maxPages);
 	}
 
 	stopPages() {
@@ -136,12 +136,29 @@ export class Pages extends View {
 //                      Tabulated Data Paginator
 // ----------------------------------------------------------------
 export class TabulatedPages extends Pages {
-	constructor(action, data, config = {}, max_pages = null, timeout = 180) {
-		max_pages = max_pages ? max_pages : Math.ceil(data.length / 15);
-		super(max_pages, timeout);
+	/**
+	 *
+	 * @param {string} action
+	 * @param {Array<Object>} data
+	 * @param {Object} config
+	 * @param {Numer} maxPages
+	 * @param {Number} maxLines
+	 * @param {Numebr} timeout
+	 */
+	constructor(
+		action,
+		data,
+		config = {},
+		maxPages = null,
+		maxLines = 15,
+		timeout = 180
+	) {
+		maxPages = maxPages ? maxPages : Math.ceil(data.length / maxLines);
+		super(maxPages, timeout);
 		this.customId = action;
 		this.data = data;
 		this.config = config;
+		this.maxLines = maxLines;
 	}
 
 	/**
@@ -196,9 +213,11 @@ export class TabulatedPages extends Pages {
 	 * @returns {String}
 	 */
 	_prepareData(page) {
-		const maxLines = 15;
 		const data = this.data;
-		const display = data.slice((page - 1) * maxLines, page * maxLines);
+		const display = data.slice(
+			(page - 1) * this.maxLines,
+			page * this.maxLines
+		);
 
 		// Tabulate data for display
 		const tabulated = this.tabulate(display);
@@ -213,9 +232,10 @@ export class TabulatedPages extends Pages {
 	tabulate(data) {
 		// Data Builder
 		const options = {
-			columnSplitter: ' | ',
+			columnSplitter: '  ',
 			config: this.config,
-			headingTransform: heading => `-${heading.toUpperCase()}-`,
+			headingTransform: heading =>
+				`${heading.toUpperCase()}\n${`-`.repeat(heading.length)}`,
 		};
 
 		const tabulated = columnify(data, options);

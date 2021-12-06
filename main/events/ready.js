@@ -28,6 +28,8 @@ export default class ReadyEvent {
 		const guildCount = bot.guilds.cache.size;
 
 		bot.logger.info(`Logged in as ${tag}!. Currently in ${guildCount} Guilds.`);
+		// Setup entries for settings if things changed while the bot was offline
+		await this.updateGuildSettings();
 
 		// Fetch Members from main guild
 		const guilds = bot.config.guilds;
@@ -43,4 +45,29 @@ export default class ReadyEvent {
 		// Set Perms
 		if (bot.config.deploySlash) await this.bot.CommandHandler.setSlashPerms();
 	};
+
+	/**
+	 *
+	 */
+	async updateGuildSettings() {
+		try {
+			const guilds = this.bot.guilds.cache;
+			const sql = [];
+			const vals = [];
+			const s = `INSERT INTO settings (server_id, owner_id, setup)
+								 VALUES ($1, $2, $3)
+								 ON CONFLICT (server_id)
+								 DO NOTHING;`;
+
+			guilds.forEach(async g => {
+				sql.push(s);
+				vals.push([g.id, g.ownerId, true]);
+			});
+
+			this.bot.db.executeMany(sql, vals);
+			this.bot.logger.info('Updated db with guild settings.	');
+		} catch (e) {
+			this.bot.logger.error(e);
+		}
+	}
 }

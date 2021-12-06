@@ -82,7 +82,7 @@ export default class HashTag {
 		const channel = interaction.options.getChannel('target');
 		const enable = interaction.options.getBoolean('set');
 		const guild = interaction.guild;
-		const cache = this.bot.caches.hashtags[guild.id];
+		const cache = this.bot.caches[guild.id].channels.hashtags;
 		let hashtags = [];
 
 		// Add to db
@@ -131,9 +131,11 @@ export async function handleHashTag(message) {
 	const guild = message.guild;
 	const channel = message.channel;
 	const content = message.content;
-	const hashtags = this.bot.caches.hashtags[guild.id];
+	const hashtags = this.bot.caches[guild.id]?.channels.hashtags;
+	const exceptions = this.bot.caches[guild.id]?.roles.exceptions;
 
-	// TODO: Check for exception
+	// Validation: Check for exception
+	if (message.member.roles.cache.has(exceptions)) return;
 
 	// Check if hashtags exist
 	if (hashtags?.length === 0) return false;

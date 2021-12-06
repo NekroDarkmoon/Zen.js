@@ -22,6 +22,9 @@ export default class MessageUpdateEvent {
 	 * @returns {Promise<void>}
 	 */
 	execute = async (oldMessage, newMessage) => {
+		// Validation - Ready
+		if (!this.bot.isReady()) return;
+
 		// Data builder
 		/** @type {Zen} */
 		const bot = oldMessage.client;
@@ -50,10 +53,12 @@ export default class MessageUpdateEvent {
 		// Validation - Content Change
 		if (before.content === after) return;
 		// Get logging channel
-		const chnId = this.bot.caches.loggingChns[before.guild.id] || null;
+		const chnId = this.bot.caches[before.guild.id].channels.logChn;
 		if (!chnId) return;
 
 		// DataBuilder
+		const bts = '```diff\n';
+		const bt = '```';
 		const author = before.author;
 		const oc = before.channel;
 		const oldContent = before.content;
@@ -70,17 +75,27 @@ export default class MessageUpdateEvent {
 			const oContentArray = chunkify(msgSanatize(oldContent), limit);
 			const nContentArray = chunkify(msgSanatize(newContent), limit);
 			// Create Embed
-			const e = new MessageEmbed().setTitle('Edited Message Log');
-			e.addField('Author', `${author.username}#${author.discriminator}`, true);
-			e.addField('AuthorID', author.id, true);
-			e.addField('Channel', oc.name, false);
+			const e = new MessageEmbed()
+				.setTitle('Edited Message Log')
+				.setColor('ORANGE');
+
+			e.addField(
+				'Author',
+				`${bts} ${author.username}#${author.discriminator} ${bt}`,
+				true
+			);
+
+			e.addField('AuthorID', `${bts} ${author.id} ${bt}`, true);
+
+			e.addField('Channel', `${bts} ${oc.name} ${bt}`, false);
+
 			if (attchs.length) e.addField('Attachments', attchs.join(',\n'), false);
 
 			oContentArray.forEach(chunk =>
-				e.addField('Before', chunk.toString(), false)
+				e.addField('Before', `${bts} ${chunk.toString()} ${bt}`, false)
 			);
 			nContentArray.forEach(chunk =>
-				e.addField('After', chunk.toString(), false)
+				e.addField('After', `${bts} ${chunk.toString()} ${bt}`, false)
 			);
 
 			await logChn.send({ embeds: [e] });
