@@ -80,7 +80,7 @@ async function addToNewDB(newDb, cursors) {
 
 	// Export data from first cursor
 	try {
-		let rows = await cursors[0].readAsync(50);
+		let rows = await cursors[0].readAsync(1);
 		let count = 0;
 		while (rows.length) {
 			console.log(`Adding ${count} from cursor 1`);
@@ -109,7 +109,7 @@ async function addToNewDB(newDb, cursors) {
 			});
 
 			await newDb.executeMany(sqls, vals);
-			rows = await cursors[0].readAsync(50);
+			rows = await cursors[0].readAsync(1);
 		}
 	} catch (e) {
 		LOGGER.error(e);

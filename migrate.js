@@ -52,12 +52,12 @@ async function main() {
 	logger.info(`Running migration script v${config.version}`);
 	try {
 		const success = await script(config.version, [oldDB, newDB], logger);
+		if (!success) throw `An error occured.`;
+		await _exit(logger, oldDB, newDB);
 	} catch (e) {
 		logger.error(e);
+		await _exit(logger, oldDB, newDB);
 	}
-
-	if (!success) throw `An error occured.`;
-	await _exit(logger, oldDB, newDB);
 }
 // ----------------------------------------------------------------
 //
