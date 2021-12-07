@@ -3,7 +3,7 @@
 // ----------------------------------------------------------------
 import Zen from '../Zen.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { Interaction } from 'discord.js';
+import { CommandInteraction } from 'discord.js';
 
 // ----------------------------------------------------------------
 //                             Command
@@ -16,15 +16,15 @@ export default class Tags {
 		this.data = new SlashCommandBuilder()
 			.setName(this.name)
 			.setDescription(this.description)
-			.addSubcommand(sub => sub.setName('get').setDescription(''))
-			.addSubcommand(sub => sub.setName('add').setDescription(''))
-			.addSubcommand(sub => sub.setName('remove').setDescription(''))
-			.addSubcommand(sub => sub.setName('list').setDescription(''))
-			.addSubcommand(sub => sub.setName('info').setDescription(''));
+			.addSubcommand(sub => sub.setName('get').setDescription('  '))
+			.addSubcommand(sub => sub.setName('add').setDescription('  '))
+			.addSubcommand(sub => sub.setName('remove').setDescription('  '))
+			.addSubcommand(sub => sub.setName('list').setDescription('  '))
+			.addSubcommand(sub => sub.setName('info').setDescription('  '));
 	}
 
 	/**
-	 * @param {Interaction} interaction
+	 * @param {CommandInteraction} interaction
 	 * @returns {Promise<void>}
 	 * */
 	execute = async interaction => {
