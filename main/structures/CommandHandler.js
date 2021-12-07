@@ -8,6 +8,9 @@ import { Routes } from 'discord-api-types/v9';
 import Zen from '../Zen.js';
 import fs, { readFileSync } from 'fs';
 
+// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//  									REWORK THIS ENTIRE STRUCTURE
+
 // ----------------------------------------------------------------
 //                          Command Handler
 // ----------------------------------------------------------------
