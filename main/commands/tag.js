@@ -15,32 +15,12 @@ export default class Tags {
 		this.global = false;
 		this.data = new SlashCommandBuilder()
 			.setName(this.name)
-			.setDescription(this.description);
-		// .addSubcommand( sub =>
-		//   sub
-		//     .setName('get')
-		//     .setDescription('')
-		// )
-		// .addSubcommand( sub =>
-		//   sub
-		//     .setName('add')
-		//     .setDescription('')
-		// )
-		// .addSubcommand( sub =>
-		//   sub
-		//     .setName('remove')
-		//     .setDescription('')
-		// )
-		// .addSubcommand( sub =>
-		//   sub
-		//     .setName('list')
-		//     .setDescription('')
-		// )
-		// .addSubcommand( sub =>
-		//   sub
-		//     .setName('info')
-		//     .setDescription('')
-		// )
+			.setDescription(this.description)
+			.addSubcommand(sub => sub.setName('get').setDescription(''))
+			.addSubcommand(sub => sub.setName('add').setDescription(''))
+			.addSubcommand(sub => sub.setName('remove').setDescription(''))
+			.addSubcommand(sub => sub.setName('list').setDescription(''))
+			.addSubcommand(sub => sub.setName('info').setDescription(''));
 	}
 
 	/**
