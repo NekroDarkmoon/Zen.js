@@ -21,7 +21,7 @@ export default class CommandHandler {
 	constructor(bot) {
 		this.bot = bot;
 		this.commands = new Collection();
-		this.globalComamnds = new Collection();
+		this.globalCommands = new Collection();
 		this.guildCommands = new Collection();
 		this.rest = new REST({ version: '9' }).setToken(this.bot.config.token);
 
@@ -168,7 +168,7 @@ export default class CommandHandler {
 		const { size } = this.guildCommands;
 		if (size <= 0) return;
 
-		this.bot.logger.info(`Registering ${size} Guild commands.`);
+		this.bot.logger.info(`Registering ${size} Guild (/) commands.`);
 
 		// Get main guilds
 		const guilds = this.bot.config.guilds;
@@ -192,14 +192,15 @@ export default class CommandHandler {
 		const { size } = this.globalCommands;
 		if (size <= 0) return;
 
-		this.bot.logger.info(`Registering ${size} Global commands.`);
+		this.bot.logger.info(`Registering ${size} Global (/) commands.`);
 		try {
 			await this.rest.put(
 				Routes.applicationCommands(this.bot.config.client_id),
 				{
-					body: this.globalComamnds.mapValues(cmd => cmd.data.toJSON()),
+					body: this.globalCommands.mapValues(cmd => cmd.data.toJSON()),
 				}
 			);
+			this.bot.logger.info(`Successfully added ${size} global (/) commands.`);
 		} catch (e) {
 			this.bot.logger.error(e);
 		}

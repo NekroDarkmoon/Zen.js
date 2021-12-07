@@ -43,7 +43,7 @@ export default class ReadyEvent {
 		});
 
 		// Set Perms
-		if (bot.config.deploySlash) await this.bot.CommandHandler.setSlashPerms();
+		if (bot.config.deploySlash) this.bot.CommandHandler.setSlashPerms();
 	};
 
 	/**

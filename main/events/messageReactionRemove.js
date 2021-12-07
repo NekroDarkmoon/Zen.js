@@ -44,11 +44,12 @@ export default class MessageReactionRemoveEvent {
 
 		// Data Builder
 		const message = reaction.message;
-		const member = message.member
-			? message.member
-			: await message.guild.members.fetch(message.author.id);
+		const member = this.bot._getOrFetchMembers(
+			message.member.id,
+			message.guildId
+		);
+
 		const guild = message.guild;
-		const rep = 1;
 
 		// Validation - Bot
 		if (member.user.bot) return;

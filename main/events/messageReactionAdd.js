@@ -44,12 +44,13 @@ export default class MessageReactionAddEvent {
 
 		// Data Builder
 		const message = reaction.message;
-		const member = message.member
-			? message.member
-			: await message.guild.members.fetch(message.author.id);
+		const member = await this.bot._getOrFetchMembers(
+			message.member.id,
+			message.guildId
+		);
+
 		if (member.partial) member = await member.fetch();
 		const guild = message.guild;
-		const rep = 1;
 
 		// Validation - Bot
 		if (member.user.bot) return;
