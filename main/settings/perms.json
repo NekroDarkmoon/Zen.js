@@ -9,19 +9,19 @@
     },
 
     "hashtag": {
-      "perms": "ADMINISTRATOR",
+      "perms": ["ADMINISTRATOR"],
       "type": "ROLE",
       "permission": true
     },
 
     "setup": {
-      "perms": "ADMINISTRATOR",
+      "perms": ["ADMINISTRATOR"],
       "type": "ROLE",
       "permission": true
     },
 
     "thread": {
-      "perms": "ADMINISTRATOR",
+      "perms": ["ADMINISTRATOR"],
       "type": "ROLE",
       "permission": true
     }

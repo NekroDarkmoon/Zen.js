@@ -207,12 +207,15 @@ export default class CommandHandler {
 	}
 
 	async setSlashPerms() {
+		// TODO: Seperate this out into guild and global setSlashPerms
 		const bot = this.bot;
 		if (!bot.application?.owner) await bot.application.fetch();
 
-		// Const get guild commands
-		// const guilds = bot.config.guilds.map(id => bot.guilds.cache.get(id));
-		const guilds = this.bot.guilds.cache;
+		// Get guilds Collection from conf
+		const guilds = new Collection();
+		bot.config.guilds.forEach(id => {
+			guilds.set(id, bot.guilds.cache.get(id));
+		});
 
 		// Set Guild Perms
 		guilds.forEach(async guild => {
@@ -220,30 +223,42 @@ export default class CommandHandler {
 			const _commands = await guild.commands.fetch();
 			// Construct perms
 			const fullPermissions = await this._permBuilder(_commands, guild);
-			await guild.commands.permissions.set({ fullPermissions });
+			guild.commands.permissions.set({ fullPermissions });
 
 			bot.logger.info(
 				`Set perms for ${fullPermissions.length} commands in guild ${guild.id} - ${guild.name}`
 			);
 		});
+
+		// TODO: Global Command perms
+		const _commands = await this.bot.application.commands.fetch();
+		const fullPermissions = await this._permBuilder(_commands);
+		const globalGuilds = this.bot.guilds.cache.difference(guilds);
+
+		// globalGuilds.forEach(g => g.commands.permissions.set({ fullPermissions }));
 	}
 
 	/**
 	 *
 	 * @param {Collection<string, discord.ApplicationCommand<{}>>} _commands
 	 * @param {Guild} guild
-	 * @returns {Array<import('discord.js').GuildApplicationCommandPermissionData>}
+	 * @returns {Array<import('discord.js').GuildApplicationCommandPermissionData>} fullPermissions
 	 */
 	async _permBuilder(_commands, guild = null) {
+		// Data Builder
 		const commands = _commands.filter(cmd =>
 			this._perms.commandNames.includes(cmd.name)
 		);
-
+		/** @type {Array<import('discord.js').GuildApplicationCommandPermissionData>} */
 		const fullPermissions = [];
 
 		for (const [cmdName, perms] of Object.entries(this._perms.commandPerms)) {
+			// Data Builder
 			const cmd = commands.find(cmd => cmd.name === cmdName);
 			const type = perms.type;
+			const cmdPerms = perms.perms?.map(p => Permissions.FLAGS[p]);
+
+			// Validation - No such command
 			if (!cmd) {
 				this.bot.logger.error(
 					`${cmdName} perms not registered for ${guild.id} - ${guild.name}`
@@ -251,33 +266,36 @@ export default class CommandHandler {
 				continue;
 			}
 
+			// Handle perm type
 			if (type === 'USER') {
 				const perm = { id: `${cmd.id}`, permissions: [perms] };
 
+				// Add to main builder
 				fullPermissions.push(perm);
-			} else if (type === 'ROLE') {
-				// TODO: Make guild input an array and then iterate it instead
-				// Check if is guild command
-				if (guild) {
-					const roles = await guild.roles.fetch();
-					const ids = roles
-						.filter(
-							r =>
-								r.permissions.has(Permissions.FLAGS[perms.perms]) &&
-								!r.tags?.botId &&
-								!r.tags?.integrationId
-						)
-						.map(r => r.id);
+			} else if (type === 'ROLE' && guild) {
+				// Get role ids with perms
+				const roles = await guild.roles.fetch();
 
-					// Add Perms to full permissions for each role
-					const perm = { id: cmd.id, permissions: [] };
-					ids.forEach(id => {
-						const p = { id: id, type: 'ROLE', permission: true };
-						perm.permissions.push(p);
-					});
+				const roleIds = roles
+					.filter(
+						r =>
+							r.permissions.has(cmdPerms) &&
+							!r.tags?.botId &&
+							!r.tags?.integrationId &&
+							!r.tags?.premiumSubscriberRole
+					)
+					.map(r => r.id);
 
-					fullPermissions.push(perm);
-				}
+				// Add Perms to full permissions for each role
+				const perm = { id: cmd.id, permissions: [] };
+				roleIds.forEach(id =>
+					perm.permissions.push({ id, type, permission: true })
+				);
+
+				// Add to main builder
+				fullPermissions.push(perm);
+			} else if (type === 'ROLE' && !guild) {
+				// Data Builder
 			}
 		}
 
