@@ -9,11 +9,11 @@ import Zen from '../Zen.js';
 // ----------------------------------------------------------------
 //                             Setup
 // ----------------------------------------------------------------
-export default class Setup {
+export default class Settings {
 	constructor() {
-		this.name = 'setup';
-		this.description = 'Setup the bot for the server.';
-		this.global = false;
+		this.name = 'settings';
+		this.description = 'Server Settings for the bot.';
+		this.global = true;
 		this.data = new SlashCommandBuilder()
 			.setName(this.name)
 			.setDescription(this.description)

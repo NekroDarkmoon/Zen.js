@@ -51,7 +51,7 @@ export default class MessageUpdateEvent {
 		// Validation - Bot
 		if (before.author.bot) return;
 		// Validation - Content Change
-		if (before.content === after) return;
+		if (before.content === after.content) return;
 		// Get logging channel
 		const chnId = this.bot.caches[before.guild.id].channels.logChn;
 		if (!chnId) return;

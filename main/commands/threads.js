@@ -13,7 +13,7 @@ export default class Threads {
 	constructor() {
 		this.name = 'thread';
 		this.description = 'Commands Related to threads';
-		this.global = false;
+		this.global = true;
 		this.data = new SlashCommandBuilder()
 			.setName(this.name)
 			.setDescription(this.description)

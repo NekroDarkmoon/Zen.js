@@ -18,7 +18,7 @@ export default class Info {
 	constructor() {
 		this.name = 'info';
 		this.description = 'Display information about the specified target.';
-		this.global = false;
+		this.global = true;
 		this.data = new SlashCommandBuilder()
 			.setName(this.name)
 			.setDescription(this.description)
@@ -161,7 +161,7 @@ export default class Info {
 		e.setFooter(`Generated at ${footer}`);
 
 		// Send embed
-		await interaction.editReply({ embeds: [e], ephemeral: hidden });
+		await interaction.editReply({ embeds: [e] });
 	}
 
 	/**
@@ -354,7 +354,6 @@ export default class Info {
 		// Add Created at
 		e.setFooter(`Created At: ${bot.application.createdAt.toString()}`);
 		interaction.editReply({ embeds: [e] });
-		// interaction.editReply('Implementation missing');
 	}
 
 	/**

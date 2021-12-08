@@ -12,7 +12,7 @@ export default class PlayChannels {
 	constructor() {
 		this.name = 'playchn';
 		this.description = 'Manage Private Channels on the server.';
-		this.global = false;
+		this.global = true;
 		this.data = new SlashCommandBuilder()
 			.setName(this.name)
 			.setDescription(this.description)

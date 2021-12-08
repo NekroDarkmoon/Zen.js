@@ -13,7 +13,7 @@ export default class Levels {
 	constructor() {
 		this.name = 'xp';
 		this.description = 'Commands Related to the Levelling system';
-		this.global = false;
+		this.global = true;
 		this.data = new SlashCommandBuilder()
 			.setName(this.name)
 			.setDescription(this.description)
