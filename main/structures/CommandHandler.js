@@ -158,7 +158,7 @@ export default class CommandHandler {
 	 */
 	async registerCommands() {
 		try {
-			await this.registerGlobalCommands();
+			// await this.registerGlobalCommands();
 			await this.registerGuildCommands();
 		} catch (err) {
 			this.bot.logger.error(err);
@@ -210,47 +210,31 @@ export default class CommandHandler {
 		}
 	}
 
+	/**
+	 *
+	 */
 	async setSlashPerms() {
-		try {
-			this.setGuildSlashPerms();
-			this.setGlobalSlashPerms();
-		} catch (e) {
-			this.bot.logger.error(e);
-		}
-	}
-
-	async setGuildSlashPerms() {
 		const bot = this.bot;
 		if (!bot.application?.owner) await bot.application.fetch();
 
-		// Set Guild Perms
-		const guilds = bot.config.guilds.map(g => bot.guilds.cache.get(g));
-		guilds.forEach(async g => {
-			// Construct Ids
-			const _commands = await g.commands.fetch();
-			// Construct perms
-			const fullPermissions = await this._permBuilder(_commands, g, true);
-			g.commands.permissions.set({ fullPermissions });
-
-			bot.logger.info(
-				`Set perms for ${fullPermissions.length} guild commands in guild ${g.id} - ${g.name}`
-			);
-		});
-	}
-
-	async setGlobalSlashPerms() {
-		const bot = this.bot;
-		if (!bot.application?.owner) await bot.application.fetch();
-
-		// Get guilds Collection from conf
-		const _commands = await bot.application.commands.fetch();
+		const _globalCommands = await bot.application.commands.fetch();
 		const globalGuilds = bot.guilds.cache;
 
 		globalGuilds.forEach(async g => {
-			const fullPermissions = await this._permBuilder(_commands, g);
+			let fullPermissions = [];
+			if (bot.config.guilds.includes(g.id)) {
+				const _guildCommands = await g.commands.fetch();
+				fullPermissions = [
+					...(await this._permBuilder(_guildCommands, g, true)),
+					...(await this._permBuilder(_globalCommands, g, false)),
+				];
+			} else {
+				fullPermissions = await this._permBuilder(_globalCommands, g);
+			}
+
 			g.commands.permissions.set({ fullPermissions });
 			bot.logger.info(
-				`Set perms for ${fullPermissions.length} global commands in guild ${g.id} - ${g.name}`
+				`Set perms for ${fullPermissions.length} commands in guild ${g.id} - ${g.name}`
 			);
 		});
 	}
@@ -276,8 +260,6 @@ export default class CommandHandler {
 			const cmd = commands.find(cmd => cmd.name === cmdName);
 			const type = perms.type;
 			const cmdPerms = perms.perms?.map(p => Permissions.FLAGS[p]);
-			// Validation - Guild Command
-			if (!cmd && guildCmd) continue;
 
 			// Validation - No such command
 			if (!cmd) {
