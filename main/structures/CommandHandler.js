@@ -207,35 +207,52 @@ export default class CommandHandler {
 	}
 
 	async setSlashPerms() {
-		// TODO: Seperate this out into guild and global setSlashPerms
+		try {
+			this.setGuildSlashPerms();
+			this.setGlobalSlashPerms();
+		} catch (e) {
+			this.bot.logger.error(e);
+		}
+	}
+
+	async setGuildSlashPerms() {
+		const bot = this.bot;
+		if (!bot.application?.owner) await bot.application.fetch();
+
+		// Set Guild Perms
+		const guilds = bot.config.guilds.map(g => bot.guilds.cache.get(g));
+		guilds.forEach(async g => {
+			// Construct Ids
+			const _commands = await g.commands.fetch();
+			// Construct perms
+			const fullPermissions = await this._permBuilder(_commands, g);
+			g.commands.permissions.set({ fullPermissions });
+
+			bot.logger.info(
+				`Set perms for ${fullPermissions.length} commands in guild ${g.id} - ${g.name}`
+			);
+		});
+	}
+
+	async setGlobalSlashPerms() {
 		const bot = this.bot;
 		if (!bot.application?.owner) await bot.application.fetch();
 
 		// Get guilds Collection from conf
-		const guilds = new Collection();
+		const localGuilds = new Collection();
 		bot.config.guilds.forEach(id => {
-			guilds.set(id, bot.guilds.cache.get(id));
+			localGuilds.set(id, bot.guilds.cache.get(id));
 		});
+		const _commands = await this.bot.application.commands.fetch();
+		const globalGuilds = this.bot.guilds.cache.difference(localGuilds);
 
-		// Set Guild Perms
-		guilds.forEach(async guild => {
-			// Construct Ids
-			const _commands = await guild.commands.fetch();
-			// Construct perms
-			const fullPermissions = await this._permBuilder(_commands, guild);
-			guild.commands.permissions.set({ fullPermissions });
-
+		globalGuilds.forEach(async g => {
+			const fullPermissions = await this._permBuilder(_commands);
+			g.commands.permissions.set({ fullPermissions });
 			bot.logger.info(
-				`Set perms for ${fullPermissions.length} commands in guild ${guild.id} - ${guild.name}`
+				`Set perms for ${fullPermissions.length} commands in guild ${g.id} - ${g.name}`
 			);
 		});
-
-		// TODO: Global Command perms
-		const _commands = await this.bot.application.commands.fetch();
-		const fullPermissions = await this._permBuilder(_commands);
-		const globalGuilds = this.bot.guilds.cache.difference(guilds);
-
-		// globalGuilds.forEach(g => g.commands.permissions.set({ fullPermissions }));
 	}
 
 	/**
@@ -294,8 +311,6 @@ export default class CommandHandler {
 
 				// Add to main builder
 				fullPermissions.push(perm);
-			} else if (type === 'ROLE' && !guild) {
-				// Data Builder
 			}
 		}
 

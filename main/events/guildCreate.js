@@ -60,7 +60,7 @@ export default class GuildCreateEvent {
 		await this.bot.buildCaches();
 
 		// Rebuild Slash Perms
-		this.bot.CommandHandler.setSlashPerms();
+		this.bot.CommandHandler.setGlobalSlashPerms();
 
 		// TODO: Setup
 	};
