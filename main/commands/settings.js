@@ -9,7 +9,7 @@ import Zen from '../Zen.js';
 // ----------------------------------------------------------------
 //                             Setup
 // ----------------------------------------------------------------
-export default class Setup {
+export default class Settings {
 	constructor() {
 		this.name = 'settings';
 		this.description = 'Server Settings for the bot.';
