@@ -11,8 +11,8 @@ import Zen from '../Zen.js';
 // ----------------------------------------------------------------
 export default class Setup {
 	constructor() {
-		this.name = 'setup';
-		this.description = 'Setup the bot for the server.';
+		this.name = 'settings';
+		this.description = 'Server Settings for the bot.';
 		this.global = false;
 		this.data = new SlashCommandBuilder()
 			.setName(this.name)
