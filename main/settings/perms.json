@@ -1,13 +1,15 @@
 {
   "commandNames": ["bot", "hashtag" ,"mod", "settings", "thread"],
   
-  "commandPerms": {
+  "guildPerms": {
     "bot": {
       "id": "157433182331863040",
       "type": "USER",
       "permission": true
-    },
+    }
+  },
 
+  "globalPerms": {
     "hashtag": {
       "perms": ["ADMINISTRATOR"],
       "type": "ROLE",

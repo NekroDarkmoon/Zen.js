@@ -18,7 +18,7 @@ export default class Info {
 	constructor() {
 		this.name = 'info';
 		this.description = 'Display information about the specified target.';
-		this.global = false;
+		this.global = true;
 		this.data = new SlashCommandBuilder()
 			.setName(this.name)
 			.setDescription(this.description)

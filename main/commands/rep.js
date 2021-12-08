@@ -13,7 +13,7 @@ export default class Rep {
 	constructor() {
 		this.name = 'rep';
 		this.description = 'Commands Related to the reputation system';
-		this.global = false;
+		this.global = true;
 		this.data = new SlashCommandBuilder()
 			.setName(this.name)
 			.setDescription(this.description)

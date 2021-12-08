@@ -13,7 +13,7 @@ export default class Settings {
 	constructor() {
 		this.name = 'settings';
 		this.description = 'Server Settings for the bot.';
-		this.global = false;
+		this.global = true;
 		this.data = new SlashCommandBuilder()
 			.setName(this.name)
 			.setDescription(this.description)

@@ -12,7 +12,7 @@ export default class Ping {
 	constructor() {
 		this.name = 'ping';
 		this.description = 'Responds with a latency to the server.';
-		this.global = false;
+		this.global = true;
 		this.data = new SlashCommandBuilder()
 			.setName(this.name)
 			.setDescription(this.description);
