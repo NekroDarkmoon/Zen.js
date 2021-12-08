@@ -161,7 +161,7 @@ export default class Info {
 		e.setFooter(`Generated at ${footer}`);
 
 		// Send embed
-		await interaction.editReply({ embeds: [e], ephemeral: hidden });
+		await interaction.editReply({ embeds: [e] });
 	}
 
 	/**
@@ -354,7 +354,6 @@ export default class Info {
 		// Add Created at
 		e.setFooter(`Created At: ${bot.application.createdAt.toString()}`);
 		interaction.editReply({ embeds: [e] });
-		// interaction.editReply('Implementation missing');
 	}
 
 	/**

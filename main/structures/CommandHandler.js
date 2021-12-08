@@ -108,6 +108,10 @@ export default class CommandHandler {
 		}
 	}
 
+	/**
+	 * @param {Number} guildId
+	 * @returns {Promise<{id:string}[]>}
+	 */
 	getGuildCommands(guildId = this.bot.config.guilds[0]) {
 		return this.rest.get(
 			Routes.applicationGuildCommands(
@@ -243,11 +247,11 @@ export default class CommandHandler {
 		bot.config.guilds.forEach(id => {
 			localGuilds.set(id, bot.guilds.cache.get(id));
 		});
-		const _commands = await this.bot.application.commands.fetch();
-		const globalGuilds = this.bot.guilds.cache.difference(localGuilds);
+		const _commands = await bot.application.commands.fetch();
+		const globalGuilds = bot.guilds.cache.difference(localGuilds);
 
 		globalGuilds.forEach(async g => {
-			const fullPermissions = await this._permBuilder(_commands);
+			const fullPermissions = await this._permBuilder(_commands, g);
 			g.commands.permissions.set({ fullPermissions });
 			bot.logger.info(
 				`Set perms for ${fullPermissions.length} commands in guild ${g.id} - ${g.name}`

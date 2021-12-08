@@ -110,13 +110,15 @@ export default class OwnerCommands {
 			}
 		} catch (e) {
 			this.bot.logger.error(e);
+			interaction.editReply('Something went wrong.');
+			return;
 		}
 
 		// Send reply
 		const val = cmdName ? cmdName : 'all';
 		const msg = `Unregistered ${val} commands.`;
 		this.bot.logger.warn(msg);
-		await interaction.editReply(msg);
+		interaction.editReply(msg);
 		return;
 	}
 
@@ -126,8 +128,11 @@ export default class OwnerCommands {
 	async updateSlashPerms(interaction) {
 		try {
 			await this.bot.CommandHandler.setSlashPerms();
+			const msg = `Slash Commands Permissions Update Sent`;
+			interaction.editReply(msg);
 		} catch (e) {
 			this.bot.logger.error(e);
+			interaction.editReply('Something went wrong.');
 		}
 	}
 }
