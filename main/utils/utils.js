@@ -40,10 +40,6 @@ export function msgSanatize(str) {
 // ----------------------------------------------------------------
 export const caches = {
 	settingsCacheBuilder,
-	cacheLogChns: cacheLogChns,
-	cacheEnabled: cacheEnabled,
-	cachePlayChns: cachePlayChns,
-	cacheHashtags: cacheHashtags,
 };
 
 // ----------------------------------------------------------------
