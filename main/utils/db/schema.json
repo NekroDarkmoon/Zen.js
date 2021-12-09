@@ -47,7 +47,7 @@
   },
 
   "tags": {
-    "id": "VARCHAR(28) PRIMARY KEY,",
+    "id": "SERIAL PRIMARY KEY,",
     "server_id": "BIGINT NOT NULL,",
     "user_id":"BIGINT NOT NULL,",
     "name": "TEXT NOT NULL,",

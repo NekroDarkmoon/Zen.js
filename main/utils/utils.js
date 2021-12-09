@@ -31,7 +31,7 @@ export function chunkify(str, chunkSize) {
  * @param {String} str
  * @returns {String} str
  */
-export function msgSanatize(str) {
+export function msgSanitize(str) {
 	return str.replaceAll('@', '@\u200b');
 }
 
