@@ -4,7 +4,7 @@
 import Zen from '../Zen.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Interaction,  MessageEmbed } from 'discord.js';
-import { msgSanitize } from 'utils.js';
+import { msgSanitize } from '../utils/utils.js';
 import { CommandInteraction } from 'discord.js';
 
 // ----------------------------------------------------------------
@@ -98,7 +98,6 @@ export default class Tags {
 		await interaction.deferReply();
 		// Execute based on subcommand
 		const sub = interaction.options.getSubcommand();
-		await interaction.editReply();
 
 		// Handler
 		switch (sub) {
@@ -155,9 +154,6 @@ export default class Tags {
 		try {
 			const sql = `INSERT INTO tags (server_id, user_id, name, description)
                      VALUES ($1, $2, $3, $4)`;
-//                     ON CONFLICT (server_id, user_id, name) 
-//                     DO NOTHING`;
-// This is wrong, it should update the old tag
 			const values = [interaction.guild.id, user.id, name, content];
 			await this.bot.db.execute(sql, values);				
 		} catch (err) {
@@ -189,7 +185,7 @@ export default class Tags {
 
 			const result = await this.bot.db.fetchOne(sql, values);           
 			if(!result) {
-				await interaction.editReply({ content:`There is no tag named ${name}.`, ephemeral: hidden });
+				await interaction.editReply({ content:`You have no tag named ${name}.`, ephemeral: hidden });
 				return;
 			}
 		} catch (err) {
@@ -235,7 +231,7 @@ export default class Tags {
 
             const result = await this.bot.db.fetchOne(sql, values);
 			if(!(result)) {
-				await interaction.editReply({ content:`You have no tag named ${name}`, ephemeral: true });
+				await interaction.editReply({ content:`You have no tag named ${name}.`, ephemeral: true });
 				return;
 			}
 
@@ -272,7 +268,7 @@ export default class Tags {
 
             const result = await this.bot.db.fetchOne(sql, values);
 			if(!(result)) {
-				await interaction.editReply({ content:`You have no tag named ${name}`, ephemeral: true });
+				await interaction.editReply({ content:`You have no tag named ${name}.`, ephemeral: true });
 				return;
 			}
 
@@ -313,11 +309,14 @@ export default class Tags {
 				return;
 			}
 
-			const e = new MessageEmbed();
-			e.setTitle(`Tags owned by ${user.username}:`);
-			for (let i = 0; i < results.length; i++) {
-				e.addField(results[i].name, results[i].description, false);
+			var msg = results[0].name;
+			for (let i = 1; i < results.length; i++) {
+				msg = msg.concat(`, ${results[i].name}`);
 			} 
+
+			const e = new MessageEmbed();
+			e.addField(`Tags owned by ${user.username}:`, msg, false);
+
             await interaction.editReply({ embeds: [e], ephemeral: hidden });
 		} catch (err) {
             this.bot.logger.error({ message: err });
