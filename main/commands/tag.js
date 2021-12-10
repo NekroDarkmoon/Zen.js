@@ -5,6 +5,7 @@ import Zen from '../Zen.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { Interaction,  MessageEmbed } from 'discord.js';
 import { msgSanitize } from 'utils.js';
+import { CommandInteraction } from 'discord.js';
 
 // ----------------------------------------------------------------
 //                             Command
@@ -84,7 +85,7 @@ export default class Tags {
 	}
 
 	/**
-	 * @param {Interaction} interaction
+	 * @param {CommandInteraction} interaction
 	 * @returns {Promise<void>}
 	 * */
 	execute = async interaction => {
@@ -97,6 +98,7 @@ export default class Tags {
 		await interaction.deferReply();
 		// Execute based on subcommand
 		const sub = interaction.options.getSubcommand();
+		await interaction.editReply();
 
 		// Handler
 		switch (sub) {

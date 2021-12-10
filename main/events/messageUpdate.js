@@ -3,7 +3,7 @@
 // ----------------------------------------------------------------
 import { Message, MessageEmbed } from 'discord.js';
 import Zen from '../Zen.js';
-import { chunkify, msgSanatize } from '../utils/utils.js';
+import { chunkify, msgSanitize } from '../utils/utils.js';
 
 // ----------------------------------------------------------------
 //                            Ready Event
@@ -51,7 +51,7 @@ export default class MessageUpdateEvent {
 		// Validation - Bot
 		if (before.author.bot) return;
 		// Validation - Content Change
-		if (before.content === after) return;
+		if (before.content === after.content) return;
 		// Get logging channel
 		const chnId = this.bot.caches[before.guild.id].channels.logChn;
 		if (!chnId) return;
@@ -72,8 +72,8 @@ export default class MessageUpdateEvent {
 			const logChn = await guild.channels.fetch(chnId);
 			const limit = 1024;
 			// Sanatize and chunk
-			const oContentArray = chunkify(msgSanatize(oldContent), limit);
-			const nContentArray = chunkify(msgSanatize(newContent), limit);
+			const oContentArray = chunkify(msgSanitize(oldContent), limit);
+			const nContentArray = chunkify(msgSanitize(newContent), limit);
 			// Create Embed
 			const e = new MessageEmbed()
 				.setTitle('Edited Message Log')

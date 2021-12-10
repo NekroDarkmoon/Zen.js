@@ -32,6 +32,11 @@ export default class OwnerCommands {
 					.addStringOption(str =>
 						str.setName('target').setDescription('Slash Command to remove')
 					)
+			)
+			.addSubcommand(sub =>
+				sub
+					.setName('updateslashperms')
+					.setDescription('Update slash commands permissions.')
 			);
 	}
 
@@ -55,6 +60,9 @@ export default class OwnerCommands {
 				break;
 			case 'removeslash':
 				await this.removeSlash(interaction);
+				break;
+			case 'updateslashperms':
+				await this.updateSlashPerms(interaction);
 				break;
 		}
 
@@ -102,13 +110,29 @@ export default class OwnerCommands {
 			}
 		} catch (e) {
 			this.bot.logger.error(e);
+			interaction.editReply('Something went wrong.');
+			return;
 		}
 
 		// Send reply
 		const val = cmdName ? cmdName : 'all';
 		const msg = `Unregistered ${val} commands.`;
 		this.bot.logger.warn(msg);
-		await interaction.editReply(msg);
+		interaction.editReply(msg);
 		return;
+	}
+
+	/**
+	 * @param {CommandInteraction} interaction
+	 */
+	async updateSlashPerms(interaction) {
+		try {
+			await this.bot.CommandHandler.setSlashPerms();
+			const msg = `Slash Commands Permissions Update Sent`;
+			interaction.editReply(msg);
+		} catch (e) {
+			this.bot.logger.error(e);
+			interaction.editReply('Something went wrong.');
+		}
 	}
 }

@@ -43,18 +43,21 @@ export default class MessageReactionAddEvent {
 		if (user.partial) user = await user.fetch();
 
 		// Data Builder
-		const member = reaction.message.member
-			? reaction.message.member
-			: await reaction.message.guild.members.fetch(reaction.message.author.id);
+		const message = reaction.message;
+		const member = await this.bot._getOrFetchMembers(
+			message.member.id,
+			message.guildId
+		);
+
 		if (member.partial) member = await member.fetch();
-		const guild = reaction.message.guild;
-		const rep = 1;
+		const guild = message.guild;
 
 		// Validation - Bot
 		if (member.user.bot) return;
 		// Validation - Self Check
+		const gUser = await this.bot._getOrFetchMembers(user.id, guild.id);
 		if (
-			!member.permissions.has(Permissions.FLAGS.ADMINISTRATOR) &&
+			!gUser.permissions.has(Permissions.FLAGS.ADMINISTRATOR) &&
 			user.id === member.id
 		)
 			return;
@@ -63,13 +66,15 @@ export default class MessageReactionAddEvent {
 
 		// Give rep to member
 		try {
-			const sql = `INSERT INTO rep (server_id, user_id, rep, last_given)
-                     VALUES ($1, $2, $3, $4)
-                     ON CONFLICT (server_id, user_id) 
-                     DO UPDATE SET rep = rep.rep + $3,
-										 							 last_given=$4;`;
-			const values = [message.guild.id, user.id, 1, new Date()];
+			const sql = `INSERT INTO rep (server_id, user_id, rep)
+                    VALUES ($1, $2, $3)
+                    ON CONFLICT (server_id, user_id) 
+                    DO UPDATE SET rep = rep.rep + $3;`;
+			const values = [guild.id, member.id, 1];
 			await this.bot.db.execute(sql, values);
+
+			// Add checkmark reaction
+			message.react('✅');
 		} catch (e) {
 			this.bot.logger.error(e);
 			return;
