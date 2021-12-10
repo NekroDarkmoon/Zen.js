@@ -2,7 +2,7 @@
 //                             Imports
 // ----------------------------------------------------------------
 import { Message, MessageEmbed } from 'discord.js';
-import { chunkify, msgSanatize } from '../utils/utils.js';
+import { chunkify, msgSanitize } from '../utils/utils.js';
 import Zen from '../Zen.js';
 
 // ----------------------------------------------------------------
@@ -73,7 +73,7 @@ export default class MessageDeleteEvent {
 			const logChn = await guild.channels.fetch(chnId);
 			const limit = 1024;
 			// Sanatize and chunk
-			const contentArray = chunkify(msgSanatize(content), limit);
+			const contentArray = chunkify(msgSanitize(content), limit);
 			// Create Embed
 			const e = new MessageEmbed()
 				.setTitle('Deleted Message Log')
