@@ -3,9 +3,8 @@
 // ----------------------------------------------------------------
 import Zen from '../Zen.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { Interaction,  MessageEmbed } from 'discord.js';
+import { CommandInteraction,  MessageEmbed } from 'discord.js';
 import { msgSanitize } from '../utils/utils.js';
-import { CommandInteraction } from 'discord.js';
 
 // ----------------------------------------------------------------
 //                             Command
@@ -128,7 +127,7 @@ export default class Tags {
 
 
 	/**
-	 *
+	 * Create a new tag.
 	 * @param {CommandInteraction} interaction
 	 */
 	async add(interaction) {
@@ -170,7 +169,7 @@ export default class Tags {
 
 
 	/**
-	 *
+	 * Remove a tag.
 	 * @param {CommandInteraction} interaction
 	 */
 	 async remove(interaction) {
@@ -212,9 +211,8 @@ export default class Tags {
 
 
 	/**
-	 * Get the Reputation points of a giver username.
-	 * Returns the rep of the calling user if no args given.
-	 * @param {Interaction} interaction
+	 * Display the content of a tag.
+	 * @param {CommandInteraction} interaction
 	 */
 	async get(interaction) {
 
@@ -249,9 +247,8 @@ export default class Tags {
 
 
 	/**
-	 * Get the Reputation points of a giver username.
-	 * Returns the rep of the calling user if no args given.
-	 * @param {Interaction} interaction
+	 * Info about the chosen tag.
+	 * @param {CommandInteraction} interaction
 	 */
 	 async info(interaction) {
 
@@ -287,9 +284,8 @@ export default class Tags {
 
 
 	/**
-	 * Get the Reputation points of a giver username.
-	 * Returns the rep of the calling user if no args given.
-	 * @param {Interaction} interaction
+	 * Lists your tags.
+	 * @param {CommandInteraction} interaction
 	 */
 	async list(interaction) {
 
