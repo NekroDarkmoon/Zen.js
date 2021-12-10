@@ -17,7 +17,7 @@ export default class Ban {
 	constructor() {
 		this.name = 'ban';
 		this.description = 'Bans a user from the server.';
-		this.global = false;
+		this.global = true;
 		this.data = new SlashCommandBuilder()
 			.setName(this.name)
 			.setDescription(this.description)

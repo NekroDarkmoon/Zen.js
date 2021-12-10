@@ -18,7 +18,7 @@ export default class HashTag {
 	constructor() {
 		this.name = 'hashtag';
 		this.description = 'Commands Related to hashtags';
-		this.global = false;
+		this.global = true;
 		this.data = new SlashCommandBuilder()
 			.setName(this.name)
 			.setDescription(this.description)
