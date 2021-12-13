@@ -71,6 +71,7 @@ export default class MessageDeleteEvent {
 		try {
 			// Fetch channel
 			const logChn = await guild.channels.fetch(chnId);
+			if (!logChn) return;
 			const limit = 1000;
 			// Sanatize and chunk
 			const contentArray = chunkify(msgSanitize(content), limit);

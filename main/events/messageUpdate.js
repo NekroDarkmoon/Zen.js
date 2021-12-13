@@ -72,6 +72,7 @@ export default class MessageUpdateEvent {
 		try {
 			// Fetch Channel
 			const logChn = await guild.channels.fetch(chnId);
+			if (!logChn) return;
 			const limit = 1000;
 			// Sanatize and chunk
 			const oContentArray = chunkify(msgSanitize(oldContent), limit);
