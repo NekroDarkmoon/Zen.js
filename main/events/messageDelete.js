@@ -2,7 +2,7 @@
 //                             Imports
 // ----------------------------------------------------------------
 import { Message, MessageEmbed } from 'discord.js';
-import { chunkify, msgSanatize } from '../utils/utils.js';
+import { chunkify, msgSanitize } from '../utils/utils.js';
 import Zen from '../Zen.js';
 
 // ----------------------------------------------------------------
@@ -71,9 +71,10 @@ export default class MessageDeleteEvent {
 		try {
 			// Fetch channel
 			const logChn = await guild.channels.fetch(chnId);
-			const limit = 1024;
+			if (!logChn) return;
+			const limit = 1000;
 			// Sanatize and chunk
-			const contentArray = chunkify(msgSanatize(content), limit);
+			const contentArray = chunkify(msgSanitize(content), limit);
 			// Create Embed
 			const e = new MessageEmbed()
 				.setTitle('Deleted Message Log')
@@ -81,19 +82,21 @@ export default class MessageDeleteEvent {
 
 			e.addField(
 				'Author',
-				`${bts} ${author.username}#${author.discriminator} ${bt}`,
+				`${bts}- ${author.username}#${author.discriminator} ${bt}`,
 				true
 			);
 
-			e.addField('AuthorID', `${bts} ${author.id} ${bt}`, true);
+			e.addField('AuthorID', `${bts}- ${author.id} ${bt}`, true);
 
-			e.addField('Channel', `${bts} ${origChannel.name} ${bt}`);
+			e.addField('Channel', `${bts}- ${origChannel.name} ${bt}`);
 
 			if (attachs.length) e.addField('Attachments', attachs.join(',\n'));
 
 			contentArray.forEach(chunk => {
 				e.addField('Content', `${bts} ${chunk.toString()} ${bt}`);
 			});
+
+			e.setFooter(`Deleted at: ${message.createdAt.toString()}`);
 
 			await logChn.send({ embeds: [e] });
 		} catch (err) {

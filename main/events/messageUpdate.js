@@ -3,7 +3,7 @@
 // ----------------------------------------------------------------
 import { Message, MessageEmbed } from 'discord.js';
 import Zen from '../Zen.js';
-import { chunkify, msgSanatize } from '../utils/utils.js';
+import { chunkify, msgSanitize } from '../utils/utils.js';
 
 // ----------------------------------------------------------------
 //                            Ready Event
@@ -44,14 +44,16 @@ export default class MessageUpdateEvent {
 	 */
 	async logEvent(before, after) {
 		// Validation - Partial
-		if (before.partial) {
+		const isPartial = before.partial || after.partial;
+		if (isPartial) {
 			before = await before.fetch();
 			after = await after.fetch();
 		}
+
 		// Validation - Bot
 		if (before.author.bot) return;
 		// Validation - Content Change
-		if (before.content === after.content) return;
+		if (before.content === after.content && !isPartial) return;
 		// Get logging channel
 		const chnId = this.bot.caches[before.guild.id].channels.logChn;
 		if (!chnId) return;
@@ -70,35 +72,64 @@ export default class MessageUpdateEvent {
 		try {
 			// Fetch Channel
 			const logChn = await guild.channels.fetch(chnId);
-			const limit = 1024;
+			if (!logChn) return;
+			const limit = 1000;
 			// Sanatize and chunk
-			const oContentArray = chunkify(msgSanatize(oldContent), limit);
-			const nContentArray = chunkify(msgSanatize(newContent), limit);
-			// Create Embed
-			const e = new MessageEmbed()
-				.setTitle('Edited Message Log')
-				.setColor('ORANGE');
+			const oContentArray = chunkify(msgSanitize(oldContent), limit);
+			const nContentArray = chunkify(msgSanitize(newContent), limit);
+			const embeds = [];
 
-			e.addField(
-				'Author',
-				`${bts} ${author.username}#${author.discriminator} ${bt}`,
-				true
-			);
+			for (
+				let pos = 0;
+				pos < oContentArray.length || pos < nContentArray.length;
+				pos++
+			) {
+				let title = '';
+				let cont = '';
+				if (pos < oContentArray.length - 1 || pos < nContentArray.length - 1) {
+					title = ' [Continued]';
+					cont = '...';
+				}
 
-			e.addField('AuthorID', `${bts} ${author.id} ${bt}`, true);
+				const beforeChunk = oContentArray[pos];
+				const afterChunk = nContentArray[pos];
 
-			e.addField('Channel', `${bts} ${oc.name} ${bt}`, false);
+				const e = new MessageEmbed()
+					.setTitle(`Edited Message Log ${title}`)
+					.setColor('ORANGE');
 
-			if (attchs.length) e.addField('Attachments', attchs.join(',\n'), false);
+				e.addField(
+					'Author',
+					`${bts}- ${author.username}#${author.discriminator} ${bt}`,
+					true
+				);
 
-			oContentArray.forEach(chunk =>
-				e.addField('Before', `${bts} ${chunk.toString()} ${bt}`, false)
-			);
-			nContentArray.forEach(chunk =>
-				e.addField('After', `${bts} ${chunk.toString()} ${bt}`, false)
-			);
+				e.addField('AuthorID', `${bts}- ${author.id} ${bt}`, true);
 
-			await logChn.send({ embeds: [e] });
+				e.addField('Channel', `${bts}- ${oc.name} ${bt}`, false);
+
+				if (attchs.length) e.addField('Attachments', attchs.join(',\n'), false);
+
+				if (before !== undefined && !isPartial)
+					e.addField('Before', `${bts}${beforeChunk}${cont} ${bt}`, false);
+				else e.addField('Before', `${bts} . . . ${bt}`, false);
+
+				if (after !== undefined)
+					e.addField('After', `${bts}${afterChunk}${cont} ${bt}`, false);
+				else e.addField('Before', `${bts} . . . ${bt}`, false);
+
+				let m = '';
+				if (isPartial)
+					m += `This message was sent before Zen's last reboot and as such before is not displayed.\n`;
+
+				m += `Edited at: ${after.createdAt.toString()}`;
+
+				e.setFooter(m);
+
+				embeds.push(e);
+			}
+
+			embeds.forEach(e => logChn.send({ embeds: [e] }));
 		} catch (e) {
 			console.error(e);
 		}
