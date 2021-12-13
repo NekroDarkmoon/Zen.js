@@ -62,7 +62,7 @@
     "user_id":"BIGINT,",
     "name": "TEXT NOT NULL,",
     "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP,",
-    "FOREIGN KEY": "(id) REFERENCES tags(id) ON DELETE CASCADE"
+    "tag_id": "INT NOT NULL REFERENCES tags(id) ON DELETE CASCADE"
   },
 
   "threads": {
