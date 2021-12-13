@@ -3,7 +3,7 @@
 // ----------------------------------------------------------------
 import Zen from '../Zen.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction,  MessageEmbed } from 'discord.js';
+import { CommandInteraction, MessageEmbed } from 'discord.js';
 import { msgSanitize } from '../utils/utils.js';
 
 // ----------------------------------------------------------------
@@ -17,7 +17,7 @@ export default class Tags {
 		this.data = new SlashCommandBuilder()
 			.setName(this.name)
 			.setDescription(this.description)
-			.addSubcommand(sub => 
+			.addSubcommand(sub =>
 				sub
 					.setName('get')
 					.setDescription('Get a tag')
@@ -26,9 +26,9 @@ export default class Tags {
 							.setName('name')
 							.setDescription('Name of the tag.')
 							.setRequired(true)
-					)		
+					)
 			)
-			.addSubcommand(sub => 
+			.addSubcommand(sub =>
 				sub
 					.setName('add')
 					.setDescription('Creates a new tag.')
@@ -37,7 +37,7 @@ export default class Tags {
 							.setName('name')
 							.setDescription('Name of the tag.')
 							.setRequired(true)
-					)					
+					)
 					.addStringOption(opt =>
 						opt
 							.setName('content')
@@ -48,7 +48,7 @@ export default class Tags {
 						opt.setName('hidden').setDescription('Set Ephemeral')
 					)
 			)
-			.addSubcommand(sub => 
+			.addSubcommand(sub =>
 				sub
 					.setName('remove')
 					.setDescription('Remove a tag.')
@@ -57,12 +57,12 @@ export default class Tags {
 							.setName('name')
 							.setDescription('Name of the tag.')
 							.setRequired(true)
-					)		
+					)
 					.addBooleanOption(opt =>
 						opt.setName('hidden').setDescription('Set Ephemeral')
-					)			
+					)
 			)
-			.addSubcommand(sub => 
+			.addSubcommand(sub =>
 				sub
 					.setName('list')
 					.setDescription('Lists your tags.')
@@ -70,7 +70,7 @@ export default class Tags {
 						opt.setName('hidden').setDescription('Set Ephemeral')
 					)
 			)
-			.addSubcommand(sub => 
+			.addSubcommand(sub =>
 				sub
 					.setName('info')
 					.setDescription('Information about a tag.')
@@ -79,7 +79,7 @@ export default class Tags {
 							.setName('name')
 							.setDescription('Name of the tag.')
 							.setRequired(true)
-					)		
+					)
 			);
 	}
 
@@ -119,13 +119,6 @@ export default class Tags {
 		return;
 	};
 
-
-
-
-
-
-
-
 	/**
 	 * Create a new tag.
 	 * @param {CommandInteraction} interaction
@@ -133,17 +126,21 @@ export default class Tags {
 	async add(interaction) {
 		// Data builder
 		const name = interaction.options.getString('name');
-		const content = msgSanitize(interaction.options.getString('content'));	
-		const hidden = interaction.options.getBoolean('hidden');	
+		const content = msgSanitize(interaction.options.getString('content'));
+		const hidden = interaction.options.getBoolean('hidden');
 		const user = interaction.user;
 
 		try {
-            const sql = 'SELECT * FROM tags WHERE server_id=$1 AND user_id=$2 AND name=$3;';
-            const values = [interaction.guild.id, user.id, name];
+			const sql =
+				'SELECT * FROM tags WHERE server_id=$1 AND user_id=$2 AND name=$3;';
+			const values = [interaction.guild.id, user.id, name];
 
-			const result = await this.bot.db.fetchOne(sql, values);           
-			if(result) {
-				await interaction.editReply({ content:`You already have a tag named ${name}. Delete it first!`, ephemeral: hidden });
+			const result = await this.bot.db.fetchOne(sql, values);
+			if (result) {
+				await interaction.editReply({
+					content: `You already have a tag named ${name}. Delete it first!`,
+					ephemeral: hidden,
+				});
 				return;
 			}
 		} catch (err) {
@@ -154,37 +151,43 @@ export default class Tags {
 			const sql = `INSERT INTO tags (server_id, user_id, name, description)
                      VALUES ($1, $2, $3, $4)`;
 			const values = [interaction.guild.id, user.id, name, content];
-			await this.bot.db.execute(sql, values);				
+			await this.bot.db.execute(sql, values);
 		} catch (err) {
 			this.bot.logger.error(err);
-			await interaction.editReply({ content:`Something went wrong...`, ephemeral: hidden });
+			await interaction.editReply({
+				content: `Something went wrong...`,
+				ephemeral: hidden,
+			});
 			return;
-		}	
+		}
 
-		await interaction.editReply({ content:`Tag "${name}" added!`, ephemeral: hidden });
+		await interaction.editReply({
+			content: `Tag "${name}" added!`,
+			ephemeral: hidden,
+		});
 	}
-
-
-
-
 
 	/**
 	 * Remove a tag.
 	 * @param {CommandInteraction} interaction
 	 */
-	 async remove(interaction) {
+	async remove(interaction) {
 		// Data builder
-		const name = interaction.options.getString('name');	
-		const hidden = interaction.options.getBoolean('hidden');	
+		const name = interaction.options.getString('name');
+		const hidden = interaction.options.getBoolean('hidden');
 		const user = interaction.user;
 
 		try {
-            const sql = 'SELECT * FROM tags WHERE server_id=$1 AND user_id=$2 AND name=$3;';
-            const values = [interaction.guild.id, user.id, name];
+			const sql =
+				'SELECT * FROM tags WHERE server_id=$1 AND user_id=$2 AND name=$3;';
+			const values = [interaction.guild.id, user.id, name];
 
-			const result = await this.bot.db.fetchOne(sql, values);           
-			if(!result) {
-				await interaction.editReply({ content:`You have no tag named ${name}.`, ephemeral: hidden });
+			const result = await this.bot.db.fetchOne(sql, values);
+			if (!result) {
+				await interaction.editReply({
+					content: `You have no tag named ${name}.`,
+					ephemeral: hidden,
+				});
 				return;
 			}
 		} catch (err) {
@@ -192,140 +195,135 @@ export default class Tags {
 		}
 
 		try {
-			var sql = 'DELETE FROM tags WHERE server_id=$1 AND user_id=$2 AND name=$3;';
-            var values = [interaction.guild.id, user.id, name];
+			var sql =
+				'DELETE FROM tags WHERE server_id=$1 AND user_id=$2 AND name=$3;';
+			var values = [interaction.guild.id, user.id, name];
 
 			await this.bot.db.execute(sql, values);
 
-			await interaction.editReply({ content:`The tag "${name}" has been deleted!`, ephemeral: hidden });
+			await interaction.editReply({
+				content: `The tag "${name}" has been deleted!`,
+				ephemeral: hidden,
+			});
 			return;
 		} catch (err) {
-				this.bot.logger.error({ message: err });
+			this.bot.logger.error({ message: err });
 		}
 
-		await interaction.editReply({ content:`Tag ${name} added!`, ephemeral: hidden });
+		await interaction.editReply({
+			content: `Tag ${name} added!`,
+			ephemeral: hidden,
+		});
 	}
-
-
-
-
 
 	/**
 	 * Display the content of a tag.
 	 * @param {CommandInteraction} interaction
 	 */
 	async get(interaction) {
-
-        const hidden = interaction.options.getBoolean('hidden');
+		const hidden = interaction.options.getBoolean('hidden');
 
 		// Data builder
-		const name = interaction.options.getString('name');	
-        const user = interaction.user;
+		const name = interaction.options.getString('name');
+		const user = interaction.user;
 
-        // Get data from db
-        try {
-            const sql = 'SELECT * FROM tags WHERE server_id=$1 AND user_id=$2 AND name=$3;';
-            const values = [interaction.guild.id, user.id, name];
+		// Get data from db
+		try {
+			const sql =
+				'SELECT * FROM tags WHERE server_id=$1 AND user_id=$2 AND name=$3;';
+			const values = [interaction.guild.id, user.id, name];
 
-            const result = await this.bot.db.fetchOne(sql, values);
-			if(!(result)) {
-				await interaction.editReply({ content:`You have no tag named ${name}.`, ephemeral: true });
+			const result = await this.bot.db.fetchOne(sql, values);
+			if (!result) {
+				await interaction.editReply({
+					content: `You have no tag named ${name}.`,
+					ephemeral: true,
+				});
 				return;
 			}
 
 			const e = new MessageEmbed();
 			e.addField(result.name, result.description, false);
-            await interaction.editReply({ embeds: [e], ephemeral: hidden });
+			await interaction.editReply({ embeds: [e], ephemeral: hidden });
 		} catch (err) {
-            this.bot.logger.error({ message: err });
-        }
-    }	
-
-
-
-
-
+			this.bot.logger.error({ message: err });
+		}
+	}
 
 	/**
 	 * Info about the chosen tag.
 	 * @param {CommandInteraction} interaction
 	 */
-	 async info(interaction) {
-
-        const hidden = interaction.options.getBoolean('hidden');
+	async info(interaction) {
+		const hidden = interaction.options.getBoolean('hidden');
 
 		// Data builder
-		const name = interaction.options.getString('name');	
-        const user = interaction.user;
+		const name = interaction.options.getString('name');
+		const user = interaction.user;
 
-        // Get data from db
-        try {
-            const sql = 'SELECT * FROM tags WHERE server_id=$1 AND user_id=$2 AND name=$3;';
-            const values = [interaction.guild.id, user.id, name];
+		// Get data from db
+		try {
+			const sql =
+				'SELECT * FROM tags WHERE server_id=$1 AND user_id=$2 AND name=$3;';
+			const values = [interaction.guild.id, user.id, name];
 
-            const result = await this.bot.db.fetchOne(sql, values);
-			if(!(result)) {
-				await interaction.editReply({ content:`You have no tag named ${name}.`, ephemeral: true });
+			const result = await this.bot.db.fetchOne(sql, values);
+			if (!result) {
+				await interaction.editReply({
+					content: `You have no tag named ${name}.`,
+					ephemeral: true,
+				});
 				return;
 			}
 
 			const e = new MessageEmbed();
 			e.setTitle(result.name);
-			e.addField('Owner:', this.bot.users.cache.get(result.user_id).username, false);
-            await interaction.editReply({ embeds: [e], ephemeral: hidden });
+			e.addField(
+				'Owner:',
+				this.bot.users.cache.get(result.user_id).username,
+				false
+			);
+			await interaction.editReply({ embeds: [e], ephemeral: hidden });
 		} catch (err) {
-            this.bot.logger.error({ message: err });
-        }
-    }	
-	
-	
-
-
-
+			this.bot.logger.error({ message: err });
+		}
+	}
 
 	/**
 	 * Lists your tags.
 	 * @param {CommandInteraction} interaction
 	 */
 	async list(interaction) {
-
-        const hidden = interaction.options.getBoolean('hidden');
+		const hidden = interaction.options.getBoolean('hidden');
 
 		// Data builder
-        const user = interaction.user;
+		const user = interaction.user;
 
-        // Get data from db
-        try {
-            const sql = 'SELECT * FROM tags WHERE server_id=$1 AND user_id=$2;';
-            const values = [interaction.guild.id, user.id];
+		// Get data from db
+		try {
+			const sql = 'SELECT * FROM tags WHERE server_id=$1 AND user_id=$2;';
+			const values = [interaction.guild.id, user.id];
 
-            const results = await this.bot.db.fetch(sql, values);
-			if(!(results)) {
-				await interaction.editReply({ content:`You currently have no tags.`, ephemeral: true });
+			const results = await this.bot.db.fetch(sql, values);
+			if (!results) {
+				await interaction.editReply({
+					content: `You currently have no tags.`,
+					ephemeral: true,
+				});
 				return;
 			}
 
 			var msg = results[0].name;
 			for (let i = 1; i < results.length; i++) {
 				msg = msg.concat(`, ${results[i].name}`);
-			} 
+			}
 
 			const e = new MessageEmbed();
 			e.addField(`Tags owned by ${user.username}:`, msg, false);
 
-            await interaction.editReply({ embeds: [e], ephemeral: hidden });
+			await interaction.editReply({ embeds: [e], ephemeral: hidden });
 		} catch (err) {
-            this.bot.logger.error({ message: err });
-        }
-    }
-
-
-
-
-
-
-
-
-
-
+			this.bot.logger.error({ message: err });
+		}
+	}
 }
