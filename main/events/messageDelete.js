@@ -71,7 +71,7 @@ export default class MessageDeleteEvent {
 		try {
 			// Fetch channel
 			const logChn = await guild.channels.fetch(chnId);
-			const limit = 1024;
+			const limit = 1000;
 			// Sanatize and chunk
 			const contentArray = chunkify(msgSanitize(content), limit);
 			// Create Embed
@@ -81,13 +81,13 @@ export default class MessageDeleteEvent {
 
 			e.addField(
 				'Author',
-				`${bts} ${author.username}#${author.discriminator} ${bt}`,
+				`${bts}- ${author.username}#${author.discriminator} ${bt}`,
 				true
 			);
 
-			e.addField('AuthorID', `${bts} ${author.id} ${bt}`, true);
+			e.addField('AuthorID', `${bts}- ${author.id} ${bt}`, true);
 
-			e.addField('Channel', `${bts} ${origChannel.name} ${bt}`);
+			e.addField('Channel', `${bts}- ${origChannel.name} ${bt}`);
 
 			if (attachs.length) e.addField('Attachments', attachs.join(',\n'));
 
