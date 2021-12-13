@@ -213,32 +213,47 @@ export default class Tags {
 	 * @param {CommandInteraction} interaction
 	 */
 	async get(interaction) {
-		const hidden = interaction.options.getBoolean('hidden');
+		const { guild, options } = interaction;
 
 		// Data builder
 		const name = interaction.options.getString('name');
-		const user = interaction.user;
+		const hidden = interaction.options.getBoolean('hidden');
 
 		// Get data from db
 		try {
-			const sql =
-				'SELECT * FROM tags WHERE server_id=$1 AND user_id=$2 AND name=$3;';
-			const values = [interaction.guild.id, user.id, name];
+			const sql = `SELECT tags.name, tags.content
+									 FROM tag_lookup
+									 INNER JOIN tags ON tags.id = tag_lookup.tag_id
+									 WHERE tag_lookup.server_id=$1 AND LOWER(tag_lookup.name)=$2;`;
+			const vals = [guild.id, name];
 
-			const result = await this.bot.db.fetchOne(sql, values);
-			if (!result) {
-				await interaction.editReply({
-					content: `You have no tag named ${name}.`,
-					ephemeral: true,
-				});
-				return;
+			const res = await this.bot.db.fetchOne(sql, vals);
+
+			if (!res) {
+				const sql = `SELECT tag_lookup.name FROM tag_lookup 
+										 WHERE tag_lookup.server_id=$1 AND tag_lookup.name % $2
+										 ORDER BY similarity(tag_lookup.name, $2) DESC
+										 LIMIT 5`;
+				const vals = [guild.id, name];
+				const res = await this.bot.db.fetch(sql, vals);
+
+				if (!res) return interaction.editReply(`Tag **${name}** not found.`);
+
+				const names = res.map(r => r.name).join('\n');
+				const e = new MessageEmbed()
+					.setTitle('Fill')
+					.setDescription(`Tag not found. Did you mean..\n\n ${names}`)
+					.setColor('RANDOM');
+
+				return interaction.editReply({ embeds: [e] });
+			} else {
+				// TODO: Return and update uses.
+
+				return interaction.editReply(res.content);
 			}
-
-			const e = new MessageEmbed();
-			e.addField(result.name, result.description, false);
-			await interaction.editReply({ embeds: [e], ephemeral: hidden });
-		} catch (err) {
-			this.bot.logger.error({ message: err });
+		} catch (e) {
+			this.bot.logger.error(e);
+			await interaction.editReply('An error occurrred while fetching the tag.');
 		}
 	}
 

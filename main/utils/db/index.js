@@ -68,6 +68,12 @@ export default class ZenDB {
 		this.logger.warn('Closed DB pool.');
 	}
 
+	/**
+	 *
+	 * @param {String} sql
+	 * @param {Array<String>} values
+	 * @returns
+	 */
 	async fetch(sql, values = []) {
 		// Validation
 		if (sql.indexOf('SELECT') === -1) throw 'Not a fetch query';
