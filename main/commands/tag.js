@@ -37,7 +37,7 @@ export default class Tags {
 		await interaction.deferReply();
 		// Execute based on subcommand
 		const sub = interaction.options.getSubcommand();
-		await interaction.editReply();
+		await interaction.editReply('Not Implemented.');
 
 		return;
 	};
