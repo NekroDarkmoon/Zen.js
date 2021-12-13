@@ -95,6 +95,8 @@ export default class MessageDeleteEvent {
 				e.addField('Content', `${bts} ${chunk.toString()} ${bt}`);
 			});
 
+			e.setFooter(`Deleted at: ${message.createdAt.toString()}`);
+
 			await logChn.send({ embeds: [e] });
 		} catch (err) {
 			console.error(err);

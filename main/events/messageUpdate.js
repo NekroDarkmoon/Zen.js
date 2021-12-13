@@ -44,16 +44,16 @@ export default class MessageUpdateEvent {
 	 */
 	async logEvent(before, after) {
 		// Validation - Partial
-		if (before.partial || after.partial) {
+		const isPartial = before.partial || after.partial;
+		if (isPartial) {
 			before = await before.fetch();
 			after = await after.fetch();
 		}
 
-		// console.log(before);
 		// Validation - Bot
 		if (before.author.bot) return;
 		// Validation - Content Change
-		if (before.content === after.content) return;
+		if (before.content === after.content && !isPartial) return;
 		// Get logging channel
 		const chnId = this.bot.caches[before.guild.id].channels.logChn;
 		if (!chnId) return;
@@ -90,8 +90,8 @@ export default class MessageUpdateEvent {
 					cont = '...';
 				}
 
-				const before = oContentArray[pos];
-				const after = nContentArray[pos];
+				const beforeChunk = oContentArray[pos];
+				const afterChunk = nContentArray[pos];
 
 				const e = new MessageEmbed()
 					.setTitle(`Edited Message Log ${title}`)
@@ -109,13 +109,21 @@ export default class MessageUpdateEvent {
 
 				if (attchs.length) e.addField('Attachments', attchs.join(',\n'), false);
 
-				if (before !== undefined)
-					e.addField('Before', `${bts}${before}${cont} ${bt}`, false);
+				if (before !== undefined && !isPartial)
+					e.addField('Before', `${bts}${beforeChunk}${cont} ${bt}`, false);
 				else e.addField('Before', `${bts} . . . ${bt}`, false);
 
 				if (after !== undefined)
-					e.addField('After', `${bts}${after}${cont} ${bt}`, false);
+					e.addField('After', `${bts}${afterChunk}${cont} ${bt}`, false);
 				else e.addField('Before', `${bts} . . . ${bt}`, false);
+
+				let m = '';
+				if (isPartial)
+					m += `This message was sent before Zen's last reboot and as such before is not displayed.\n`;
+
+				m += `Edited at: ${after.createdAt.toString()}`;
+
+				e.setFooter(m);
 
 				embeds.push(e);
 			}
