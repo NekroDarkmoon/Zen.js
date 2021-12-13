@@ -47,6 +47,14 @@ export default class ZenDB {
 				const sql = `${ct} ${table}(${query})`;
 				await this.execute(sql);
 			}
+
+			// Create indexes
+			const indexes = (await import('./indexes.js')).default;
+			const sqls = [];
+			sqls.push('CREATE EXTENSION IF NOT EXISTS pg_trgm;\n');
+			indexes.forEach(i => sqls.push(i));
+
+			await this.executeMany(sqls);
 		}
 
 		this.logger.info('DB setup Complete');
@@ -117,7 +125,7 @@ export default class ZenDB {
 	 * @param {Array<String>} sqlArray
 	 * @param {Array<Array>} valArray
 	 */
-	async executeMany(sqlArray, valArray) {
+	async executeMany(sqlArray, valArray = []) {
 		// Validation - Match Array Size
 
 		const conn = await this.pool.connect();

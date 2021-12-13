@@ -56,7 +56,7 @@
     "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
   },
 
-  "tags_lookup": {
+  "tag_lookup": {
     "id": "SERIAL PRIMARY KEY,",
     "server_id":"BIGINT NOT NULL,",
     "user_id":"BIGINT,",
