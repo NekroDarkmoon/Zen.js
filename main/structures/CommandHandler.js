@@ -158,7 +158,7 @@ export default class CommandHandler {
 	 */
 	async registerCommands() {
 		try {
-//			await this.registerGlobalCommands();
+			//			await this.registerGlobalCommands();
 			await this.registerGuildCommands();
 		} catch (err) {
 			this.bot.logger.error(err);

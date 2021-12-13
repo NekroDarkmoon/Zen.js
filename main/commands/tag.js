@@ -125,35 +125,27 @@ export default class Tags {
 	 */
 	async add(interaction) {
 		// Data builder
-		const name = interaction.options.getString('name');
-		const content = msgSanitize(interaction.options.getString('content'));
-		const hidden = interaction.options.getBoolean('hidden');
-		const user = interaction.user;
+		const { guild, options, user } = interaction;
+		const name = options.getString('name');
+		const content = msgSanitize(options.getString('content'));
+		const hidden = options.getBoolean('hidden');
 
 		try {
-			const sql =
-				'SELECT * FROM tags WHERE server_id=$1 AND user_id=$2 AND name=$3;';
-			const values = [interaction.guild.id, user.id, name];
+			const sql = `WITH tag_create AS (
+												INSERT INTO tags (server_id, user_id, name, content)
+												VALUES($1, $2, $3, $4)
+												RETURNING id
+									)
+									INSERT INTO tag_lookup (server_id, user_id, name, tag_id)
+									VALUES ($1, $2, $3, (SELECT id from tag_create))`;
+			const values = [guild.id, user.id, name, content];
 
-			const result = await this.bot.db.fetchOne(sql, values);
-			if (result) {
-				await interaction.editReply({
-					content: `You already have a tag named ${name}. Delete it first!`,
-					ephemeral: hidden,
-				});
-				return;
-			}
-		} catch (err) {
-			this.bot.logger.error(err);
-		}
-
-		try {
-			const sql = `INSERT INTO tags (server_id, user_id, name, description)
-                     VALUES ($1, $2, $3, $4)`;
-			const values = [interaction.guild.id, user.id, name, content];
 			await this.bot.db.execute(sql, values);
-		} catch (err) {
-			this.bot.logger.error(err);
+		} catch (e) {
+			if (e.code === '23505')
+				return interaction.editReply(`The tag **${name}** already exists`);
+
+			this.bot.logger.error(e);
 			await interaction.editReply({
 				content: `Something went wrong...`,
 				ephemeral: hidden,
