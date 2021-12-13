@@ -56,6 +56,15 @@
     "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
   },
 
+  "tags_lookup": {
+    "id": "SERIAL PRIMARY KEY,",
+    "server_id":"BIGINT NOT NULL,",
+    "user_id":"BIGINT,",
+    "name": "TEXT NOT NULL,",
+    "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP,",
+    "FOREIGN KEY": "(id) REFERENCES tags(id) ON DELETE CASCADE"
+  },
+
   "threads": {
     "server_id": "BIGINT PRIMARY KEY NOT NULL,",
     "channels": "BIGINT ARRAY,",
