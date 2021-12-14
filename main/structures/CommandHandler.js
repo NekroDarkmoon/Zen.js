@@ -150,7 +150,7 @@ export default class CommandHandler {
 		await Promise.all(promises);
 
 		this.globalCommands = this.commands.filter(cmd => cmd.global);
-		this.guildCommands = this.commands.filter(cmd => !cmd.global);
+		this.guildCommands = this.commands.filter(cmd => !cmd.global || cmd.global);
 	}
 
 	/**
@@ -158,7 +158,7 @@ export default class CommandHandler {
 	 */
 	async registerCommands() {
 		try {
-			await this.registerGlobalCommands();
+			// await this.registerGlobalCommands();
 			await this.registerGuildCommands();
 		} catch (err) {
 			this.bot.logger.error(err);

@@ -60,6 +60,11 @@
     "threads": "BIGINT ARRAY "
   },
 
+  "users": {
+    "user_id":"BIGINT PRIMARY KEY NOT NULL,",
+    "timezone": "REAL"
+  },
+
   "xp": {
     "server_id": "BIGINT NOT NULL,",
     "user_id": "BIGINT NOT NULL,",
