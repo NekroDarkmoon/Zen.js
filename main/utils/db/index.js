@@ -47,6 +47,14 @@ export default class ZenDB {
 				const sql = `${ct} ${table}(${query})`;
 				await this.execute(sql);
 			}
+
+			// Create indexes
+			const indexes = (await import('./indexes.js')).default;
+			const sqls = [];
+			sqls.push('CREATE EXTENSION IF NOT EXISTS pg_trgm;\n');
+			indexes.forEach(i => sqls.push(i));
+
+			await this.executeMany(sqls);
 		}
 
 		this.logger.info('DB setup Complete');
@@ -106,13 +114,15 @@ export default class ZenDB {
 
 		// Start Transaction
 		try {
+			// Begin Transaction
+			await conn.query('BEGIN');
 			await conn.query(sql, values);
 			// Commit transaction
 			await conn.query('COMMIT');
-		} catch (err) {
-			// Rollback if an error occured
+		} catch (e) {
+			// Rollback and throw on error
 			await conn.query('ROLLBACK');
-			console.error(err);
+			throw e;
 		} finally {
 			conn.release();
 		}
@@ -123,22 +133,25 @@ export default class ZenDB {
 	 * @param {Array<String>} sqlArray
 	 * @param {Array<Array>} valArray
 	 */
-	async executeMany(sqlArray, valArray) {
-		// Validation - Match Array Size
-
+	async executeMany(sqlArray, valArray = []) {
 		const conn = await this.pool.connect();
 
 		try {
+			// Begin Transaction
+			await conn.query('BEGIN');
+
 			for (let pos = 0; pos < sqlArray.length; pos++) {
 				const sql = sqlArray[pos];
 				const values = valArray[pos] || [];
 				await conn.query(sql, values);
 			}
 
+			// Commit Transaction
 			await conn.query('COMMIT');
-		} catch (err) {
+		} catch (e) {
+			// Rollback and throw
 			await conn.query('ROLLBACK');
-			console.error(err);
+			throw e;
 		} finally {
 			conn.release();
 		}
