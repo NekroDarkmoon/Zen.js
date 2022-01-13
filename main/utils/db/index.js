@@ -71,8 +71,8 @@ export default class ZenDB {
 	/**
 	 *
 	 * @param {String} sql
-	 * @param {Array<String>} values
-	 * @returns
+	 * @param {Array} values
+	 * @returns {Array | null}
 	 */
 	async fetch(sql, values = []) {
 		// Validation
