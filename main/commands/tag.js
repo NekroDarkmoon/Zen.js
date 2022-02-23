@@ -44,9 +44,6 @@ export default class Tags {
 							.setDescription('Content of the tag.')
 							.setRequired(true)
 					)
-					.addBooleanOption(opt =>
-						opt.setName('hidden').setDescription('Set Ephemeral')
-					)
 			)
 			.addSubcommand(sub =>
 				sub
@@ -58,17 +55,9 @@ export default class Tags {
 							.setDescription('Name of the tag.')
 							.setRequired(true)
 					)
-					.addBooleanOption(opt =>
-						opt.setName('hidden').setDescription('Set Ephemeral')
-					)
 			)
 			.addSubcommand(sub =>
-				sub
-					.setName('list')
-					.setDescription('Lists your tags.')
-					.addBooleanOption(opt =>
-						opt.setName('hidden').setDescription('Set Ephemeral')
-					)
+				sub.setName('list').setDescription('Lists your tags.')
 			)
 			.addSubcommand(sub =>
 				sub
@@ -128,7 +117,6 @@ export default class Tags {
 		const { guild, options, user } = interaction;
 		const name = options.getString('name');
 		const content = msgSanitize(options.getString('content'));
-		const hidden = options.getBoolean('hidden');
 
 		try {
 			const sql = `WITH tag_create AS (
@@ -148,14 +136,12 @@ export default class Tags {
 			this.bot.logger.error(e);
 			await interaction.editReply({
 				content: `Something went wrong...`,
-				ephemeral: hidden,
 			});
 			return;
 		}
 
 		await interaction.editReply({
-			content: `Tag "${name}" added!`,
-			ephemeral: hidden,
+			content: `Tag \`${name}\` added! \n ${content}`,
 		});
 	}
 
@@ -166,7 +152,6 @@ export default class Tags {
 	async remove(interaction) {
 		// Data builder
 		const name = interaction.options.getString('name');
-		const hidden = interaction.options.getBoolean('hidden');
 		const user = interaction.user;
 
 		try {
@@ -178,7 +163,6 @@ export default class Tags {
 			if (!result) {
 				await interaction.editReply({
 					content: `You have no tag named ${name}.`,
-					ephemeral: hidden,
 				});
 				return;
 			}
@@ -195,7 +179,6 @@ export default class Tags {
 
 			await interaction.editReply({
 				content: `The tag "${name}" has been deleted!`,
-				ephemeral: hidden,
 			});
 			return;
 		} catch (err) {
@@ -204,7 +187,6 @@ export default class Tags {
 
 		await interaction.editReply({
 			content: `Tag ${name} added!`,
-			ephemeral: hidden,
 		});
 	}
 
@@ -216,8 +198,7 @@ export default class Tags {
 		const { guild, options } = interaction;
 
 		// Data builder
-		const name = interaction.options.getString('name');
-		const hidden = interaction.options.getBoolean('hidden');
+		const name = options.getString('name');
 
 		// Get data from db
 		try {
@@ -247,9 +228,13 @@ export default class Tags {
 
 				return interaction.editReply({ embeds: [e] });
 			} else {
-				// TODO: Return and update uses.
+				// Return and update uses.
+				interaction.editReply(res.content);
 
-				return interaction.editReply(res.content);
+				const sql = `UPDATE tags SET uses = uses + 1 WHERE name=$1 AND server_id=$2;`;
+				await this.bot.db.execute(sql, [name, guild.id]);
+
+				return;
 			}
 		} catch (e) {
 			this.bot.logger.error(e);
@@ -262,13 +247,55 @@ export default class Tags {
 	 * @param {CommandInteraction} interaction
 	 */
 	async info(interaction) {
-		const hidden = interaction.options.getBoolean('hidden');
-
 		// Data builder
-		const name = interaction.options.getString('name');
-		const user = interaction.user;
+		const { guild, options, user } = interaction;
+		const name = options.getString('name');
+		const e = new MessageEmbed().setColor('RANDOM');
+		e.setAuthor(`${user.username}`, user.displayAvatarURL);
+		e.setFooter('These statistics are server-specific.');
 
 		// Get data from db
+		try {
+			const sql = `SELECT name, uses, COUNT(*) OVER() AS "Count", SUM(uses) OVER() AS "Uses"
+									 FROM tags
+									 WHERE server_id=$1 AND user_id=$2 
+									 ORDER BY uses DESC
+									 LIMIT 3;`;
+			const vals = [guild.id, user.id];
+			const res = await this.bot.db.fetch(sql, vals);
+
+			let owned = null,
+				uses = null;
+
+			if (res.length > 1) {
+				owned = res[0]['Count'];
+				uses = res[0]['Uses'];
+			} else {
+				owned = 'None';
+				uses = 0;
+			}
+
+			e.addField('Owned Tags', `${owned}`);
+			e.addField('Owned Tag Uses', `${uses}`);
+
+			if (res.length < 3) {
+				for (let i = 0; i < 3 - res.length; i++) res.push(null);
+			}
+
+			const emoji = 129351;
+
+			res.forEach((entry, index) => {
+				let val = 'Nothing!';
+
+				if (entry?.name) val = `${entry.name} (${entry.uses} uses)`;
+				e.addField(`${String.fromCharCode(emoji)} Owned Tag`, val);
+			});
+
+			return interaction.editReply({ embeds: [e] });
+		} catch (err) {
+			this.bot.logger.error({ message: err });
+		}
+
 		try {
 			const sql =
 				'SELECT * FROM tags WHERE server_id=$1 AND user_id=$2 AND name=$3;';
@@ -286,11 +313,11 @@ export default class Tags {
 			const e = new MessageEmbed();
 			e.setTitle(result.name);
 			e.addField(
-				'Owner:',
+				`Owner`,
 				this.bot.users.cache.get(result.user_id).username,
 				false
 			);
-			await interaction.editReply({ embeds: [e], ephemeral: hidden });
+			await interaction.editReply({ embeds: [e] });
 		} catch (err) {
 			this.bot.logger.error({ message: err });
 		}
@@ -301,8 +328,6 @@ export default class Tags {
 	 * @param {CommandInteraction} interaction
 	 */
 	async list(interaction) {
-		const hidden = interaction.options.getBoolean('hidden');
-
 		// Data builder
 		const user = interaction.user;
 
@@ -328,7 +353,7 @@ export default class Tags {
 			const e = new MessageEmbed();
 			e.addField(`Tags owned by ${user.username}:`, msg, false);
 
-			await interaction.editReply({ embeds: [e], ephemeral: hidden });
+			await interaction.editReply({ embeds: [e] });
 		} catch (err) {
 			this.bot.logger.error({ message: err });
 		}
